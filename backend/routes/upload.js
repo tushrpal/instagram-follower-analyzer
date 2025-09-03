@@ -56,7 +56,7 @@ router.post('/', upload.single('instagramData'), async (req, res) => {
 
     // Search through ZIP contents
     for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
-      if (relativePath.includes('followers') && relativePath.endsWith('.json')) {
+      if (relativePath.includes('followers_1') && relativePath.endsWith('.json')) {
         const content = await zipEntry.async('text');
         followersData = JSON.parse(content);
       } else if (relativePath.includes('following') && relativePath.endsWith('.json')) {
