@@ -10,14 +10,21 @@ const { initDatabase } = require("./models/database");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy - required for rate limiting behind reverse proxies
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
+
+// CORS middleware
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://your-domain.com"]
-        : ["http://localhost:3000"],
+    origin: process.env.NODE_ENV === "production"
+      ? [
+          process.env.FRONTEND_URL || "https://instagram-follower-analyzer-frontend.onrender.com",
+          "https://instagram-follower-analyzer-frontend.onrender.com"
+        ]
+      : "http://localhost:3000",
     credentials: true,
   })
 );
@@ -27,6 +34,9 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  trustProxy: true, // Trust the X-Forwarded-For header
 });
 app.use(limiter);
 
