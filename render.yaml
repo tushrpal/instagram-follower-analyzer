@@ -3,6 +3,8 @@ services:
     name: instagram-follower-analyzer-api
     env: docker
     rootDir: .
+    buildCommand: docker build -t instagram-follower-analyzer .
+    startCommand: docker run -p 5000:5000 instagram-follower-analyzer
     envVars:
       - key: NODE_ENV
         value: production

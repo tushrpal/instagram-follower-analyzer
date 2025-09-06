@@ -3,7 +3,10 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
-RUN npm run build
+# Add execute permissions and build with production env
+ENV NODE_ENV=production
+ENV CI=false
+RUN chmod +x ./node_modules/.bin/react-scripts && npm run build
 
 FROM node:18-alpine AS backend-builder
 WORKDIR /app/backend
