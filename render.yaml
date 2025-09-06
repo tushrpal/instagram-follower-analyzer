@@ -16,13 +16,15 @@ services:
   - type: static
     name: instagram-follower-analyzer-frontend
     rootDir: frontend
-    buildCommand: npm install --force && NODE_ENV=production CI=false npm run build
+    buildCommand: NODE_ENV=production CI=false node build.js
     publishDir: build
     envVars:
       - key: REACT_APP_API_URL
         sync: false # Will be set manually
       - key: NODE_VERSION
         value: 20.8.0
+      - key: PATH
+        value: /usr/local/bin:/usr/bin:/bin:/app/node_modules/.bin
     headers:
       - path: /*
         name: Cache-Control

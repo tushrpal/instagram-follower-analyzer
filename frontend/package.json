@@ -20,10 +20,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "node build.js",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "postinstall": "npm rebuild node-sass"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
