@@ -7,13 +7,9 @@ services:
       - key: NODE_ENV
         value: production
     disk:
-      name: data-disk
-      mountPath: /app/data
-      sizeGB: 1
-    disk:
-      name: uploads-disk
-      mountPath: /app/uploads
-      sizeGB: 1
+      name: persistent-disk
+      mountPath: /app
+      sizeGB: 2
 
   - type: static
     name: instagram-follower-analyzer-frontend

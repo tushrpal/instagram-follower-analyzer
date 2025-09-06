@@ -1,7 +1,14 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const fs = require("fs");
 
-const DB_PATH = path.join(__dirname, "../data/analyzer.db");
+const DATA_DIR = path.join(__dirname, "../data");
+const DB_PATH = path.join(DATA_DIR, "analyzer.db");
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 class Database {
   constructor() {
