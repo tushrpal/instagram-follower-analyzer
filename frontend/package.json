@@ -20,7 +20,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false NODE_ENV=production ./node_modules/.bin/react-scripts build",
+    "build": "CI=false NODE_ENV=production npx react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

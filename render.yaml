@@ -17,13 +17,16 @@ services:
     name: instagram-follower-analyzer-frontend
     rootDir: frontend
     buildCommand: |
-      npm install
-      chmod +x ./node_modules/.bin/react-scripts
-      CI=false NODE_ENV=production npm run build
+      chmod +x build.sh
+      ./build.sh
     publishDir: build
     envVars:
       - key: REACT_APP_API_URL
         sync: false # Will be set manually
+      - key: CI
+        value: false
+      - key: NODE_ENV
+        value: production
     headers:
       - path: /*
         name: Cache-Control
