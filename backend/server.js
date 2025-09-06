@@ -31,8 +31,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Body parsing middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "1gb" }));
+app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
 // Static files
 app.use(express.static("uploads"));

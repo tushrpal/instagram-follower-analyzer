@@ -3,6 +3,7 @@
 
 /frontend/node_modules/
 
-/data/analyzer.db
+/data/
 
+/uploads/
 

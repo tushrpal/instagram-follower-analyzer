@@ -1,44 +1,46 @@
-const express = require('express');
-const multer = require('multer');
-const JSZip = require('jszip');
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs').promises;
-const path = require('path');
-const { database } = require('../models/database');
-const { analyzeFollowers } = require('../utils/analyzer');
+const express = require("express");
+const multer = require("multer");
+const JSZip = require("jszip");
+const { v4: uuidv4 } = require("uuid");
+const fs = require("fs").promises;
+const path = require("path");
+const { database } = require("../models/database");
+const { analyzeFollowers } = require("../utils/analyzer");
 
 const router = express.Router();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
-  }
+  },
 });
 
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit
+    fileSize: 1024 * 1024 * 1024, // 1GB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/zip' || 
-        file.mimetype === 'application/x-zip-compressed' ||
-        path.extname(file.originalname).toLowerCase() === '.zip') {
+    if (
+      file.mimetype === "application/zip" ||
+      file.mimetype === "application/x-zip-compressed" ||
+      path.extname(file.originalname).toLowerCase() === ".zip"
+    ) {
       cb(null, true);
     } else {
-      cb(new Error('Only ZIP files are allowed'), false);
+      cb(new Error("Only ZIP files are allowed"), false);
     }
-  }
+  },
 });
 
-router.post('/', upload.single('instagramData'), async (req, res) => {
+router.post("/", upload.single("instagramData"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ error: "No file uploaded" });
     }
 
     const sessionId = uuidv4();
@@ -54,23 +56,41 @@ router.post('/', upload.single('instagramData'), async (req, res) => {
     let followersData = null;
     let followingData = null;
 
-    // Search through ZIP contents
+    // Debug: List all files in the ZIP
+    console.log("📁 Files in ZIP:");
+    Object.keys(zip.files).forEach((path) => console.log(path));
+
     for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
-      if (relativePath.includes('followers_1') && relativePath.endsWith('.json')) {
-        const content = await zipEntry.async('text');
+      // Skip directories
+      if (zipEntry.dir) continue;
+
+      console.log(`📄 Processing file: ${relativePath}`);
+
+      // More specific path matching
+      if (relativePath.includes("followers_and_following/followers_1.json")) {
+        const content = await zipEntry.async("text");
         followersData = JSON.parse(content);
-      } else if (relativePath.includes('following') && relativePath.endsWith('.json')) {
-        const content = await zipEntry.async('text');
+        console.log("✅ Found followers data");
+      } else if (
+        relativePath.includes("followers_and_following/following.json")
+      ) {
+        const content = await zipEntry.async("text");
         followingData = JSON.parse(content);
+        console.log("✅ Found following data");
       }
     }
 
-    // Cleanup uploaded file
-    await fs.unlink(filePath);
-
     if (!followersData || !followingData) {
-      return res.status(400).json({ 
-        error: 'Invalid Instagram export file. Could not find followers.json or following.json' 
+      console.log("❌ Missing data files:");
+      console.log("Followers data:", !!followersData);
+      console.log("Following data:", !!followingData);
+
+      // Cleanup uploaded file
+      await fs.unlink(filePath);
+
+      return res.status(400).json({
+        error:
+          "Invalid Instagram export file. Could not find followers.json or following.json",
       });
     }
 
@@ -79,9 +99,17 @@ router.post('/', upload.single('instagramData'), async (req, res) => {
 
     // Save to database
     await database.saveAnalysis(sessionId, analysisResult);
-    await database.saveUsers(sessionId, analysisResult.mutual, 'mutual');
-    await database.saveUsers(sessionId, analysisResult.followersOnly, 'followers_only');
-    await database.saveUsers(sessionId, analysisResult.followingOnly, 'following_only');
+    await database.saveUsers(sessionId, analysisResult.mutual, "mutual");
+    await database.saveUsers(
+      sessionId,
+      analysisResult.followersOnly,
+      "followers_only"
+    );
+    await database.saveUsers(
+      sessionId,
+      analysisResult.followingOnly,
+      "following_only"
+    );
 
     console.log(`✅ Analysis completed for session: ${sessionId}`);
 
@@ -92,25 +120,38 @@ router.post('/', upload.single('instagramData'), async (req, res) => {
         totalFollowing: analysisResult.following.length,
         mutualCount: analysisResult.mutual.length,
         followersOnlyCount: analysisResult.followersOnly.length,
-        followingOnlyCount: analysisResult.followingOnly.length
-      }
+        followingOnlyCount: analysisResult.followingOnly.length,
+      },
     });
-
   } catch (error) {
-    console.error('Upload processing error:', error);
-    
+    console.error("Upload processing error:", error);
+
+    // Handle Multer errors specifically
+    if (error instanceof multer.MulterError) {
+      if (error.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({
+          error: "File too large",
+          message: "The uploaded file exceeds the 500MB size limit",
+        });
+      }
+      return res.status(400).json({
+        error: "Upload error",
+        message: error.message,
+      });
+    }
+
     // Cleanup file if it exists
     if (req.file) {
       try {
         await fs.unlink(req.file.path);
       } catch (cleanupError) {
-        console.error('File cleanup error:', cleanupError);
+        console.error("File cleanup error:", cleanupError);
       }
     }
 
-    res.status(500).json({ 
-      error: 'Failed to process Instagram data',
-      message: error.message 
+    res.status(500).json({
+      error: "Failed to process Instagram data",
+      message: error.message,
     });
   }
 });
