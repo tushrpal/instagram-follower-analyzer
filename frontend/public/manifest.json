@@ -1,0 +1,16 @@
+{
+  "name": "Instagram Follower Analyzer",
+  "short_name": "IG Analyzer",
+  "description": "Analyze your Instagram followers and following",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#9333ea",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

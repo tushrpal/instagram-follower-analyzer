@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: instagram-follower-analyzer-api
+    env: docker
+    rootDir: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: data-disk
+      mountPath: /app/data
+      sizeGB: 1
+    disk:
+      name: uploads-disk
+      mountPath: /app/uploads
+      sizeGB: 1
+
+  - type: static
+    name: instagram-follower-analyzer-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: build
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false # Will be set manually

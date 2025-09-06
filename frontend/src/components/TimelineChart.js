@@ -1,81 +1,80 @@
-import React from "react";
-import { Line } from "react-chartjs-2";
+import React, { useMemo } from "react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+  ResponsiveContainer,
+} from "recharts";
 
 export function TimelineChart({ timelineData }) {
-  if (!timelineData || !timelineData.followEvents.length) {
+  const chartData = useMemo(() => {
+    if (!timelineData?.followEvents) return [];
+
+    // Create a map to store latest counts for each timestamp
+    const dateMap = new Map();
+
+    timelineData.followEvents.forEach((event) => {
+      const date = new Date(event.timestamp).toISOString().split("T")[0];
+      dateMap.set(date, {
+        date,
+        followers: event.followersCount,
+        following: event.followingCount,
+      });
+    });
+
+    // Convert map to array and sort by date
+    return Array.from(dateMap.values()).sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
+  }, [timelineData]);
+
+  if (!chartData.length) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        No timeline data available
+      <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+        <p className="text-gray-500">No timeline data available</p>
       </div>
     );
   }
 
-  const data = {
-    labels: timelineData.followEvents.map((event) =>
-      new Date(event.timestamp).toLocaleDateString()
-    ),
-    datasets: [
-      {
-        label: "Followers Growth",
-        data: timelineData.followEvents.map((_, index) => index + 1),
-        borderColor: "rgb(147, 51, 234)",
-        backgroundColor: "rgba(147, 51, 234, 0.5)",
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Follower Growth Timeline",
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: "Number of Followers",
-        },
-      },
-      x: {
-        title: {
-          display: true,
-          text: "Date",
-        },
-      },
-    },
-  };
-
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <Line data={data} options={options} />
-    </div>
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart data={chartData}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="date"
+          tickFormatter={(date) => new Date(date).toLocaleDateString()}
+        />
+        <YAxis />
+        <Tooltip
+          labelFormatter={(label) => new Date(label).toLocaleDateString()}
+          contentStyle={{
+            backgroundColor: "white",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+          }}
+        />
+        <Legend />
+        <Line
+          type="monotone"
+          dataKey="followers"
+          stroke="#8884d8"
+          name="Followers"
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="following"
+          stroke="#82ca9d"
+          name="Following"
+          strokeWidth={2}
+          dot={false}
+        />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }

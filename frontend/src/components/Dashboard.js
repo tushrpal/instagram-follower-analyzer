@@ -26,8 +26,64 @@ export function Dashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [timelineView, setTimelineView] = useState("all");
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [loadingExport, setLoadingExport] = useState(false);
 
   useEffect(() => {
+    const loadTimelineData = async () => {
+      if (!sessionId) return;
+
+      try {
+        const response = await axios.get(
+          `/api/analysis/${sessionId}/timeline`,
+          {
+            params: { timeframe: timelineView },
+          }
+        );
+
+        if (response.data && response.data.timelineData) {
+          setAnalysis((prev) => ({
+            ...prev,
+            timeline: response.data.timelineData,
+            statistics: response.data.statistics,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to load timeline data:", error);
+        // Don't set error state here to prevent blocking the whole dashboard
+      }
+    };
+
+    if (analysis?.summary) {
+      // Only load timeline data if we have the basic analysis
+      loadTimelineData();
+    }
+  }, [sessionId, timelineView, analysis?.summary]);
+
+  useEffect(() => {
+    const loadAnalysis = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axios.get(`/api/analysis/${sessionId}`);
+
+        if (!response.data) {
+          throw new Error("No analysis data received");
+        }
+
+        setAnalysis(response.data);
+        // Removed the redundant timeline data loading here
+      } catch (error) {
+        setError(
+          error.response?.data?.error || "Failed to load analysis results"
+        );
+        console.error("Analysis error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadAnalysis();
   }, [sessionId]);
 
@@ -52,22 +108,10 @@ export function Dashboard() {
     }
   }, [page, activeTab, searchQuery, sessionId]);
 
-  const loadAnalysis = async () => {
-    try {
-      const response = await axios.get(`/api/analysis/${sessionId}`);
-      setAnalysis(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Failed to load analysis:", error);
-      setError(
-        "Failed to load analysis results. The session may have expired."
-      );
-      setLoading(false);
-    }
-  };
-
+  // Update the loadUsers function
   const loadUsers = async (category, pageNum = 1) => {
     try {
+      setLoadingUsers(true);
       const response = await axios.get(
         `/api/analysis/${sessionId}/${category}?page=${pageNum}&limit=${limit}`
       );
@@ -80,56 +124,89 @@ export function Dashboard() {
       setTotalPages(response.data.pagination.totalPages || 1); // total pages from backend
     } catch (error) {
       console.error(`Failed to load ${category} users:`, error);
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
+  // Update the search handling
   const handleSearch = async (pageNum = 1) => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      return;
+    }
+
     try {
+      setLoadingSearch(true);
       const response = await axios.get(
-        `/api/analysis/${sessionId}/search/${searchQuery}?page=${pageNum}&limit=${limit}`
+        `/api/analysis/${sessionId}/search/${encodeURIComponent(searchQuery)}`,
+        {
+          params: {
+            page: pageNum,
+            limit: limit,
+          },
+        }
       );
+
       setSearchResults({
         ...response.data,
         page: pageNum,
         limit: limit,
-        totalPages: response.data.totalPages || 1,
+        totalPages: Math.ceil(response.data.pagination.totalFound / limit),
       });
-      setTotalUsers(response.data.totalFound); // total found
-      setTotalPages(response.data.totalPages || 1); // total pages from backend
     } catch (error) {
       console.error("Search failed:", error);
+      setError("Search failed. Please try again.");
+    } finally {
+      setLoadingSearch(false);
     }
   };
 
   const exportData = async (category = null) => {
     try {
+      setLoadingExport(true);
       const url = category
         ? `/api/analysis/${sessionId}/export?category=${category}`
         : `/api/analysis/${sessionId}/export`;
 
       const response = await axios.get(url, { responseType: "blob" });
 
-      const blob = new Blob([response.data], { type: "text/csv" });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = category
+      // Create a temporary anchor element
+      const downloadUrl = window.URL.createObjectURL(response.data);
+      const fileName = category
         ? `instagram_${category}_analysis.csv`
         : "instagram_full_analysis.csv";
+
+      // Use download attribute instead of click event
+      const link = document.createElement("a");
+      link.setAttribute("href", downloadUrl);
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
       link.click();
-      window.URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(link);
+
+      // Clean up the URL object
+      setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
     } catch (error) {
       console.error("Export failed:", error);
+    } finally {
+      setLoadingExport(false);
     }
   };
 
+  // Add proper error boundary
+  const handleError = (error) => {
+    console.error("Dashboard error:", error);
+    setError(error.message || "An unexpected error occurred");
+  };
+
+  // Add proper loading state handling
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading your analysis...</p>
+          <div className="spinner mb-4"></div>
+          <p className="text-gray-600">Loading analysis...</p>
         </div>
       </div>
     );
@@ -193,6 +270,44 @@ export function Dashboard() {
   const currentUsers = searchResults
     ? searchResults.results[searchResultKeyMap[activeTab]] || []
     : users[activeTab] || [];
+
+  const GrowthStats = ({ statistics }) => (
+    <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-sm font-medium text-gray-500">Daily Growth</h3>
+        <p
+          className={`text-2xl font-bold ${
+            statistics.dailyGrowth >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {statistics.dailyGrowth > 0 ? "+" : ""}
+          {statistics.dailyGrowth}
+        </p>
+      </div>
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-sm font-medium text-gray-500">Weekly Growth</h3>
+        <p
+          className={`text-2xl font-bold ${
+            statistics.weeklyGrowth >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {statistics.weeklyGrowth > 0 ? "+" : ""}
+          {statistics.weeklyGrowth}
+        </p>
+      </div>
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-sm font-medium text-gray-500">Monthly Growth</h3>
+        <p
+          className={`text-2xl font-bold ${
+            statistics.monthlyGrowth >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {statistics.monthlyGrowth > 0 ? "+" : ""}
+          {statistics.monthlyGrowth}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -261,6 +376,9 @@ export function Dashboard() {
         <TimelineChart timelineData={analysis?.timeline} />
       </div>
 
+      {/* Growth Statistics */}
+      {analysis?.statistics && <GrowthStats statistics={analysis.statistics} />}
+
       {/* Search and Export */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -299,7 +417,7 @@ export function Dashboard() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
             {searchResults
-              ? `Search Results (${searchResults.totalFound} found)`
+              ? `Search Results (${searchResults.pagination.totalFound} found)`
               : tabs.find((t) => t.id === activeTab)?.label}
           </h2>
           <span className="text-gray-500">{currentUsers.length} users</span>

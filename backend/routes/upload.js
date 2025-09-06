@@ -39,66 +39,116 @@ const upload = multer({
 
 router.post("/", upload.single("instagramData"), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
     const sessionId = uuidv4();
-    const filePath = req.file.path;
+    const uploadPath = req.file.path;
 
+    // Process the ZIP file and analyze followers
     console.log(`📦 Processing upload for session: ${sessionId}`);
 
-    // Read and extract ZIP file
-    const zipData = await fs.readFile(filePath);
-    const zip = await JSZip.loadAsync(zipData);
+    const zip = new JSZip();
+    const zipData = await fs.readFile(uploadPath);
+    const zipContents = await zip.loadAsync(zipData);
 
-    // Look for Instagram data files
-    let followersData = null;
-    let followingData = null;
+    let followersData = [];
+    let followingData = [];
+    let runningFollowersCount = 0;
+    let runningFollowingCount = 0;
 
-    // Debug: List all files in the ZIP
-    console.log("📁 Files in ZIP:");
-    Object.keys(zip.files).forEach((path) => console.log(path));
+    // Process each file
+    for (const [filename, file] of Object.entries(zipContents.files)) {
+      if (!file.dir) {
+        console.log(`📄 Processing file: ${filename}`);
+        const content = await file.async("string");
 
-    for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
-      // Skip directories
-      if (zipEntry.dir) continue;
+        try {
+          const data = JSON.parse(content);
 
-      console.log(`📄 Processing file: ${relativePath}`);
+          if (filename.includes("followers_")) {
+            console.log("✅ Processing followers data");
+            if (Array.isArray(data)) {
+              followersData = data
+                .filter(
+                  (item) =>
+                    item?.string_list_data?.[0]?.value &&
+                    item?.string_list_data?.[0]?.timestamp
+                )
+                .sort(
+                  (a, b) =>
+                    a.string_list_data[0].timestamp -
+                    b.string_list_data[0].timestamp
+                );
 
-      // More specific path matching
-      if (relativePath.includes("followers_and_following/followers_1.json")) {
-        const content = await zipEntry.async("text");
-        followersData = JSON.parse(content);
-        console.log("✅ Found followers data");
-      } else if (
-        relativePath.includes("followers_and_following/following.json")
-      ) {
-        const content = await zipEntry.async("text");
-        followingData = JSON.parse(content);
-        console.log("✅ Found following data");
+              // Save follower events with running count
+              for (const follower of followersData) {
+                runningFollowersCount++;
+                const userData = follower.string_list_data[0];
+                await database.saveFollowerEvent(
+                  sessionId,
+                  userData.timestamp,
+                  runningFollowersCount,
+                  runningFollowingCount,
+                  "follower",
+                  userData.value
+                );
+              }
+            }
+          }
+
+          if (filename.includes("following.json")) {
+            console.log("✅ Processing following data");
+            if (data?.relationships_following) {
+              followingData = data.relationships_following
+                .filter(
+                  (item) =>
+                    item?.string_list_data?.[0]?.value &&
+                    item?.string_list_data?.[0]?.timestamp
+                )
+                .sort(
+                  (a, b) =>
+                    a.string_list_data[0].timestamp -
+                    b.string_list_data[0].timestamp
+                );
+
+              // Save following events with running count
+              for (const following of followingData) {
+                runningFollowingCount++;
+                const userData = following.string_list_data[0];
+                await database.saveFollowerEvent(
+                  sessionId,
+                  userData.timestamp,
+                  runningFollowersCount,
+                  runningFollowingCount,
+                  "following",
+                  userData.value
+                );
+              }
+            }
+          }
+        } catch (parseError) {
+          console.error(`Error parsing ${filename}:`, parseError);
+          continue;
+        }
       }
     }
 
-    if (!followersData || !followingData) {
-      console.log("❌ Missing data files:");
-      console.log("Followers data:", !!followersData);
-      console.log("Following data:", !!followingData);
-
-      // Cleanup uploaded file
-      await fs.unlink(filePath);
-
-      return res.status(400).json({
-        error:
-          "Invalid Instagram export file. Could not find followers.json or following.json",
-      });
+    // Verify we have data
+    if (!followersData.length && !followingData.length) {
+      throw new Error("No valid follower or following data found");
     }
 
-    // Analyze the data
+    console.log(
+      `📊 Found ${followersData.length} followers and ${followingData.length} following`
+    );
     const analysisResult = analyzeFollowers(followersData, followingData);
 
-    // Save to database
-    await database.saveAnalysis(sessionId, analysisResult);
+    // Save analysis results
+    await database.saveAnalysis(sessionId, {
+      ...analysisResult,
+      followers: followersData,
+      following: followingData,
+    });
+
+    // Save user categories
     await database.saveUsers(sessionId, analysisResult.mutual, "mutual");
     await database.saveUsers(
       sessionId,
@@ -111,13 +161,11 @@ router.post("/", upload.single("instagramData"), async (req, res) => {
       "following_only"
     );
 
-    console.log(`✅ Analysis completed for session: ${sessionId}`);
-
     res.json({
       sessionId,
       summary: {
-        totalFollowers: analysisResult.followers.length,
-        totalFollowing: analysisResult.following.length,
+        totalFollowers: followersData.length,
+        totalFollowing: followingData.length,
         mutualCount: analysisResult.mutual.length,
         followersOnlyCount: analysisResult.followersOnly.length,
         followingOnlyCount: analysisResult.followingOnly.length,
@@ -125,22 +173,12 @@ router.post("/", upload.single("instagramData"), async (req, res) => {
     });
   } catch (error) {
     console.error("Upload processing error:", error);
-
-    // Handle Multer errors specifically
-    if (error instanceof multer.MulterError) {
-      if (error.code === "LIMIT_FILE_SIZE") {
-        return res.status(413).json({
-          error: "File too large",
-          message: "The uploaded file exceeds the 500MB size limit",
-        });
-      }
-      return res.status(400).json({
-        error: "Upload error",
-        message: error.message,
-      });
-    }
-
-    // Cleanup file if it exists
+    res.status(500).json({
+      error: "Failed to process Instagram data",
+      message: error.message,
+    });
+  } finally {
+    // Cleanup uploaded file
     if (req.file) {
       try {
         await fs.unlink(req.file.path);
@@ -148,11 +186,6 @@ router.post("/", upload.single("instagramData"), async (req, res) => {
         console.error("File cleanup error:", cleanupError);
       }
     }
-
-    res.status(500).json({
-      error: "Failed to process Instagram data",
-      message: error.message,
-    });
   }
 });
 
