@@ -3,13 +3,9 @@ services:
     name: instagram-follower-analyzer-api
     env: docker
     rootDir: .
-    buildCommand: docker build -t instagram-follower-analyzer .
-    startCommand: docker run -p 5000:5000 instagram-follower-analyzer
     envVars:
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_URL
-        value: https://instagram-follower-analyzer-frontend.onrender.com
     disk:
       name: persistent-disk
       mountPath: /app
@@ -18,16 +14,8 @@ services:
   - type: static
     name: instagram-follower-analyzer-frontend
     rootDir: frontend
-    buildCommand: NODE_ENV=production CI=false node build.js
+    buildCommand: npm install && npm run build
     publishDir: build
     envVars:
       - key: REACT_APP_API_URL
         sync: false # Will be set manually
-      - key: NODE_VERSION
-        value: 20.8.0
-      - key: PATH
-        value: /usr/local/bin:/usr/bin:/bin:/app/node_modules/.bin
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache
