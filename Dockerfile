@@ -3,6 +3,8 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
+# Fix permissions for react-scripts and other binaries
+RUN chmod +x node_modules/.bin/* || true
 RUN npm run build
 
 FROM node:18-alpine AS backend-builder

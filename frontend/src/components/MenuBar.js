@@ -10,6 +10,11 @@ export function MenuBar() {
     setIsOpen(!isOpen);
   };
 
+  // Only show menu if we have a valid sessionId
+  if (!sessionId || sessionId === "" || location.pathname === "/") {
+    return null;
+  }
+
   const menuItems = [
     {
       name: "Dashboard",

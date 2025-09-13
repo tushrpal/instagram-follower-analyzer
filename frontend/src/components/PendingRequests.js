@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 
 export function PendingRequests() {
@@ -26,7 +26,13 @@ export function PendingRequests() {
         setError(null);
       } catch (error) {
         console.error("Error fetching pending requests:", error);
-        setError(error.message);
+        if (error.response?.status === 404) {
+          setError(
+            "Analysis session not found. Please upload your Instagram data first."
+          );
+        } else {
+          setError(error.message);
+        }
         setPendingRequests([]);
       } finally {
         setLoading(false);
@@ -35,6 +41,11 @@ export function PendingRequests() {
 
     if (sessionId) {
       fetchPendingRequests();
+    } else {
+      setError(
+        "No session ID provided. Please upload your Instagram data first."
+      );
+      setLoading(false);
     }
   }, [sessionId]);
 
@@ -57,7 +68,17 @@ export function PendingRequests() {
 
       <div className="bg-white rounded-lg shadow-lg p-6">
         {error ? (
-          <div className="text-red-500 p-4 bg-red-50 rounded-lg">{error}</div>
+          <div className="text-red-500 p-4 bg-red-50 rounded-lg">
+            <p className="mb-3">{error}</p>
+            {error.includes("upload") && (
+              <Link
+                to="/"
+                className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              >
+                Go to Upload Page
+              </Link>
+            )}
+          </div>
         ) : pendingRequests.length === 0 ? (
           <p className="text-gray-600">No pending follow requests found.</p>
         ) : (

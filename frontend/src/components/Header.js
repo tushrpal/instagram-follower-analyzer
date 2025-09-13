@@ -1,5 +1,5 @@
-import React from 'react';
-import { Instagram } from 'lucide-react';
+import React from "react";
+import { Instagram, Linkedin } from "lucide-react";
 
 export function Header() {
   return (
@@ -11,11 +11,28 @@ export function Header() {
               <Instagram className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Instagram Follower Analyzer</h1>
-              <p className="text-sm text-gray-600">Analyze your follower relationships</p>
+              <h1 className="text-xl font-bold text-gray-900">
+                Instagram Follower Analyzer
+              </h1>
+              <p className="text-sm text-gray-600">
+                Analyze your follower relationships
+              </p>
             </div>
           </div>
-          
+
+          <div className="flex items-center">
+            <a
+              href="https://www.linkedin.com/in/tushrpal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+            >
+              <Linkedin className="w-5 h-5" />
+              <span className="hidden sm:inline text-sm">
+                Connect on LinkedIn
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </header>
