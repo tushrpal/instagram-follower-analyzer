@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Github } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 
 export function Header() {
   return (
@@ -16,15 +16,6 @@ export function Header() {
             </div>
           </div>
           
-          <a
-            href="https://github.com/tushrpal0/instagram-follower-analyzer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <Github className="w-5 h-5" />
-            <span className="hidden md:inline">View on GitHub</span>
-          </a>
         </div>
       </div>
     </header>
