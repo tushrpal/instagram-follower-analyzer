@@ -6,6 +6,7 @@ import {
   FileText,
   AlertCircle,
   CheckCircle,
+  Play,
 } from "lucide-react";
 import axios from "axios";
 
@@ -146,6 +147,51 @@ export function Upload() {
         )}
       </div>
 
+      {/* Video Tutorial Section */}
+      <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div className="flex items-center mb-6">
+          <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center mr-3">
+            <Play className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            🎥 Video Tutorial: How to Download Your Instagram Data
+          </h2>
+        </div>
+
+        <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-6 mb-6">
+          <p className="text-red-800 font-medium mb-4">
+            📺 Watch this step-by-step video guide to learn how to download your
+            Instagram data export:
+          </p>
+
+          <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg">
+            <iframe
+              src="https://www.youtube.com/embed/JwBRvOBlCJc"
+              title="How to Download Instagram Data Export"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full"
+            ></iframe>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-red-700">
+              💡 This video shows the exact process step-by-step
+            </p>
+            <a
+              href="https://youtu.be/JwBRvOBlCJc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+            >
+              <Play className="w-4 h-4" />
+              <span>Watch on YouTube</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Instructions */}
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="flex items-center mb-6">
@@ -153,7 +199,7 @@ export function Upload() {
             <FileText className="w-5 h-5 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900">
-            📥 How to Download Your Instagram Followers/Following Data
+            📥 Step-by-Step Written Instructions
           </h2>
         </div>
 
