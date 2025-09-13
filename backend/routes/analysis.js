@@ -1,5 +1,7 @@
 const express = require("express");
 const { database } = require("../models/database");
+const path = require("path");
+const fs = require("fs").promises;
 
 const router = express.Router();
 
@@ -12,6 +14,76 @@ const validateSessionId = (req, res, next) => {
   next();
 };
 
+const validatePagination = (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  if (page < 1 || limit < 1 || limit > 100) {
+    return res.status(400).json({ error: "Invalid pagination parameters" });
+  }
+  req.pagination = { page, limit };
+  next();
+};
+
+const validateAnalysisData = (req, res, next) => {
+  const { followers, following } = req.body;
+  if (!Array.isArray(followers) || !Array.isArray(following)) {
+    return res.status(400).json({ error: "Invalid data format" });
+  }
+  next();
+};
+
+// Get pending follow requests
+router.get(
+  "/:sessionId/pending-requests",
+  validateSessionId,
+  async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+
+      // First check if session exists
+      const analysis = await database.getAnalysis(sessionId);
+      if (!analysis) {
+        return res.status(404).json({ error: "Analysis session not found" });
+      }
+
+      // Get both pending requests and following users
+      const [pendingRequests, followingUsers, mutualUsers] = await Promise.all([
+        database.getPendingRequests(sessionId),
+        database.getUsers(sessionId, "following_only"),
+        database.getUsers(sessionId, "mutual"),
+      ]);
+
+      // Create a set of usernames that you're following (both mutual and following_only)
+      const followingUsernames = new Set([
+        ...followingUsers.map((user) => user.username),
+        ...mutualUsers.map((user) => user.username),
+      ]);
+
+      // Filter out pending requests for users you already follow
+      const filteredRequests = pendingRequests.filter(
+        (request) => !followingUsernames.has(request.username)
+      );
+
+      res.json({
+        sessionId,
+        pendingRequests: filteredRequests.map((request) => ({
+          username: request.username,
+          profileUrl: request.profile_url,
+          requestDate: request.request_date,
+          status: request.status,
+        })),
+        summary: {
+          totalCount: filteredRequests.length,
+          filteredCount: pendingRequests.length - filteredRequests.length,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching pending requests:", error);
+      res.status(500).json({ error: "Failed to fetch pending requests" });
+    }
+  }
+);
+
 // 1. Analysis Summary Route
 router.get("/:sessionId", validateSessionId, async (req, res) => {
   try {
@@ -23,6 +95,9 @@ router.get("/:sessionId", validateSessionId, async (req, res) => {
       return res.status(404).json({ error: "Analysis session not found" });
     }
 
+    // Get unfollowed count
+    const unfollowedCount = await database.getUnfollowedCount(sessionId);
+
     res.json({
       sessionId: analysis.id,
       createdAt: analysis.created_at,
@@ -33,6 +108,7 @@ router.get("/:sessionId", validateSessionId, async (req, res) => {
         mutualCount: analysis.mutual_count,
         followersOnlyCount: analysis.followers_only_count,
         followingOnlyCount: analysis.following_only_count,
+        unfollowedCount,
       },
     });
   } catch (error) {
@@ -67,7 +143,7 @@ router.get("/:sessionId/timeline", validateSessionId, async (req, res) => {
     const timelineData = await database.getTimelineData(sessionId);
 
     // Add debug logging
-    console.log("Raw Timeline Data:", JSON.stringify(timelineData, null, 2));
+    // console.log("Raw Timeline Data:", JSON.stringify(timelineData, null, 2));
 
     // Even if we have no events, return empty structure rather than 404
     const baseResponse = {
@@ -189,52 +265,149 @@ router.get("/:sessionId/export", validateSessionId, async (req, res) => {
   }
 });
 
+// Get list of unfollowed profiles
+router.get("/:sessionId/unfollowed", validateSessionId, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20; // Changed default to 20
+    const search = req.query.search || null;
+    const offset = (page - 1) * limit;
+
+    console.log("API route debug:", {
+      originalQuery: req.query,
+      page,
+      limit,
+      search,
+      offset,
+    });
+
+    // First check if session exists
+    const analysis = await database.getAnalysis(sessionId);
+    if (!analysis) {
+      return res.status(404).json({ error: "Analysis session not found" });
+    }
+
+    const profiles = await database.getUnfollowedProfiles(
+      sessionId,
+      limit,
+      offset,
+      search
+    );
+
+    // Get total count for pagination
+    const totalCount = await database.getUnfollowedProfilesCount(
+      sessionId,
+      search
+    );
+
+    console.log("Unfollowed profiles debug:", {
+      sessionId,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      offset,
+      search,
+      profilesCount: profiles.length,
+      totalCount,
+      firstProfile: profiles[0],
+    });
+
+    res.json({
+      success: true,
+      data: profiles,
+      pagination: {
+        page: page,
+        limit: limit,
+        totalItems: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+      search: search || null,
+    });
+  } catch (error) {
+    console.error("Error fetching unfollowed profiles:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch unfollowed profiles",
+    });
+  }
+});
+
 // 4. Search Route
 router.get("/:sessionId/search/:query", validateSessionId, async (req, res) => {
   try {
     const { sessionId, query } = req.params;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
+    const { page = 1, limit = 50, category = null } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
 
-    const results = {
-      mutual: await database.getUsers(sessionId, "mutual", query),
-      followersOnly: await database.getUsers(
-        sessionId,
-        "followers_only",
-        query
-      ),
-      followingOnly: await database.getUsers(
-        sessionId,
-        "following_only",
-        query
-      ),
-    };
+    if (category) {
+      // Search within a specific category with proper pagination
+      const allResults = await database.getUsers(sessionId, category, query);
+      const startIndex = (pageNum - 1) * limitNum;
+      const endIndex = startIndex + limitNum;
+      const paginatedResults = allResults.slice(startIndex, endIndex);
 
-    // Paginate each category
-    const paginatedResults = {};
-    Object.keys(results).forEach((key) => {
-      paginatedResults[key] = results[key].slice(startIndex, endIndex);
-    });
-
-    res.json({
-      query,
-      results: paginatedResults,
-      pagination: {
-        page,
-        limit,
-        total: {
-          mutual: results.mutual.length,
-          followersOnly: results.followersOnly.length,
-          followingOnly: results.followingOnly.length,
+      res.json({
+        query,
+        category,
+        results: {
+          [category === "followers_only"
+            ? "followersOnly"
+            : category === "following_only"
+            ? "followingOnly"
+            : category]: paginatedResults,
         },
-        totalFound:
-          results.mutual.length +
-          results.followersOnly.length +
-          results.followingOnly.length,
-      },
-    });
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: allResults.length,
+          totalPages: Math.ceil(allResults.length / limitNum),
+          totalFound: allResults.length,
+        },
+      });
+    } else {
+      // Search across all categories (legacy behavior)
+      const startIndex = (pageNum - 1) * limitNum;
+      const endIndex = startIndex + limitNum;
+
+      const results = {
+        mutual: await database.getUsers(sessionId, "mutual", query),
+        followersOnly: await database.getUsers(
+          sessionId,
+          "followers_only",
+          query
+        ),
+        followingOnly: await database.getUsers(
+          sessionId,
+          "following_only",
+          query
+        ),
+      };
+
+      // Paginate each category
+      const paginatedResults = {};
+      Object.keys(results).forEach((key) => {
+        paginatedResults[key] = results[key].slice(startIndex, endIndex);
+      });
+
+      res.json({
+        query,
+        results: paginatedResults,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: {
+            mutual: results.mutual.length,
+            followersOnly: results.followersOnly.length,
+            followingOnly: results.followingOnly.length,
+          },
+          totalFound:
+            results.mutual.length +
+            results.followersOnly.length +
+            results.followingOnly.length,
+        },
+      });
+    }
   } catch (error) {
     console.error("Search error:", error);
     res.status(500).json({ error: "Search failed" });

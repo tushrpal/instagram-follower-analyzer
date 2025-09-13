@@ -8,9 +8,12 @@ import {
   Download,
   AlertCircle,
   Loader,
+  UserMinus,
+  X,
 } from "lucide-react";
 import axios from "axios";
 import { TimelineChart } from "./TimelineChart";
+import RecentlyUnfollowed from "./RecentlyUnfollowed";
 
 export function Dashboard() {
   const { sessionId } = useParams();
@@ -20,6 +23,7 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showUnfollowed, setShowUnfollowed] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(20); // You can make this adjustable if you want
@@ -99,14 +103,72 @@ export function Dashboard() {
     setPage(1);
   }, [searchQuery]);
 
+  // Update the search handling
+  const handleSearch = async (pageNum = 1) => {
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      // Load the current tab's users when search is cleared
+      loadUsers(activeTab, 1);
+      setPage(1);
+      return;
+    }
+
+    try {
+      setLoadingSearch(true);
+      const response = await axios.get(
+        `/api/analysis/${sessionId}/search/${encodeURIComponent(searchQuery)}`,
+        {
+          params: {
+            page: pageNum,
+            limit: limit,
+            category: activeTab !== "unfollowed" ? activeTab : null,
+          },
+        }
+      );
+
+      // Handle both category-specific and general search responses
+      const searchData = response.data;
+      let totalPages;
+
+      if (searchData.category) {
+        // Category-specific search
+        totalPages = searchData.pagination.totalPages;
+      } else {
+        // General search (legacy)
+        totalPages = Math.ceil(searchData.pagination.totalFound / limit);
+      }
+
+      setSearchResults({
+        ...searchData,
+        page: pageNum,
+        limit: limit,
+        totalPages: totalPages,
+      });
+    } catch (error) {
+      console.error("Search failed:", error);
+      setError("Search failed. Please try again.");
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
+
   // Fetch users or search results when page, tab, search, or session changes
   useEffect(() => {
     if (searchQuery.trim()) {
       handleSearch(page);
-    } else if (activeTab) {
+    } else if (activeTab && activeTab !== "unfollowed") {
       loadUsers(activeTab, page);
     }
-  }, [page, activeTab, searchQuery, sessionId]);
+  }, [page, activeTab, sessionId]); // Removed searchQuery from dependencies
+
+  // Handle search query changes separately
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      handleSearch(1); // Always start from page 1 when search query changes
+    } else if (activeTab && activeTab !== "unfollowed") {
+      loadUsers(activeTab, 1); // Load first page when search is cleared
+    }
+  }, [searchQuery]);
 
   // Update the loadUsers function
   const loadUsers = async (category, pageNum = 1) => {
@@ -119,7 +181,7 @@ export function Dashboard() {
         ...prev,
         [category]: response.data.users,
       }));
-      console.log("User data:", response.data);
+      // console.log("User data:", response.data);
       setTotalUsers(response.data.total); // total users
       setTotalPages(response.data.pagination.totalPages || 1); // total pages from backend
     } catch (error) {
@@ -129,37 +191,12 @@ export function Dashboard() {
     }
   };
 
-  // Update the search handling
-  const handleSearch = async (pageNum = 1) => {
-    if (!searchQuery.trim()) {
-      setSearchResults(null);
-      return;
-    }
-
-    try {
-      setLoadingSearch(true);
-      const response = await axios.get(
-        `/api/analysis/${sessionId}/search/${encodeURIComponent(searchQuery)}`,
-        {
-          params: {
-            page: pageNum,
-            limit: limit,
-          },
-        }
-      );
-
-      setSearchResults({
-        ...response.data,
-        page: pageNum,
-        limit: limit,
-        totalPages: Math.ceil(response.data.pagination.totalFound / limit),
-      });
-    } catch (error) {
-      console.error("Search failed:", error);
-      setError("Search failed. Please try again.");
-    } finally {
-      setLoadingSearch(false);
-    }
+  // Clear search function
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults(null);
+    setPage(1);
+    loadUsers(activeTab, 1);
   };
 
   const exportData = async (category = null) => {
@@ -258,6 +295,15 @@ export function Dashboard() {
       bgColor: "bg-orange-50",
       borderColor: "border-orange-200",
     },
+    {
+      id: "unfollowed",
+      label: "Recently Unfollowed",
+      icon: UserMinus,
+      count: analysis?.summary.unfollowedCount || 0,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      borderColor: "border-purple-200",
+    },
   ];
 
   const searchResultKeyMap = {
@@ -271,6 +317,16 @@ export function Dashboard() {
     ? searchResults.results[searchResultKeyMap[activeTab]] || []
     : users[activeTab] || [];
 
+  // Use appropriate pagination values based on search state
+  const currentTotalPages = searchResults
+    ? searchResults.totalPages
+    : totalPages;
+
+  const currentTotalUsers = searchResults
+    ? searchResults.category
+      ? searchResults.pagination.total
+      : searchResults.pagination.totalFound
+    : totalUsers;
   const GrowthStats = ({ statistics }) => (
     <div className="grid grid-cols-3 gap-4 mb-8">
       <div className="bg-white rounded-lg shadow p-4">
@@ -350,6 +406,8 @@ export function Dashboard() {
                   "People who follow you but you don't follow back"}
                 {tab.id === "following_only" &&
                   "People you follow but don't follow you back"}
+                {tab.id === "unfollowed" &&
+                  "People you have recently unfollowed"}
               </p>
             </div>
           );
@@ -389,8 +447,17 @@ export function Dashboard() {
               placeholder="Search usernames..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 w-5 h-5"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <div className="flex gap-2">
@@ -417,13 +484,33 @@ export function Dashboard() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
             {searchResults
-              ? `Search Results (${searchResults.pagination.totalFound} found)`
+              ? `Search Results (${
+                  searchResults.category
+                    ? searchResults.pagination.total
+                    : searchResults.pagination.totalFound
+                } found)`
               : tabs.find((t) => t.id === activeTab)?.label}
           </h2>
-          <span className="text-gray-500">{currentUsers.length} users</span>
-        </div>
-
-        {currentUsers.length > 0 ? (
+          {activeTab !== "unfollowed" && (
+            <span className="text-gray-500">
+              {searchResults
+                ? `${currentUsers.length} of ${currentTotalUsers} users`
+                : `${currentUsers.length} users`}
+            </span>
+          )}
+          {activeTab === "unfollowed" && (
+            <span className="text-gray-500">
+              {analysis?.summary.unfollowedCount || 0} users
+            </span>
+          )}
+        </div>{" "}
+        {activeTab === "unfollowed" ? (
+          <RecentlyUnfollowed
+            sessionId={sessionId}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        ) : currentUsers.length > 0 ? (
           <>
             <div className="grid gap-3">
               {currentUsers.map((user, index) => (
@@ -465,20 +552,22 @@ export function Dashboard() {
             {/* Pagination Controls */}
             <div className="flex justify-center items-center mt-6 gap-2">
               <button
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={page === 1}
                 onClick={() => setPage(page > 1 ? page - 1 : 1)}
               >
                 Prev
               </button>
               <span>
-                Page {page} of {totalPages}
+                Page {page} of {currentTotalPages}
               </span>
               <button
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
-                disabled={page >= totalPages}
+                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={page >= currentTotalPages}
                 onClick={() =>
-                  setPage(page < totalPages ? page + 1 : totalPages)
+                  setPage(
+                    page < currentTotalPages ? page + 1 : currentTotalPages
+                  )
                 }
               >
                 Next

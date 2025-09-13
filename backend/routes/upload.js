@@ -6,6 +6,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const { database } = require("../models/database");
 const { analyzeFollowers } = require("../utils/analyzer");
+const StreamZip = require("node-stream-zip");
 
 const router = express.Router();
 
@@ -42,133 +43,23 @@ router.post("/", upload.single("instagramData"), async (req, res) => {
     const sessionId = uuidv4();
     const uploadPath = req.file.path;
 
-    // Process the ZIP file and analyze followers
     console.log(`📦 Processing upload for session: ${sessionId}`);
 
-    const zip = new JSZip();
-    const zipData = await fs.readFile(uploadPath);
-    const zipContents = await zip.loadAsync(zipData);
-
-    let followersData = [];
-    let followingData = [];
-    let runningFollowersCount = 0;
-    let runningFollowingCount = 0;
-
-    // Process each file
-    for (const [filename, file] of Object.entries(zipContents.files)) {
-      if (!file.dir) {
-        console.log(`📄 Processing file: ${filename}`);
-        const content = await file.async("string");
-
-        try {
-          const data = JSON.parse(content);
-
-          if (filename.includes("followers_")) {
-            console.log("✅ Processing followers data");
-            if (Array.isArray(data)) {
-              followersData = data
-                .filter(
-                  (item) =>
-                    item?.string_list_data?.[0]?.value &&
-                    item?.string_list_data?.[0]?.timestamp
-                )
-                .sort(
-                  (a, b) =>
-                    a.string_list_data[0].timestamp -
-                    b.string_list_data[0].timestamp
-                );
-
-              // Save follower events with running count
-              for (const follower of followersData) {
-                runningFollowersCount++;
-                const userData = follower.string_list_data[0];
-                await database.saveFollowerEvent(
-                  sessionId,
-                  userData.timestamp,
-                  runningFollowersCount,
-                  runningFollowingCount,
-                  "follower",
-                  userData.value
-                );
-              }
-            }
-          }
-
-          if (filename.includes("following.json")) {
-            console.log("✅ Processing following data");
-            if (data?.relationships_following) {
-              followingData = data.relationships_following
-                .filter(
-                  (item) =>
-                    item?.string_list_data?.[0]?.value &&
-                    item?.string_list_data?.[0]?.timestamp
-                )
-                .sort(
-                  (a, b) =>
-                    a.string_list_data[0].timestamp -
-                    b.string_list_data[0].timestamp
-                );
-
-              // Save following events with running count
-              for (const following of followingData) {
-                runningFollowingCount++;
-                const userData = following.string_list_data[0];
-                await database.saveFollowerEvent(
-                  sessionId,
-                  userData.timestamp,
-                  runningFollowersCount,
-                  runningFollowingCount,
-                  "following",
-                  userData.value
-                );
-              }
-            }
-          }
-        } catch (parseError) {
-          console.error(`Error parsing ${filename}:`, parseError);
-          continue;
-        }
-      }
-    }
-
-    // Verify we have data
-    if (!followersData.length && !followingData.length) {
-      throw new Error("No valid follower or following data found");
-    }
-
-    console.log(
-      `📊 Found ${followersData.length} followers and ${followingData.length} following`
-    );
-    const analysisResult = analyzeFollowers(followersData, followingData);
-
-    // Save analysis results
-    await database.saveAnalysis(sessionId, {
-      ...analysisResult,
-      followers: followersData,
-      following: followingData,
-    });
-
-    // Save user categories
-    await database.saveUsers(sessionId, analysisResult.mutual, "mutual");
-    await database.saveUsers(
+    // Use optimized processing
+    const processedData = await processInstagramDataOptimized(
       sessionId,
-      analysisResult.followersOnly,
-      "followers_only"
-    );
-    await database.saveUsers(
-      sessionId,
-      analysisResult.followingOnly,
-      "following_only"
+      uploadPath
     );
 
     res.json({
       sessionId,
       summary: {
-        totalFollowers: followersData.length,
-        totalFollowing: followingData.length,
-        mutualCount: analysisResult.mutual.length,
-        followersOnlyCount: analysisResult.followersOnly.length,
-        followingOnlyCount: analysisResult.followingOnly.length,
+        totalFollowers: processedData.followersCount,
+        totalFollowing: processedData.followingCount,
+        mutualCount: processedData.mutualCount,
+        followersOnlyCount: processedData.followersOnlyCount,
+        followingOnlyCount: processedData.followingOnlyCount,
+        pendingRequestsCount: processedData.pendingRequestsCount,
       },
     });
   } catch (error) {
@@ -188,5 +79,252 @@ router.post("/", upload.single("instagramData"), async (req, res) => {
     }
   }
 });
+
+// Optimized processing function
+async function processInstagramDataOptimized(sessionId, zipPath) {
+  console.log(`🚀 Starting optimized processing for session: ${sessionId}`);
+
+  const processedData = {
+    followers: [],
+    following: [],
+    pendingRequests: [],
+    unfollowedProfiles: [],
+  };
+
+  // Process ZIP file efficiently
+  const zip = new JSZip();
+  const zipData = await fs.readFile(zipPath);
+  const zipContents = await zip.loadAsync(zipData);
+
+  // Process all files in parallel where possible
+  const fileProcessingPromises = [];
+
+  for (const [filename, file] of Object.entries(zipContents.files)) {
+    if (!file.dir) {
+      fileProcessingPromises.push(
+        processFileContent(filename, file, processedData)
+      );
+    }
+  }
+
+  await Promise.all(fileProcessingPromises);
+
+  // Verify we have data
+  if (
+    !processedData.followers.length &&
+    !processedData.following.length &&
+    !processedData.pendingRequests.length
+  ) {
+    throw new Error("No valid data found in the upload");
+  }
+
+  console.log(
+    `📊 Found ${processedData.followers.length} followers, ${processedData.following.length} following, and ${processedData.pendingRequests.length} pending requests`
+  );
+
+  // Get previous session for comparison
+  const previousSessions = await database.getAnalysisSessions(1);
+  const previousSessionId =
+    previousSessions.length > 0 ? previousSessions[0].id : null;
+
+  // Single analysis pass - no duplicate processing
+  const analysisResult = await analyzeFollowers(
+    processedData.followers,
+    processedData.following,
+    previousSessionId,
+    sessionId // Pass sessionId to prevent duplicate processing
+  );
+
+  // Create timeline events with progressive counts
+  const timelineEvents = createProgressiveTimelineEvents(
+    processedData.followers,
+    processedData.following
+  );
+
+  console.log(
+    `📈 Created ${timelineEvents.length} timeline events for session: ${sessionId}`
+  );
+
+  // Batch save all data using transactions
+  await Promise.all([
+    database.saveAnalysis(sessionId, {
+      ...analysisResult,
+      followers: processedData.followers,
+      following: processedData.following,
+    }),
+    database.saveBatchUsers(sessionId, analysisResult.mutual, "mutual"),
+    database.saveBatchUsers(
+      sessionId,
+      analysisResult.followersOnly,
+      "followers_only"
+    ),
+    database.saveBatchUsers(
+      sessionId,
+      analysisResult.followingOnly,
+      "following_only"
+    ),
+    // Save timeline events
+    timelineEvents.length > 0
+      ? database.saveBatchFollowerEvents(sessionId, timelineEvents)
+      : Promise.resolve(),
+    // Save pending requests
+    processedData.pendingRequests.length > 0
+      ? database.savePendingRequests(sessionId, processedData.pendingRequests)
+      : Promise.resolve(),
+    // Save unfollowed profiles
+    ...processedData.unfollowedProfiles.map((profile) =>
+      database.addUnfollowedProfile(
+        sessionId,
+        profile.username,
+        "imported",
+        profile.href,
+        Math.floor(profile.timestamp)
+      )
+    ),
+  ]);
+
+  console.log(`✅ Optimized processing complete for session: ${sessionId}`);
+
+  return {
+    followersCount: processedData.followers.length,
+    followingCount: processedData.following.length,
+    mutualCount: analysisResult.mutual.length,
+    followersOnlyCount: analysisResult.followersOnly.length,
+    followingOnlyCount: analysisResult.followingOnly.length,
+    pendingRequestsCount: processedData.pendingRequests.length,
+  };
+}
+
+// Process individual file content
+async function processFileContent(filename, file, processedData) {
+  console.log(`📄 Processing file: ${filename}`);
+
+  try {
+    const content = await file.async("string");
+    const data = JSON.parse(content);
+
+    if (filename.includes("followers_")) {
+      console.log("✅ Processing followers data");
+      if (Array.isArray(data)) {
+        processedData.followers = data
+          .filter(
+            (item) =>
+              item?.string_list_data?.[0]?.value &&
+              item?.string_list_data?.[0]?.timestamp
+          )
+          .sort(
+            (a, b) =>
+              a.string_list_data[0].timestamp - b.string_list_data[0].timestamp
+          );
+      }
+    }
+
+    if (filename.includes("following.json")) {
+      console.log("✅ Processing following data");
+      if (data?.relationships_following) {
+        processedData.following = data.relationships_following
+          .filter(
+            (item) =>
+              item?.string_list_data?.[0]?.value &&
+              item?.string_list_data?.[0]?.timestamp
+          )
+          .sort(
+            (a, b) =>
+              a.string_list_data[0].timestamp - b.string_list_data[0].timestamp
+          );
+      }
+    }
+
+    if (filename.includes("pending_follow_requests.json")) {
+      console.log("✅ Processing pending requests data");
+      if (data?.relationships_follow_requests_sent) {
+        processedData.pendingRequests = data.relationships_follow_requests_sent
+          .filter(
+            (item) =>
+              item?.string_list_data?.[0]?.value &&
+              item?.string_list_data?.[0]?.timestamp
+          )
+          .sort(
+            (a, b) =>
+              b.string_list_data[0].timestamp - a.string_list_data[0].timestamp
+          );
+      }
+    }
+
+    if (filename.includes("recently_unfollowed_profiles.json")) {
+      console.log("✅ Processing recently unfollowed profiles data");
+      if (data?.relationships_unfollowed_users) {
+        const unfollowedProfiles = data.relationships_unfollowed_users
+          .filter(
+            (item) =>
+              item?.string_list_data?.[0]?.value &&
+              item?.string_list_data?.[0]?.timestamp
+          )
+          .map((item) => ({
+            username: item.string_list_data[0].value,
+            href: item.string_list_data[0].href,
+            timestamp: item.string_list_data[0].timestamp,
+          }));
+
+        processedData.unfollowedProfiles = unfollowedProfiles;
+        console.log(
+          `✅ Found ${unfollowedProfiles.length} unfollowed profiles`
+        );
+      }
+    }
+  } catch (parseError) {
+    console.error(`Error parsing ${filename}:`, parseError);
+  }
+}
+
+// Function to create timeline events with progressive counts
+function createProgressiveTimelineEvents(followers, following) {
+  const allEvents = [];
+
+  // Add follower events
+  followers.forEach((follower) => {
+    allEvents.push({
+      timestamp: follower.string_list_data[0].timestamp,
+      username: follower.string_list_data[0].value,
+      direction: "follower",
+      originalTimestamp: follower.string_list_data[0].timestamp,
+    });
+  });
+
+  // Add following events
+  following.forEach((followingUser) => {
+    allEvents.push({
+      timestamp: followingUser.string_list_data[0].timestamp,
+      username: followingUser.string_list_data[0].value,
+      direction: "following",
+      originalTimestamp: followingUser.string_list_data[0].timestamp,
+    });
+  });
+
+  // Sort all events by timestamp
+  allEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+  // Calculate progressive counts
+  let followersCount = 0;
+  let followingCount = 0;
+
+  const timelineEvents = allEvents.map((event) => {
+    if (event.direction === "follower") {
+      followersCount++;
+    } else if (event.direction === "following") {
+      followingCount++;
+    }
+
+    return {
+      timestamp: event.timestamp,
+      username: event.username,
+      direction: event.direction,
+      followersCount: followersCount,
+      followingCount: followingCount,
+    };
+  });
+
+  return timelineEvents;
+}
 
 module.exports = router;

@@ -1,15 +1,38 @@
+const { database } = require("../models/database");
+
 /**
  * Analyzes Instagram followers and following data
  * @param {Object|Array} followersData - Raw followers data from Instagram
  * @param {Object|Array} followingData - Raw following data from Instagram
+ * @param {string} previousSessionId - Previous session ID for comparison
+ * @param {string} currentSessionId - Current session ID (optional, prevents duplicate DB operations)
  * @returns {Object} Analysis results including followers, following, mutual connections and timeline
  */
-async function analyzeFollowers(followersData, followingData) {
+async function analyzeFollowers(
+  followersData,
+  followingData,
+  previousSessionId,
+  currentSessionId = null
+) {
   console.log("🔍 Starting follower analysis...");
 
   // Extract usernames from the data structures
   const followers = extractUsers(followersData);
   const following = extractUsers(followingData);
+
+  // Get previous session data if available
+  let previousFollowing = new Set();
+  if (previousSessionId) {
+    try {
+      const previousUsers = await database.getUsers(
+        previousSessionId,
+        "following"
+      );
+      previousFollowing = new Set(previousUsers.map((u) => u.username));
+    } catch (error) {
+      console.error("Error loading previous session data:", error);
+    }
+  }
 
   // // Debug: print usernames
   // console.log(
@@ -115,36 +138,74 @@ async function analyzeFollowers(followersData, followingData) {
       )
   );
 
-  // Save followers events
-  for (const follower of followers) {
-    try {
-      await database.saveFollowerEvent(
-        sessionId,
-        follower.timestamp,
-        followers.length,
-        following.length,
-        "follower", // Add direction
-        follower.value || follower.username
-      );
-    } catch (error) {
-      console.error("Error saving follower event:", error);
+  // Detect unfollowed profiles
+  if (previousSessionId && currentSessionId) {
+    const currentFollowingSet = new Set(
+      following.map((f) => f.value || f.username)
+    );
+
+    // Get previous session users with their details
+    const previousUsers = await database.getUsers(
+      previousSessionId,
+      "following"
+    );
+
+    for (const prevUser of previousUsers) {
+      if (!currentFollowingSet.has(prevUser.username)) {
+        // This user was in previous following list but not in current, means they were unfollowed
+        try {
+          await database.addUnfollowedProfile(
+            currentSessionId,
+            prevUser.username,
+            "following",
+            prevUser.href,
+            Math.floor(Date.now() / 1000),
+            "detected"
+          );
+        } catch (error) {
+          console.error("Error saving unfollowed profile:", error);
+        }
+      }
     }
   }
 
-  // Save following events
-  for (const followedUser of following) {
-    try {
-      await database.saveFollowerEvent(
-        sessionId,
-        followedUser.timestamp,
-        followers.length,
-        following.length,
-        "following", // Add direction
-        followedUser.value || followedUser.username
-      );
-    } catch (error) {
-      console.error("Error saving following event:", error);
+  // Only save follower events if not called from optimized upload (no currentSessionId means legacy call)
+  if (!currentSessionId) {
+    console.log("💾 Saving follower events individually (legacy mode)");
+
+    // Save followers events
+    for (const follower of followers) {
+      try {
+        await database.saveFollowerEvent(
+          sessionId,
+          follower.timestamp,
+          followers.length,
+          following.length,
+          "follower", // Add direction
+          follower.value || follower.username
+        );
+      } catch (error) {
+        console.error("Error saving follower event:", error);
+      }
     }
+
+    // Save following events
+    for (const followedUser of following) {
+      try {
+        await database.saveFollowerEvent(
+          sessionId,
+          followedUser.timestamp,
+          followers.length,
+          following.length,
+          "following", // Add direction
+          followedUser.value || followedUser.username
+        );
+      } catch (error) {
+        console.error("Error saving following event:", error);
+      }
+    }
+  } else {
+    console.log("⚡ Skipping individual saves - using batch processing");
   }
 
   return {
