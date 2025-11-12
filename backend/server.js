@@ -8,6 +8,10 @@ const analysisRoutes = require("./routes/analysis");
 const { initDatabase } = require("./models/database");
 
 const app = express();
+// When running behind a reverse proxy (nginx in Docker) we need to trust the proxy
+// so that middleware like express-rate-limit can correctly read client IP addresses
+// and not mistake the presence of X-Forwarded-For for a header injection issue.
+app.set("trust proxy", true);
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
@@ -49,6 +53,17 @@ app.get("/api/health", (req, res) => {
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error("Error:", error);
+
+  // Handle express-rate-limit validation error when X-Forwarded-For is present
+  // but 'trust proxy' is not configured (older versions throw this validation error).
+  if (error && error.code === "ERR_ERL_UNEXPECTED_X_FORWARDED_FOR") {
+    return res.status(400).json({
+      error: "Invalid proxy configuration",
+      message:
+        "The server received an X-Forwarded-For header but 'trust proxy' is not enabled. This usually happens when running behind a reverse proxy (nginx/Docker). The server has been configured to trust the proxy. If you still see this error, check your proxy headers.",
+    });
+  }
+
   res.status(500).json({
     error: "Internal Server Error",
     message:

@@ -201,9 +201,40 @@ async function processFileContent(filename, file, processedData) {
 
   try {
     const content = await file.async("string");
-    const data = JSON.parse(content);
 
-    if (filename.includes("followers_")) {
+    // Skip binary files early (images, fonts, etc.)
+    const ext = path.extname(filename).toLowerCase();
+    const binaryExts = [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".gif",
+      ".webp",
+      ".svg",
+      ".ico",
+      ".woff",
+      ".woff2",
+      ".ttf",
+    ];
+
+    if (binaryExts.includes(ext)) {
+      // Not JSON — skip silently
+      console.log(`⏭ Skipping binary file: ${filename}`);
+      return;
+    }
+
+    // Try to robustly extract JSON from the content. The Instagram export
+    // may include raw JSON files, or HTML files that embed JSON inside a
+    // <script> tag or similar. tryExtractJson will attempt several strategies
+    // and return a parsed object or null.
+    const data = tryExtractJson(content);
+
+    if (!data) {
+      console.log(`⏭ No JSON found in ${filename}; skipping`);
+      return;
+    }
+
+    if (filename.includes("followers_") || filename.includes("followers_1")) {
       console.log("✅ Processing followers data");
       if (Array.isArray(data)) {
         processedData.followers = data
@@ -275,6 +306,59 @@ async function processFileContent(filename, file, processedData) {
   } catch (parseError) {
     console.error(`Error parsing ${filename}:`, parseError);
   }
+}
+
+// Helper: robust JSON extractor
+function tryExtractJson(content) {
+  const s = content && typeof content === "string" ? content.trim() : "";
+  if (!s) return null;
+
+  // Direct JSON
+  try {
+    return JSON.parse(s);
+  } catch (e) {
+    // continue to other strategies
+  }
+
+  // Look for JSON-like start
+  const firstBracket = s.search(/[\{\[]/);
+  if (firstBracket !== -1) {
+    // Attempt to find a valid JSON substring starting at firstBracket
+    // This is a best-effort approach for HTML files that may contain a JSON blob.
+    for (let end = s.length; end > firstBracket; end--) {
+      const substr = s.slice(firstBracket, end);
+      try {
+        return JSON.parse(substr);
+      } catch (e) {
+        // keep trying
+      }
+    }
+  }
+
+  // Extract from <script> tags
+  const scriptMatch = s.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+  if (scriptMatch) {
+    const inside = scriptMatch[1];
+    // Look for assignment like: window._sharedData = { ... };
+    const objMatch = inside.match(/=\s*({[\s\S]*})\s*;?/);
+    if (objMatch) {
+      try {
+        return JSON.parse(objMatch[1]);
+      } catch (e) {
+        // fallthrough
+      }
+    }
+    const arrMatch = inside.match(/=\s*(\[[\s\S]*\])\s*;?/);
+    if (arrMatch) {
+      try {
+        return JSON.parse(arrMatch[1]);
+      } catch (e) {
+        // fallthrough
+      }
+    }
+  }
+
+  return null;
 }
 
 // Function to create timeline events with progressive counts
