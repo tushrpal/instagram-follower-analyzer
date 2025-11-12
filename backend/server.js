@@ -11,7 +11,9 @@ const app = express();
 // When running behind a reverse proxy (nginx in Docker) we need to trust the proxy
 // so that middleware like express-rate-limit can correctly read client IP addresses
 // and not mistake the presence of X-Forwarded-For for a header injection issue.
-app.set("trust proxy", true);
+// Use a numeric value (number of trusted proxies) instead of `true` which is
+// permissive and triggers express-rate-limit's validation error.
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
