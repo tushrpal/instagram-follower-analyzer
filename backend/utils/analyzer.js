@@ -256,50 +256,49 @@ function flattenStringListData(userArray) {
         return null;
       }
 
-      // Handle new format with string_list_data
+      // Handle format with string_list_data
       if (user.string_list_data && Array.isArray(user.string_list_data)) {
-        // Handle cases where string_list_data might be empty or have multiple entries
-        if (user.string_list_data.length === 0) {
-          console.warn("Empty string_list_data found, skipping entry");
-          return null;
-        }
-
-        // For multiple entries, we'll take the first one (most common case)
-        // but log a warning so users know
-        if (user.string_list_data.length > 1) {
-          console.warn(
-            "Multiple entries in string_list_data, using first entry"
-          );
-        }
-
-        const stringData = user.string_list_data[0];
-
-        // Skip if the string data entry is null or missing required fields
-        if (
-          !stringData ||
-          typeof stringData !== "object" ||
-          !stringData.value
-        ) {
-          console.warn("Invalid or missing string_list_data entry, skipping");
+        const stringData = user.string_list_data[0] || {};
+        
+        // Instagram export format: username can be in "title" field OR in string_list_data[0].value
+        // The string_list_data typically contains href and timestamp
+        const username = user.title || stringData.value || null;
+        
+        if (!username) {
+          // Skip entries without any identifiable username
           return null;
         }
 
         return {
-          value: stringData.value,
-          username: stringData.value, // For backward compatibility
-          href: stringData.href,
-          timestamp: stringData.timestamp,
+          value: username,
+          username: username,
+          href: stringData.href || null,
+          timestamp: stringData.timestamp || null,
+        };
+      }
+
+      // Handle format where "title" contains the username but no string_list_data
+      if (user.title) {
+        return {
+          value: user.title,
+          username: user.title,
+          href: user.href || null,
+          timestamp: user.timestamp || null,
         };
       }
 
       // Handle old format - user already has value/username directly
-      // Skip if missing required username field
-      if (!user.value && !user.username) {
-        console.warn("User entry missing username/value field, skipping");
-        return null;
+      if (user.value || user.username) {
+        return {
+          value: user.value || user.username,
+          username: user.value || user.username,
+          href: user.href || null,
+          timestamp: user.timestamp || null,
+        };
       }
 
-      return user;
+      // Skip entries without any identifiable username
+      return null;
     })
     .filter((user) => user !== null); // Remove null entries
 }
@@ -470,50 +469,49 @@ function flattenStringListData(userArray) {
         return null;
       }
 
-      // Handle new format with string_list_data
+      // Handle format with string_list_data
       if (user.string_list_data && Array.isArray(user.string_list_data)) {
-        // Handle cases where string_list_data might be empty or have multiple entries
-        if (user.string_list_data.length === 0) {
-          console.warn("Empty string_list_data found, skipping entry");
-          return null;
-        }
-
-        // For multiple entries, we'll take the first one (most common case)
-        // but log a warning so users know
-        if (user.string_list_data.length > 1) {
-          console.warn(
-            "Multiple entries in string_list_data, using first entry"
-          );
-        }
-
-        const stringData = user.string_list_data[0];
-
-        // Skip if the string data entry is null or missing required fields
-        if (
-          !stringData ||
-          typeof stringData !== "object" ||
-          !stringData.value
-        ) {
-          console.warn("Invalid or missing string_list_data entry, skipping");
+        const stringData = user.string_list_data[0] || {};
+        
+        // Instagram export format: username can be in "title" field OR in string_list_data[0].value
+        // The string_list_data typically contains href and timestamp
+        const username = user.title || stringData.value || null;
+        
+        if (!username) {
+          // Skip entries without any identifiable username
           return null;
         }
 
         return {
-          value: stringData.value,
-          username: stringData.value, // For backward compatibility
-          href: stringData.href,
-          timestamp: stringData.timestamp,
+          value: username,
+          username: username,
+          href: stringData.href || null,
+          timestamp: stringData.timestamp || null,
+        };
+      }
+
+      // Handle format where "title" contains the username but no string_list_data
+      if (user.title) {
+        return {
+          value: user.title,
+          username: user.title,
+          href: user.href || null,
+          timestamp: user.timestamp || null,
         };
       }
 
       // Handle old format - user already has value/username directly
-      // Skip if missing required username field
-      if (!user.value && !user.username) {
-        console.warn("User entry missing username/value field, skipping");
-        return null;
+      if (user.value || user.username) {
+        return {
+          value: user.value || user.username,
+          username: user.value || user.username,
+          href: user.href || null,
+          timestamp: user.timestamp || null,
+        };
       }
 
-      return user;
+      // Skip entries without any identifiable username
+      return null;
     })
     .filter((user) => user !== null); // Remove null entries
 }
