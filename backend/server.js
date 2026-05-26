@@ -18,12 +18,26 @@ app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        frameSrc: ["'self'", "https://www.youtube.com", "https://youtube.com"],
+        connectSrc: ["'self'"],
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://your-domain.com"]
+        ? [process.env.APP_URL || "https://instagram-follower-analyzer.onrender.com", "http://localhost:5000", "http://localhost"]
         : ["http://localhost:3000"],
     credentials: true,
   })
@@ -87,16 +101,6 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 }
-
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["http://localhost:5000", "http://localhost"] // Add Docker URLs
-        : ["http://localhost:3000"],
-    credentials: true,
-  })
-);
 
 // 404 handler
 app.use("*", (req, res) => {
