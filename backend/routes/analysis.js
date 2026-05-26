@@ -32,6 +32,81 @@ const validateAnalysisData = (req, res, next) => {
   next();
 };
 
+// Session history - list all past sessions (must be before /:sessionId routes)
+router.get("/", async (req, res) => {
+  try {
+    const sessions = await database.getAnalysisSessions(50);
+    res.json({
+      sessions: sessions.map((s) => ({
+        id: s.id,
+        createdAt: s.created_at,
+        processedAt: s.processed_at,
+        followersCount: s.followers_count,
+        followingCount: s.following_count,
+        mutualCount: s.mutual_count,
+        followersOnlyCount: s.followers_only_count,
+        followingOnlyCount: s.following_only_count,
+      })),
+    });
+  } catch (error) {
+    console.error("Session history error:", error);
+    res.status(500).json({ error: "Failed to fetch session history" });
+  }
+});
+
+// Session comparison (must be before /:sessionId routes)
+router.get("/compare", async (req, res) => {
+  try {
+    const { a, b } = req.query;
+    if (!a || !b) return res.status(400).json({ error: "Both session IDs (a, b) are required" });
+
+    const [sessionA, sessionB] = await Promise.all([
+      database.getAnalysis(a),
+      database.getAnalysis(b),
+    ]);
+
+    if (!sessionA || !sessionB) {
+      return res.status(404).json({ error: "One or both sessions not found" });
+    }
+
+    const [usersA, usersB] = await Promise.all([
+      database.getUsers(a),
+      database.getUsers(b),
+    ]);
+
+    const setA = {
+      followers: new Set(usersA.filter((u) => u.category !== "following_only").map((u) => u.username)),
+      following: new Set(usersA.filter((u) => u.category !== "followers_only").map((u) => u.username)),
+    };
+    const setB = {
+      followers: new Set(usersB.filter((u) => u.category !== "following_only").map((u) => u.username)),
+      following: new Set(usersB.filter((u) => u.category !== "followers_only").map((u) => u.username)),
+    };
+
+    const diff = {
+      newFollowers: [...setB.followers].filter((u) => !setA.followers.has(u)),
+      lostFollowers: [...setA.followers].filter((u) => !setB.followers.has(u)),
+      newFollowing: [...setB.following].filter((u) => !setA.following.has(u)),
+      removedFollowing: [...setA.following].filter((u) => !setB.following.has(u)),
+    };
+
+    res.json({
+      sessionA: { id: a, createdAt: sessionA.created_at, followersCount: sessionA.followers_count, followingCount: sessionA.following_count, mutualCount: sessionA.mutual_count },
+      sessionB: { id: b, createdAt: sessionB.created_at, followersCount: sessionB.followers_count, followingCount: sessionB.following_count, mutualCount: sessionB.mutual_count },
+      diff,
+      summary: {
+        newFollowersCount: diff.newFollowers.length,
+        lostFollowersCount: diff.lostFollowers.length,
+        newFollowingCount: diff.newFollowing.length,
+        removedFollowingCount: diff.removedFollowing.length,
+      },
+    });
+  } catch (error) {
+    console.error("Compare error:", error);
+    res.status(500).json({ error: "Failed to compare sessions" });
+  }
+});
+
 // Get pending follow requests
 router.get(
   "/:sessionId/pending-requests",
@@ -95,8 +170,10 @@ router.get("/:sessionId", validateSessionId, async (req, res) => {
       return res.status(404).json({ error: "Analysis session not found" });
     }
 
-    // Get unfollowed count
-    const unfollowedCount = await database.getUnfollowedCount(sessionId);
+    const [unfollowedCount, relationshipCounts] = await Promise.all([
+      database.getUnfollowedCount(sessionId),
+      database.getRelationshipProfileCounts(sessionId),
+    ]);
 
     res.json({
       sessionId: analysis.id,
@@ -110,6 +187,7 @@ router.get("/:sessionId", validateSessionId, async (req, res) => {
         followingOnlyCount: analysis.following_only_count,
         unfollowedCount,
       },
+      relationshipCounts,
     });
   } catch (error) {
     console.error("Analysis retrieval error:", error);
@@ -329,6 +407,148 @@ router.get("/:sessionId/unfollowed", validateSessionId, async (req, res) => {
       success: false,
       error: "Failed to fetch unfollowed profiles",
     });
+  }
+});
+
+// Relationship profiles - counts per list type
+router.get("/:sessionId/relationships", validateSessionId, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const analysis = await database.getAnalysis(sessionId);
+    if (!analysis) return res.status(404).json({ error: "Analysis session not found" });
+
+    const counts = await database.getRelationshipProfileCounts(sessionId);
+    res.json({ sessionId, counts });
+  } catch (error) {
+    console.error("Relationships error:", error);
+    res.status(500).json({ error: "Failed to fetch relationship data" });
+  }
+});
+
+// Relationship profiles - paginated list for a specific list type
+router.get("/:sessionId/relationships/:listType", validateSessionId, async (req, res) => {
+  try {
+    const { sessionId, listType } = req.params;
+    const validTypes = [
+      "close_friend", "blocked", "hidden_story", "restricted",
+      "favorited", "removed_suggestion", "received_request", "recent_request",
+    ];
+    if (!validTypes.includes(listType)) {
+      return res.status(400).json({ error: "Invalid list type" });
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || null;
+    const offset = (page - 1) * limit;
+
+    const [profiles, totalCount] = await Promise.all([
+      database.getRelationshipProfiles(sessionId, listType, limit, offset, search),
+      database.getRelationshipProfileCount(sessionId, listType, search),
+    ]);
+
+    res.json({
+      profiles,
+      pagination: {
+        page, limit,
+        totalItems: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Relationship list error:", error);
+    res.status(500).json({ error: "Failed to fetch relationship profiles" });
+  }
+});
+
+// Cross-reference insights
+router.get("/:sessionId/insights", validateSessionId, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const analysis = await database.getAnalysis(sessionId);
+    if (!analysis) return res.status(404).json({ error: "Analysis session not found" });
+
+    const insights = await database.queryRaw(
+      `WITH followers AS (
+          SELECT username FROM users WHERE session_id = $1 AND category IN ('mutual', 'followers_only')
+        ),
+        following AS (
+          SELECT username FROM users WHERE session_id = $2 AND category IN ('mutual', 'following_only')
+        ),
+        mutual AS (
+          SELECT username FROM users WHERE session_id = $3 AND category = 'mutual'
+        )
+        SELECT
+          rp.list_type,
+          rp.username,
+          rp.display_name,
+          rp.profile_url,
+          rp.timestamp,
+          CASE WHEN f.username IS NOT NULL THEN 1 ELSE 0 END as is_follower,
+          CASE WHEN fw.username IS NOT NULL THEN 1 ELSE 0 END as is_following,
+          CASE WHEN m.username IS NOT NULL THEN 1 ELSE 0 END as is_mutual
+        FROM relationship_profiles rp
+        LEFT JOIN followers f ON f.username = rp.username
+        LEFT JOIN following fw ON fw.username = rp.username
+        LEFT JOIN mutual m ON m.username = rp.username
+        WHERE rp.session_id = $4`,
+      [sessionId, sessionId, sessionId, sessionId]
+    );
+
+    const result = {
+      closeFriendsNotFollowingBack: [],
+      closeFriendsYouDontFollow: [],
+      blockedStillInFollowers: [],
+      hiddenStoryMutual: [],
+      requestConversions: [],
+      receivedNotAccepted: [],
+      removedSuggestionsNowFollowing: [],
+    };
+
+    let totalRecentRequests = 0;
+
+    insights.forEach((row) => {
+      const profile = {
+        username: row.username,
+        displayName: row.display_name,
+        profileUrl: row.profile_url,
+        timestamp: row.timestamp,
+      };
+
+      switch (row.list_type) {
+        case "close_friend":
+          if (!row.is_follower) result.closeFriendsNotFollowingBack.push(profile);
+          if (!row.is_following) result.closeFriendsYouDontFollow.push(profile);
+          break;
+        case "blocked":
+          if (row.is_follower) result.blockedStillInFollowers.push(profile);
+          break;
+        case "hidden_story":
+          if (row.is_mutual) result.hiddenStoryMutual.push(profile);
+          break;
+        case "recent_request":
+          totalRecentRequests++;
+          if (row.is_follower || row.is_following) result.requestConversions.push(profile);
+          break;
+        case "received_request":
+          if (!row.is_follower) result.receivedNotAccepted.push(profile);
+          break;
+        case "removed_suggestion":
+          if (row.is_following) result.removedSuggestionsNowFollowing.push(profile);
+          break;
+      }
+    });
+
+    res.json({
+      sessionId,
+      insights: result,
+      conversionRate: totalRecentRequests > 0
+        ? Math.round((result.requestConversions.length / totalRecentRequests) * 100)
+        : 0,
+    });
+  } catch (error) {
+    console.error("Insights error:", error);
+    res.status(500).json({ error: "Failed to compute insights" });
   }
 });
 
