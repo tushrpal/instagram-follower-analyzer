@@ -91,10 +91,10 @@ export function PendingRequests() {
                 <div className="flex items-center justify-between">
                   <div>
                     <a
-                      href={request.profileUrl}
+                      href={request.profileUrl || `https://www.instagram.com/${request.username}/`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold text-blue-600 hover:text-blue-800"
+                      className="font-semibold text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       {request.username}
                     </a>
