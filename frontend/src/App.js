@@ -6,6 +6,9 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { MenuBar } from "./components/MenuBar";
 import { PendingRequests } from "./components/PendingRequests";
+import { RelationshipLists } from "./components/RelationshipLists";
+import { Insights } from "./components/Insights";
+import { SessionHistory } from "./components/SessionHistory";
 import "./App.css";
 
 function App() {
@@ -18,11 +21,11 @@ function App() {
         <main className="flex-grow container mx-auto px-4 py-8">
           <Routes>
             <Route path="/" element={<Upload />} />
+            <Route path="/history" element={<SessionHistory />} />
             <Route path="/dashboard/:sessionId" element={<Dashboard />} />
-            <Route
-              path="/pending-requests/:sessionId"
-              element={<PendingRequests />}
-            />
+            <Route path="/pending-requests/:sessionId" element={<PendingRequests />} />
+            <Route path="/relationships/:sessionId" element={<RelationshipLists />} />
+            <Route path="/insights/:sessionId" element={<Insights />} />
           </Routes>
         </main>
 

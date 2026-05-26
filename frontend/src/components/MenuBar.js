@@ -22,9 +22,24 @@ export function MenuBar() {
       icon: "📊",
     },
     {
+      name: "Relationships",
+      path: `/relationships/${sessionId}`,
+      icon: "🔗",
+    },
+    {
+      name: "Insights",
+      path: `/insights/${sessionId}`,
+      icon: "💡",
+    },
+    {
       name: "Pending Requests",
       path: `/pending-requests/${sessionId}`,
       icon: "⏳",
+    },
+    {
+      name: "History",
+      path: "/history",
+      icon: "📅",
     },
   ];
 

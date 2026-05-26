@@ -434,6 +434,44 @@ export function Dashboard() {
         <TimelineChart timelineData={analysis?.timeline} />
       </div>
 
+      {/* Account Insights */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-lg shadow p-4 text-center">
+          <p className="text-sm text-gray-500 mb-1">Follow-back Rate</p>
+          <p className="text-2xl font-bold text-purple-600">
+            {analysis?.summary?.totalFollowing > 0
+              ? Math.round((analysis.summary.mutualCount / analysis.summary.totalFollowing) * 100)
+              : 0}%
+          </p>
+          <p className="text-xs text-gray-400">of people you follow, follow back</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4 text-center">
+          <p className="text-sm text-gray-500 mb-1">Fan Rate</p>
+          <p className="text-2xl font-bold text-blue-600">
+            {analysis?.summary?.totalFollowers > 0
+              ? Math.round((analysis.summary.followersOnlyCount / analysis.summary.totalFollowers) * 100)
+              : 0}%
+          </p>
+          <p className="text-xs text-gray-400">of followers are fans only</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4 text-center">
+          <p className="text-sm text-gray-500 mb-1">Close Friends</p>
+          <p className="text-2xl font-bold text-green-600">
+            {analysis?.relationshipCounts?.close_friend || 0}
+          </p>
+          <p className="text-xs text-gray-400">on your close friends list</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4 text-center">
+          <p className="text-sm text-gray-500 mb-1">Relationship Lists</p>
+          <p className="text-2xl font-bold text-orange-600">
+            {analysis?.relationshipCounts
+              ? Object.values(analysis.relationshipCounts).reduce((s, c) => s + c, 0)
+              : 0}
+          </p>
+          <p className="text-xs text-gray-400">total profiles across all lists</p>
+        </div>
+      </div>
+
       {/* Growth Statistics */}
       {analysis?.statistics && <GrowthStats statistics={analysis.statistics} />}
 

@@ -251,23 +251,15 @@ function flattenStringListData(userArray) {
 
   return userArray
     .map((user) => {
-      // Skip null or undefined entries
       if (!user || typeof user !== "object") {
         return null;
       }
 
-      // Handle format with string_list_data
+      // Handle format with string_list_data (older exports)
       if (user.string_list_data && Array.isArray(user.string_list_data)) {
         const stringData = user.string_list_data[0] || {};
-        
-        // Instagram export format: username can be in "title" field OR in string_list_data[0].value
-        // The string_list_data typically contains href and timestamp
         const username = user.title || stringData.value || null;
-        
-        if (!username) {
-          // Skip entries without any identifiable username
-          return null;
-        }
+        if (!username) return null;
 
         return {
           value: username,
@@ -277,220 +269,21 @@ function flattenStringListData(userArray) {
         };
       }
 
-      // Handle format where "title" contains the username but no string_list_data
-      if (user.title) {
-        return {
-          value: user.title,
-          username: user.title,
-          href: user.href || null,
-          timestamp: user.timestamp || null,
-        };
-      }
-
-      // Handle old format - user already has value/username directly
-      if (user.value || user.username) {
-        return {
-          value: user.value || user.username,
-          username: user.value || user.username,
-          href: user.href || null,
-          timestamp: user.timestamp || null,
-        };
-      }
-
-      // Skip entries without any identifiable username
-      return null;
-    })
-    .filter((user) => user !== null); // Remove null entries
-}
-
-// Add proper type documentation for the main function
-/**
- * Analyzes Instagram followers and following data
- * @param {Object|Array} followersData - Raw followers data from Instagram
- * @param {Object|Array} followingData - Raw following data from Instagram
- * @returns {Object} Analysis results including followers, following, mutual connections and timeline
- */
-function analyzeFollowers(followersData, followingData) {
-  console.log("🔍 Starting follower analysis...");
-
-  // Extract usernames from the data structures
-  const followers = extractUsers(followersData);
-  const following = extractUsers(followingData);
-
-  // // Debug: print usernames
-  // console.log(
-  //   "Followers:",
-  //   followers.map((f) => f.value || f.username)
-  // );
-  // console.log(
-  //   "Following:",
-  //   following.map((f) => f.value || f.username)
-  // );
-
-  console.log(
-    `📊 Found ${followers.length} followers and ${following.length} following`
-  );
-
-  // Create sets for efficient lookup
-  const followerUsernames = new Set(
-    followers.map((f) => f.value || f.username)
-  );
-  const followingUsernames = new Set(
-    following.map((f) => f.value || f.username)
-  );
-
-  // Analyze relationships
-  const mutual = [];
-  const followersOnly = [];
-  const followingOnly = [];
-
-  // Find mutual followers
-  followers.forEach((follower) => {
-    const username = follower.value || follower.username;
-    if (followingUsernames.has(username)) {
-      mutual.push(follower);
-    } else {
-      followersOnly.push(follower);
-    }
-  });
-
-  // Find following only (people you follow but don't follow you back)
-  following.forEach((followedUser) => {
-    const username = followedUser.value || followedUser.username;
-    if (!followerUsernames.has(username)) {
-      followingOnly.push(followedUser);
-    }
-  });
-
-  console.log(
-    `✅ Analysis complete: ${mutual.length} mutual, ${followersOnly.length} followers only, ${followingOnly.length} following only`
-  );
-
-  // Generate timeline events
-  const timeline = {
-    followEvents: [],
-  };
-
-  // Add follower events with running counts
-  let currentFollowers = 0;
-  let currentFollowing = 0;
-
-  // Process followers
-  followers.forEach((follower) => {
-    currentFollowers++;
-    timeline.followEvents.push({
-      timestamp: follower.timestamp || new Date().toISOString(),
-      username: follower.value || follower.username,
-      direction: "follower",
-      followersCount: currentFollowers,
-      followingCount: currentFollowing,
-    });
-  });
-
-  // Process following
-  following.forEach((following) => {
-    currentFollowing++;
-    timeline.followEvents.push({
-      timestamp: following.timestamp || new Date().toISOString(),
-      username: following.value || following.username,
-      direction: "following",
-      followersCount: currentFollowers,
-      followingCount: currentFollowing,
-    });
-  });
-
-  // Sort events by timestamp
-  timeline.followEvents.sort((a, b) => {
-    const tsA =
-      typeof a.timestamp === "number"
-        ? a.timestamp
-        : new Date(a.timestamp).getTime();
-    const tsB =
-      typeof b.timestamp === "number"
-        ? b.timestamp
-        : new Date(b.timestamp).getTime();
-    return tsA - tsB;
-  });
-
-  // Remove duplicate events
-  timeline.followEvents = timeline.followEvents.filter(
-    (event, index, self) =>
-      index ===
-      self.findIndex(
-        (e) => e.username === event.username && e.direction === event.direction
-      )
-  );
-
-  return {
-    followers,
-    following,
-    mutual,
-    followersOnly,
-    followingOnly,
-    timeline,
-  };
-}
-
-function extractUsers(data) {
-  // Handle different Instagram export formats
-  if (Array.isArray(data)) {
-    return flattenStringListData(data);
-  }
-
-  // Some exports have the data nested under different keys
-  if (data.relationships_followers) {
-    return flattenStringListData(data.relationships_followers);
-  }
-
-  if (data.relationships_following) {
-    return flattenStringListData(data.relationships_following);
-  }
-
-  // Look for any array property
-  for (const key in data) {
-    if (Array.isArray(data[key])) {
-      return flattenStringListData(data[key]);
-    }
-  }
-
-  console.warn("Unexpected data structure:", data);
-  return [];
-}
-
-function flattenStringListData(userArray) {
-  if (!Array.isArray(userArray)) {
-    return [];
-  }
-
-  return userArray
-    .map((user) => {
-      // Skip null or undefined entries
-      if (!user || typeof user !== "object") {
-        return null;
-      }
-
-      // Handle format with string_list_data
-      if (user.string_list_data && Array.isArray(user.string_list_data)) {
-        const stringData = user.string_list_data[0] || {};
-        
-        // Instagram export format: username can be in "title" field OR in string_list_data[0].value
-        // The string_list_data typically contains href and timestamp
-        const username = user.title || stringData.value || null;
-        
-        if (!username) {
-          // Skip entries without any identifiable username
-          return null;
-        }
+      // Handle label_values format (newer exports: {timestamp, label_values: [{label, value}], fbid})
+      if (Array.isArray(user.label_values)) {
+        const usernameEntry = user.label_values.find((lv) => lv.label === "Username");
+        const urlEntry = user.label_values.find((lv) => lv.label === "URL");
+        const username = usernameEntry?.value || null;
+        if (!username) return null;
 
         return {
           value: username,
           username: username,
-          href: stringData.href || null,
-          timestamp: stringData.timestamp || null,
+          href: urlEntry?.value || null,
+          timestamp: user.timestamp || null,
         };
       }
 
-      // Handle format where "title" contains the username but no string_list_data
       if (user.title) {
         return {
           value: user.title,
@@ -500,7 +293,6 @@ function flattenStringListData(userArray) {
         };
       }
 
-      // Handle old format - user already has value/username directly
       if (user.value || user.username) {
         return {
           value: user.value || user.username,
@@ -510,10 +302,9 @@ function flattenStringListData(userArray) {
         };
       }
 
-      // Skip entries without any identifiable username
       return null;
     })
-    .filter((user) => user !== null); // Remove null entries
+    .filter((user) => user !== null);
 }
 
 // Add this helper function to convert Unix timestamp to Date object

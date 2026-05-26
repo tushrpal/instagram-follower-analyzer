@@ -89,6 +89,7 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
     following: [],
     pendingRequests: [],
     unfollowedProfiles: [],
+    relationshipProfiles: [],
   };
 
   // Process ZIP file efficiently
@@ -149,7 +150,8 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
   if (
     !processedData.followers.length &&
     !processedData.following.length &&
-    !processedData.pendingRequests.length
+    !processedData.pendingRequests.length &&
+    !processedData.relationshipProfiles.length
   ) {
     throw new Error("No valid data found in the upload");
   }
@@ -217,6 +219,10 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
         Math.floor(profile.timestamp)
       )
     ),
+    // Save relationship profiles
+    processedData.relationshipProfiles.length > 0
+      ? database.saveRelationshipProfiles(sessionId, processedData.relationshipProfiles)
+      : Promise.resolve(),
   ]);
 
   console.log(`✅ Optimized processing complete for session: ${sessionId}`);
@@ -270,13 +276,11 @@ async function processFileContent(filename, file, processedData) {
       return;
     }
 
-    if (
-      filename.includes("followers_") ||
-      filename.includes("followers_1.json")
-    ) {
+    const basename = path.basename(filename).toLowerCase();
+
+    if (basename.startsWith("followers_") && basename.endsWith(".json")) {
       console.log("✅ Processing followers data");
       if (Array.isArray(data)) {
-        // Append entries rather than overwrite. We'll normalize later.
         const entries = data.filter((item) => extractUsername(item));
         if (entries.length > 0) {
           processedData.followers.push(...entries);
@@ -287,7 +291,7 @@ async function processFileContent(filename, file, processedData) {
       }
     }
 
-    if (filename.toLowerCase().includes("following")) {
+    if (basename === "following.json") {
       console.log("✅ Processing following data");
       // Accept multiple shapes:
       // - { relationships_following: [...] }
@@ -345,48 +349,90 @@ async function processFileContent(filename, file, processedData) {
       }
     }
 
-    if (filename.includes("pending_follow_requests.json")) {
+    if (basename === "pending_follow_requests.json") {
       console.log("✅ Processing pending requests data");
-      if (data?.relationships_follow_requests_sent) {
-        const entries = data.relationships_follow_requests_sent.filter((item) =>
-          extractUsername(item)
+      let rawEntries = [];
+      if (Array.isArray(data)) {
+        rawEntries = data;
+      } else if (data?.relationships_follow_requests_sent) {
+        rawEntries = data.relationships_follow_requests_sent;
+      }
+      const entries = rawEntries.filter((item) => extractUsername(item));
+      if (entries.length > 0) {
+        processedData.pendingRequests.push(...entries);
+        console.log(
+          `➕ Appended ${entries.length} pending requests from ${filename}`
         );
-        if (entries.length > 0) {
-          processedData.pendingRequests.push(...entries);
-          console.log(
-            `➕ Appended ${entries.length} pending requests from ${filename}`
-          );
-        }
       }
     }
 
-    if (filename.includes("recently_unfollowed_profiles.json")) {
+    if (basename === "recently_unfollowed_profiles.json") {
       console.log("✅ Processing recently unfollowed profiles data");
-      if (data?.relationships_unfollowed_users) {
-        const unfollowedProfiles = data.relationships_unfollowed_users
-          .filter((item) => extractUsername(item))
-          .map((item) => ({
-            username: extractUsername(item),
-            href:
-              (item.string_list_data &&
-                item.string_list_data[0] &&
-                item.string_list_data[0].href) ||
-              item.href ||
-              null,
-            timestamp: extractTimestamp(item),
-          }));
+      let rawEntries = [];
+      if (Array.isArray(data)) {
+        rawEntries = data;
+      } else if (data?.relationships_unfollowed_users) {
+        rawEntries = data.relationships_unfollowed_users;
+      }
+      const unfollowedProfiles = rawEntries
+        .filter((item) => extractUsername(item))
+        .map((item) => ({
+          username: extractUsername(item),
+          href: extractUrl(item),
+          timestamp: extractTimestamp(item),
+        }));
 
-        if (unfollowedProfiles.length > 0) {
-          processedData.unfollowedProfiles.push(...unfollowedProfiles);
-        }
-        console.log(
-          `✅ Found ${unfollowedProfiles.length} unfollowed profiles in ${filename}`
-        );
+      if (unfollowedProfiles.length > 0) {
+        processedData.unfollowedProfiles.push(...unfollowedProfiles);
+      }
+      console.log(
+        `✅ Found ${unfollowedProfiles.length} unfollowed profiles in ${filename}`
+      );
+    }
+    // Relationship list files — map basename to list_type
+    const relationshipFileMap = {
+      "close_friends.json": "close_friend",
+      "blocked_profiles.json": "blocked",
+      "hide_story_from.json": "hidden_story",
+      "restricted_profiles.json": "restricted",
+      "profiles_you've_favorited.json": "favorited",
+      "removed_suggestions.json": "removed_suggestion",
+      "follow_requests_you've_received.json": "received_request",
+      "recent_follow_requests.json": "recent_request",
+    };
+
+    const listType = relationshipFileMap[basename];
+    if (listType) {
+      console.log(`✅ Processing relationship list: ${basename} → ${listType}`);
+      const entries = Array.isArray(data) ? data : [data];
+      const profiles = entries
+        .filter((item) => item && typeof item === "object" && extractUsername(item))
+        .map((item) => ({
+          username: extractUsername(item),
+          displayName: extractDisplayName(item),
+          listType,
+          profileUrl: extractUrl(item),
+          fbid: item.fbid || null,
+          timestamp: extractTimestamp(item),
+        }));
+      if (profiles.length > 0) {
+        processedData.relationshipProfiles.push(...profiles);
+        console.log(`➕ Appended ${profiles.length} ${listType} profiles from ${filename}`);
       }
     }
   } catch (parseError) {
     console.error(`Error parsing ${filename}:`, parseError);
   }
+}
+
+// Global helper: extract display name from label_values
+function extractDisplayName(item) {
+  if (!item || typeof item !== "object") return null;
+  if (Array.isArray(item.label_values)) {
+    const entry = item.label_values.find((lv) => lv.label === "Name");
+    if (entry && entry.value) return entry.value;
+  }
+  return null;
 }
 
 // Global helper: extract username from common shapes
@@ -395,6 +441,10 @@ function extractUsername(item) {
   const sld = item.string_list_data && item.string_list_data[0];
   if (sld && sld.value) return sld.value;
   if (item.title) return item.title;
+  if (Array.isArray(item.label_values)) {
+    const entry = item.label_values.find((lv) => lv.label === "Username");
+    if (entry && entry.value) return entry.value;
+  }
   if (item.value) return item.value;
   if (item.username) return item.username;
   return null;
@@ -406,6 +456,19 @@ function extractTimestamp(item) {
   const sld = item.string_list_data && item.string_list_data[0];
   if (sld && (sld.timestamp || sld.timestamp === 0)) return sld.timestamp;
   if (item.timestamp || item.timestamp === 0) return item.timestamp;
+  return null;
+}
+
+// Global helper: extract profile URL from common shapes
+function extractUrl(item) {
+  if (!item || typeof item !== "object") return null;
+  const sld = item.string_list_data && item.string_list_data[0];
+  if (sld && sld.href) return sld.href;
+  if (item.href) return item.href;
+  if (Array.isArray(item.label_values)) {
+    const entry = item.label_values.find((lv) => lv.label === "URL");
+    if (entry && entry.value) return entry.value;
+  }
   return null;
 }
 
