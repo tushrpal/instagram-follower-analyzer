@@ -166,10 +166,11 @@ export function Upload() {
 
           <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg">
             <iframe
-              src="https://www.youtube.com/embed/JwBRvOBlCJc"
+              src="https://www.youtube-nocookie.com/embed/JwBRvOBlCJc"
               title="How to Download Instagram Data Export"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
               className="w-full h-full"
             ></iframe>

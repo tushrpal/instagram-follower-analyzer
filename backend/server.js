@@ -27,10 +27,11 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
-        frameSrc: ["'self'", "https://www.youtube.com", "https://youtube.com"],
+        frameSrc: ["'self'", "https://www.youtube.com", "https://youtube.com", "https://www.youtube-nocookie.com"],
         connectSrc: ["'self'"],
       },
     },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   })
 );
 app.use(
