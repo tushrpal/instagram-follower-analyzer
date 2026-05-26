@@ -6,3 +6,5 @@ uploads
 data
 .git
 *.md
+.env
+backend/.env
