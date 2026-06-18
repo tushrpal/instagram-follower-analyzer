@@ -2,8 +2,13 @@ const express = require("express");
 const { database } = require("../models/database");
 const path = require("path");
 const fs = require("fs").promises;
+const requireAuth = require("../middleware/requireAuth");
+const optionalAuth = require("../middleware/optionalAuth");
 
 const router = express.Router();
+
+// Allow unauthenticated access by default; individual routes enforce auth where needed
+router.use(optionalAuth);
 
 // Add input validation middleware
 const validateSessionId = (req, res, next) => {
@@ -33,12 +38,13 @@ const validateAnalysisData = (req, res, next) => {
 };
 
 // Session history - list all past sessions (must be before /:sessionId routes)
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
-    const sessions = await database.getAnalysisSessions(50);
+    const sessions = await database.getAnalysisSessions(50, req.session.userId);
     res.json({
       sessions: sessions.map((s) => ({
         id: s.id,
+        name: s.name || null,
         createdAt: s.created_at,
         processedAt: s.processed_at,
         followersCount: s.followers_count,
@@ -74,6 +80,9 @@ router.get("/compare", async (req, res) => {
       database.getUsers(b),
     ]);
 
+    const hrefA = new Map(usersA.map((u) => [u.username, u.href]));
+    const hrefB = new Map(usersB.map((u) => [u.username, u.href]));
+
     const setA = {
       followers: new Set(usersA.filter((u) => u.category !== "following_only").map((u) => u.username)),
       following: new Set(usersA.filter((u) => u.category !== "followers_only").map((u) => u.username)),
@@ -83,16 +92,21 @@ router.get("/compare", async (req, res) => {
       following: new Set(usersB.filter((u) => u.category !== "followers_only").map((u) => u.username)),
     };
 
+    const toUserObj = (username, mapB, mapA) => ({
+      username,
+      href: mapB.get(username) || mapA.get(username) || null,
+    });
+
     const diff = {
-      newFollowers: [...setB.followers].filter((u) => !setA.followers.has(u)),
-      lostFollowers: [...setA.followers].filter((u) => !setB.followers.has(u)),
-      newFollowing: [...setB.following].filter((u) => !setA.following.has(u)),
-      removedFollowing: [...setA.following].filter((u) => !setB.following.has(u)),
+      newFollowers: [...setB.followers].filter((u) => !setA.followers.has(u)).map((u) => toUserObj(u, hrefB, hrefA)),
+      lostFollowers: [...setA.followers].filter((u) => !setB.followers.has(u)).map((u) => toUserObj(u, hrefA, hrefB)),
+      newFollowing: [...setB.following].filter((u) => !setA.following.has(u)).map((u) => toUserObj(u, hrefB, hrefA)),
+      removedFollowing: [...setA.following].filter((u) => !setB.following.has(u)).map((u) => toUserObj(u, hrefA, hrefB)),
     };
 
     res.json({
-      sessionA: { id: a, createdAt: sessionA.created_at, followersCount: sessionA.followers_count, followingCount: sessionA.following_count, mutualCount: sessionA.mutual_count },
-      sessionB: { id: b, createdAt: sessionB.created_at, followersCount: sessionB.followers_count, followingCount: sessionB.following_count, mutualCount: sessionB.mutual_count },
+      sessionA: { id: a, createdAt: sessionA.created_at, name: sessionA.name || null, followersCount: sessionA.followers_count, followingCount: sessionA.following_count, mutualCount: sessionA.mutual_count },
+      sessionB: { id: b, createdAt: sessionB.created_at, name: sessionB.name || null, followersCount: sessionB.followers_count, followingCount: sessionB.following_count, mutualCount: sessionB.mutual_count },
       diff,
       summary: {
         newFollowersCount: diff.newFollowers.length,
@@ -104,6 +118,49 @@ router.get("/compare", async (req, res) => {
   } catch (error) {
     console.error("Compare error:", error);
     res.status(500).json({ error: "Failed to compare sessions" });
+  }
+});
+
+// Rename a session
+router.patch("/:sessionId/name", validateSessionId, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { name } = req.body;
+    if (typeof name !== "string") {
+      return res.status(400).json({ error: "name must be a string" });
+    }
+    const analysis = await database.getAnalysis(sessionId);
+    if (!analysis) return res.status(404).json({ error: "Analysis session not found" });
+    await database.updateSessionName(sessionId, name.trim().slice(0, 120));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Rename session error:", error);
+    res.status(500).json({ error: "Failed to rename session" });
+  }
+});
+
+// Unfollow candidates — following_only sorted by oldest-followed-first
+router.get("/:sessionId/unfollow-candidates", validateSessionId, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const analysis = await database.getAnalysis(sessionId);
+    if (!analysis) return res.status(404).json({ error: "Analysis session not found" });
+
+    const { rows } = await database.queryRaw(
+      `SELECT u.username, u.href,
+              fe.event_timestamp as followed_at
+       FROM users u
+       LEFT JOIN follower_events fe
+         ON fe.session_id = u.session_id AND fe.username = u.username AND fe.direction = 'following'
+       WHERE u.session_id = $1 AND u.category = 'following_only'
+       ORDER BY fe.event_timestamp ASC NULLS LAST, u.username ASC`,
+      [sessionId]
+    );
+
+    res.json({ candidates: rows });
+  } catch (error) {
+    console.error("Unfollow candidates error:", error);
+    res.status(500).json({ error: "Failed to fetch unfollow candidates" });
   }
 });
 

@@ -7,6 +7,8 @@ const path = require("path");
 const { database } = require("../models/database");
 const { analyzeFollowers } = require("../utils/analyzer");
 const StreamZip = require("node-stream-zip");
+const jobQueue = require("../utils/jobQueue");
+const optionalAuth = require("../middleware/optionalAuth");
 
 const router = express.Router();
 
@@ -38,50 +40,53 @@ const upload = multer({
   },
 });
 
-router.post("/", upload.single("instagramData"), async (req, res) => {
-  try {
-    const sessionId = uuidv4();
-    const uploadPath = req.file.path;
+router.post("/", optionalAuth, upload.single("instagramData"), async (req, res) => {
+  const sessionId = uuidv4();
+  const uploadPath = req.file.path;
+  const userId = req.session.userId;
 
-    console.log(`📦 Processing upload for session: ${sessionId}`);
+  // Create job and return immediately so the client isn't blocked
+  jobQueue.create(sessionId);
+  res.status(202).json({ sessionId });
 
-    // Use optimized processing
-    const processedData = await processInstagramDataOptimized(
-      sessionId,
-      uploadPath
-    );
-
-    res.json({
-      sessionId,
-      summary: {
-        totalFollowers: processedData.followersCount,
-        totalFollowing: processedData.followingCount,
-        mutualCount: processedData.mutualCount,
-        followersOnlyCount: processedData.followersOnlyCount,
-        followingOnlyCount: processedData.followingOnlyCount,
-        pendingRequestsCount: processedData.pendingRequestsCount,
-      },
-    });
-  } catch (error) {
-    console.error("Upload processing error:", error);
-    res.status(500).json({
-      error: "Failed to process Instagram data",
-      message: error.message,
-    });
-  } finally {
-    // Cleanup uploaded file
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (cleanupError) {
-        console.error("File cleanup error:", cleanupError);
-      }
+  // Run processing in background
+  setImmediate(async () => {
+    try {
+      jobQueue.progress(sessionId, "Reading ZIP file…");
+      const processedData = await processInstagramDataOptimized(sessionId, uploadPath, userId, (msg) => {
+        jobQueue.progress(sessionId, msg);
+      });
+      jobQueue.complete(sessionId, {
+        sessionId,
+        summary: {
+          totalFollowers: processedData.followersCount,
+          totalFollowing: processedData.followingCount,
+          mutualCount: processedData.mutualCount,
+          followersOnlyCount: processedData.followersOnlyCount,
+          followingOnlyCount: processedData.followingOnlyCount,
+          pendingRequestsCount: processedData.pendingRequestsCount,
+        },
+      });
+    } catch (error) {
+      console.error("Upload processing error:", error);
+      jobQueue.fail(sessionId, error.message || "Failed to process Instagram data");
+    } finally {
+      try { await fs.unlink(uploadPath); } catch {}
     }
-  }
+  });
+});
+
+// SSE status endpoint
+router.get("/status/:sessionId", (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+  jobQueue.subscribe(req.params.sessionId, res);
 });
 
 // Optimized processing function
-async function processInstagramDataOptimized(sessionId, zipPath) {
+async function processInstagramDataOptimized(sessionId, zipPath, userId, onProgress = () => {}) {
   console.log(`🚀 Starting optimized processing for session: ${sessionId}`);
 
   const processedData = {
@@ -92,10 +97,14 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
     relationshipProfiles: [],
   };
 
+  onProgress("Extracting ZIP contents…");
+
   // Process ZIP file efficiently
   const zip = new JSZip();
   const zipData = await fs.readFile(zipPath);
   const zipContents = await zip.loadAsync(zipData);
+
+  onProgress("Parsing follower data files…");
 
   // Process all files in parallel where possible
   const fileProcessingPromises = [];
@@ -109,6 +118,8 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
   }
 
   await Promise.all(fileProcessingPromises);
+
+  onProgress("Normalizing data…");
 
   // Normalization: multiple files in the ZIP may each contain followers/following
   // fragments. We append during parsing which can create duplicates or unsorted
@@ -165,6 +176,8 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
   const previousSessionId =
     previousSessions.length > 0 ? previousSessions[0].id : null;
 
+  onProgress(`Analyzing ${processedData.followers.length} followers and ${processedData.following.length} following…`);
+
   // Single analysis pass - no duplicate processing
   const analysisResult = await analyzeFollowers(
     processedData.followers,
@@ -179,9 +192,7 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
     processedData.following
   );
 
-  console.log(
-    `📈 Created ${timelineEvents.length} timeline events for session: ${sessionId}`
-  );
+  onProgress("Saving to database…");
 
   // Batch save all data using transactions
   await Promise.all([
@@ -189,7 +200,7 @@ async function processInstagramDataOptimized(sessionId, zipPath) {
       ...analysisResult,
       followers: processedData.followers,
       following: processedData.following,
-    }),
+    }, userId),
     database.saveBatchUsers(sessionId, analysisResult.mutual, "mutual"),
     database.saveBatchUsers(
       sessionId,

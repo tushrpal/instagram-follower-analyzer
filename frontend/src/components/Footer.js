@@ -3,27 +3,33 @@ import { Heart, Shield, Lock } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-white border-t mt-auto">
+    <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-700 mt-auto">
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-3 gap-6 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start space-x-2">
             <Heart className="w-5 h-5 text-red-500" />
-            <span className="text-gray-600">Made with love for Instagram users</span>
+            <span className="text-gray-600 dark:text-gray-400">Made with love for Instagram users</span>
           </div>
-          
+
           <div className="flex items-center justify-center space-x-2">
             <Shield className="w-5 h-5 text-green-500" />
-            <span className="text-gray-600">Privacy-focused & secure</span>
+            <span className="text-gray-600 dark:text-gray-400">Privacy-focused &amp; secure</span>
           </div>
-          
+
           <div className="flex items-center justify-center md:justify-end space-x-2">
             <Lock className="w-5 h-5 text-blue-500" />
-            <span className="text-gray-600">Data processed locally</span>
+            <span className="text-gray-600 dark:text-gray-400">Data processed locally</span>
           </div>
         </div>
-        
-        <div className="mt-6 pt-6 border-t text-center text-gray-500 text-sm">
-          <p>© 2024 Instagram Follower Analyzer. This tool is not affiliated with Instagram.</p>
+
+        <div className="mt-6 pt-6 border-t dark:border-gray-700">
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <a href="/about" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">About Us</a>
+            <a href="/contact" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact Us</a>
+            <a href="/privacy-policy" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Terms &amp; Conditions</a>
+          </nav>
+          <p className="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Analyzer. Not affiliated with Instagram or Meta.</p>
         </div>
       </div>
     </footer>

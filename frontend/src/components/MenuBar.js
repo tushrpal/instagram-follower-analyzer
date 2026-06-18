@@ -16,31 +16,12 @@ export function MenuBar() {
   }
 
   const menuItems = [
-    {
-      name: "Dashboard",
-      path: `/dashboard/${sessionId}`,
-      icon: "📊",
-    },
-    {
-      name: "Relationships",
-      path: `/relationships/${sessionId}`,
-      icon: "🔗",
-    },
-    {
-      name: "Insights",
-      path: `/insights/${sessionId}`,
-      icon: "💡",
-    },
-    {
-      name: "Pending Requests",
-      path: `/pending-requests/${sessionId}`,
-      icon: "⏳",
-    },
-    {
-      name: "History",
-      path: "/history",
-      icon: "📅",
-    },
+    { name: "Dashboard", path: `/dashboard/${sessionId}`, icon: "📊" },
+    { name: "Unfollow Helper", path: `/unfollow/${sessionId}`, icon: "🚫" },
+    { name: "Relationships", path: `/relationships/${sessionId}`, icon: "🔗" },
+    { name: "Insights", path: `/insights/${sessionId}`, icon: "💡" },
+    { name: "Pending Requests", path: `/pending-requests/${sessionId}`, icon: "⏳" },
+    { name: "History", path: "/history", icon: "📅" },
   ];
 
   return (
@@ -48,10 +29,10 @@ export function MenuBar() {
       {/* Menu Button */}
       <button
         onClick={toggleMenu}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:bg-gray-100 focus:outline-none"
+        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
       >
         <svg
-          className="w-6 h-6"
+          className="w-6 h-6 text-gray-700 dark:text-gray-200"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -67,7 +48,7 @@ export function MenuBar() {
 
       {/* Sidebar Menu */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
+        className={`fixed top-0 left-0 h-full w-56 sm:w-64 bg-white dark:bg-gray-900 shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -78,8 +59,8 @@ export function MenuBar() {
               to={item.path}
               className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-colors duration-200 ${
                 location.pathname === item.path
-                  ? "bg-blue-100 text-blue-600"
-                  : "hover:bg-gray-100"
+                  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               }`}
               onClick={() => setIsOpen(false)}
             >

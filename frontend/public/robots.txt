@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Disallow dynamic session routes
+Disallow: /dashboard/
+Disallow: /processing/
+Disallow: /unfollow/
+Disallow: /pending-requests/
+Disallow: /relationships/
+Disallow: /insights/
+
+Sitemap: https://YOUR_DOMAIN/sitemap.xml

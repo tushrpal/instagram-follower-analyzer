@@ -59,16 +59,16 @@ export function PendingRequests() {
 
   return (
     <div className="container mx-auto px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Pending Follow Requests</h2>
-        <span className="text-sm text-gray-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Pending Follow Requests</h2>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
           Total Requests: {totalCount}
         </span>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
         {error ? (
-          <div className="text-red-500 p-4 bg-red-50 rounded-lg">
+          <div className="text-red-500 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
             <p className="mb-3">{error}</p>
             {error.includes("upload") && (
               <Link
@@ -80,13 +80,13 @@ export function PendingRequests() {
             )}
           </div>
         ) : pendingRequests.length === 0 ? (
-          <p className="text-gray-600">No pending follow requests found.</p>
+          <p className="text-gray-600 dark:text-gray-400">No pending follow requests found.</p>
         ) : (
           <div className="grid gap-4">
             {pendingRequests.map((request, index) => (
               <div
                 key={index}
-                className="border rounded-lg p-4 hover:bg-gray-50"
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -94,17 +94,17 @@ export function PendingRequests() {
                       href={request.profileUrl || `https://www.instagram.com/${request.username}/`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                      className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
                     >
                       {request.username}
                     </a>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Requested on:{" "}
                       {new Date(request.requestDate).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-sm">
-                    <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                    <span className="px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
                       {request.status}
                     </span>
                   </div>

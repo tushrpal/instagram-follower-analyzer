@@ -7,13 +7,95 @@ import {
   AlertCircle,
   CheckCircle,
   Play,
+  Download,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import axios from "axios";
+
+const INSTAGRAM_EXPORT_URL = "https://accountscenter.instagram.com/info_and_permissions/dyi/";
+
+function DownloadGuideModal({ onClose }) {
+  const steps = [
+    { num: 1, text: 'Click "Create new export"' },
+    { num: 2, text: 'Choose "Export to this device"' },
+    { num: 3, text: 'Click "Customize information" → unselect all → select only "Followers and Following"' },
+    { num: 4, text: 'Set date range to "All time"' },
+    { num: 5, text: 'Select format: JSON (not HTML)' },
+    { num: 6, text: 'Click "Export" and wait 10–20 minutes' },
+    { num: 7, text: "Come back to this page and download the file when ready" },
+  ];
+
+  const handleOpen = () => {
+    window.open(INSTAGRAM_EXPORT_URL, "_blank", "noopener,noreferrer");
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 z-10">
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Download className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">What to do on Instagram</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Follow these steps after the site opens</p>
+          </div>
+        </div>
+
+        {/* Steps */}
+        <ol className="space-y-3 mb-6">
+          {steps.map((s) => (
+            <li key={s.num} className="flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                {s.num}
+              </span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{s.text}</span>
+            </li>
+          ))}
+        </ol>
+
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+          💡 Instagram takes <strong>10–20 minutes</strong> to prepare the file. Come back here once it's downloaded and upload the ZIP.
+        </p>
+
+        {/* CTA */}
+        <button
+          onClick={handleOpen}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Open Instagram Data Page
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function Upload() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [showGuide, setShowGuide] = useState(false);
   const navigate = useNavigate();
 
   const onDrop = async (acceptedFiles) => {
@@ -45,11 +127,12 @@ export function Upload() {
             (progressEvent.loaded * 100) / progressEvent.total
           );
           setProgress(percentCompleted);
+          if (percentCompleted === 100) setProcessing(true);
         },
       });
 
       if (response.data.sessionId) {
-        navigate(`/dashboard/${response.data.sessionId}`);
+        navigate(`/processing/${response.data.sessionId}`);
       }
     } catch (error) {
       console.error("Upload error:", error);
@@ -59,6 +142,7 @@ export function Upload() {
       );
     } finally {
       setUploading(false);
+      setProcessing(false);
       setProgress(0);
     }
   };
@@ -75,32 +159,44 @@ export function Upload() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {showGuide && <DownloadGuideModal onClose={() => setShowGuide(false)} />}
+
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+      <div className="text-center mb-8 sm:mb-12">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
           Instagram Follower
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
             {" "}
             Analyzer
           </span>
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8">
           Discover who follows you back, who doesn't, and gain insights into
           your Instagram connections.
+        </p>
+        <button
+          onClick={() => setShowGuide(true)}
+          className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold text-base sm:text-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+        >
+          <Download className="w-5 h-5" />
+          Download Instagram Data
+        </button>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
+          Don't have the file yet? Download it from Instagram first.
         </p>
       </div>
 
       {/* Upload Area */}
-      <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-8 mb-8">
         <div
           {...getRootProps()}
           className={`
-            border-2 border-dashed rounded-xl p-12 text-center cursor-pointer
+            border-2 border-dashed rounded-xl p-6 sm:p-12 text-center cursor-pointer
             transition-all duration-300 ease-in-out
             ${
               isDragActive
-                ? "border-purple-500 bg-purple-50"
-                : "border-gray-300 hover:border-purple-400 hover:bg-gray-50"
+                ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                : "border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             }
             ${uploading ? "pointer-events-none opacity-50" : ""}
           `}
@@ -113,53 +209,62 @@ export function Upload() {
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {uploading
-                  ? "Processing your data..."
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {processing
+                  ? "Analyzing your data..."
+                  : uploading
+                  ? "Uploading..."
                   : "Upload Instagram Data Export"}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 {isDragActive
                   ? "Drop your ZIP file here..."
                   : "Drag & drop your Instagram export ZIP file or click to browse"}
               </p>
             </div>
 
-            {uploading && (
+            {uploading && !processing && (
               <div className="w-full max-w-md">
-                <div className="bg-gray-200 rounded-full h-2 mb-2">
+                <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
                   <div
                     className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
-                <p className="text-sm text-gray-600">{progress}% complete</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{progress}% uploaded</p>
+              </div>
+            )}
+
+            {processing && (
+              <div className="w-full max-w-md text-center">
+                <div className="spinner mb-2 mx-auto"></div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Parsing followers &amp; building your analysis…</p>
               </div>
             )}
           </div>
         </div>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-3">
+          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-red-700">{error}</p>
+            <p className="text-red-700 dark:text-red-400">{error}</p>
           </div>
         )}
       </div>
 
       {/* Video Tutorial Section */}
-      <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
         <div className="flex items-center mb-6">
           <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center mr-3">
             <Play className="w-5 h-5 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             🎥 Video Tutorial: How to Download Your Instagram Data
           </h2>
         </div>
 
-        <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-6 mb-6">
-          <p className="text-red-800 font-medium mb-4">
+        <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
+          <p className="text-red-800 dark:text-red-300 font-medium mb-4">
             📺 Watch this step-by-step video guide to learn how to download your
             Instagram data export:
           </p>
@@ -177,7 +282,7 @@ export function Upload() {
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-red-700 dark:text-red-400">
               💡 This video shows the exact process step-by-step
             </p>
             <a
@@ -193,13 +298,64 @@ export function Upload() {
         </div>
       </div>
 
+      {/* SEO Content Section */}
+      <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 prose prose-gray dark:prose-invert max-w-none">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          The Best Free Instagram Follower Tracker Online
+        </h2>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          If you've ever wondered who stopped following you or why your follower count quietly dropped overnight, you need a reliable <strong>Instagram follower tracker</strong>. Our tool gives you a complete picture of your Instagram audience — for free, without installing anything, and without handing over your Instagram password.
+        </p>
+
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+          How Our Instagram Follower Tracker Works
+        </h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          Unlike third-party apps that require your Instagram credentials, our <strong>Instagram follower tracker online free</strong> tool works differently. You simply download your own data export directly from Instagram — a ZIP file containing your followers and following lists in JSON format — and upload it here. No passwords, no OAuth tokens, no risk to your account. Everything is analyzed server-side in seconds and the raw data is deleted after processing.
+        </p>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          Once uploaded, the dashboard instantly categorizes every account: mutual followers, people you follow who don't follow back, followers who you haven't followed back, and pending follow requests. You can search and filter across thousands of accounts, export any list to CSV, and leave private notes on specific profiles.
+        </p>
+
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+          Track Who Unfollowed You on Instagram
+        </h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          The most common reason people look for an <strong>Instagram follower tracker — who unfollowed me</strong> — is to understand audience churn. Our session comparison feature does exactly that. Upload a second export a week or a month later, and the tool compares the two snapshots side by side. It shows you a precise list of accounts that unfollowed you between sessions, along with direct profile links so you can review them instantly. No guessing, no approximations — just the actual data from Instagram itself.
+        </p>
+
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+          Works for Private Accounts Too
+        </h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          Most <strong>Instagram follower tracker apps</strong> fail for private accounts because they rely on scraping public profile pages or Instagram's API, neither of which exposes follower data for private accounts. Our approach is fundamentally different. Because you're working with your own downloaded data export, it works perfectly as an <strong>Instagram follower tracker for private accounts</strong> — your privacy settings are irrelevant. The data comes straight from Instagram to your device to our analyzer, nothing more.
+        </p>
+
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+          Live Follower Tracking Across Multiple Sessions
+        </h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          Want to monitor your growth over time? Our <strong>Instagram follower tracker live</strong> session history lets you build up a timeline by uploading new exports regularly. Each session is saved under a custom name you choose, and the dashboard charts your follower and following counts over time using a growth timeline. You can compare any two sessions to see exactly what changed — who came in, who left, and how your mutual follower ratio shifted.
+        </p>
+
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+          Why This Is the Best Free Instagram Follower Tracker App
+        </h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          There are plenty of paid tools and sketchy apps that ask for your password. What makes this the <strong>best free Instagram follower tracker app</strong> is the combination of depth, safety, and zero cost. You get eight different relationship list types, cross-session comparison, a batch unfollow helper, search and pagination, CSV exports, private account compatibility, and full dark mode — completely free. There's no premium tier hiding the important features, no account required to get started, and no app to download. It runs entirely in your browser.
+        </p>
+        <p className="text-gray-700 dark:text-gray-300 mb-2">
+          Whether you're a creator tracking audience loyalty, a brand monitoring follower quality, or just curious who quietly unfollowed you, this <strong>best Instagram follower tracker app</strong> gives you the data you need in under a minute. Upload your Instagram data export above to get started.
+        </p>
+      </article>
+
       {/* Instructions */}
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
         <div className="flex items-center mb-6">
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mr-3">
             <FileText className="w-5 h-5 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             📥 Step-by-Step Written Instructions
           </h2>
         </div>
@@ -211,22 +367,22 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">1</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Open the link
               </h3>
             </div>
-            <p className="text-gray-700 mb-2">
+            <p className="text-gray-700 dark:text-gray-300 mb-2">
               Go to 👉{" "}
               <a
                 href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline font-medium"
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline font-medium"
               >
-                https://accountscenter.instagram.com/info_and_permissions/dyi/
+                Instagram Data Export Page
               </a>
             </p>
-            <p className="text-sm text-gray-600 italic">
+            <p className="text-sm text-gray-600 dark:text-gray-400 italic">
               (Make sure you're logged into the correct Instagram account)
             </p>
           </div>
@@ -237,11 +393,11 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">2</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Create a New Export
               </h3>
             </div>
-            <p className="text-gray-700">
+            <p className="text-gray-700 dark:text-gray-300">
               Click on <span className="font-semibold">Create new export</span>.
             </p>
           </div>
@@ -252,15 +408,15 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">3</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Choose Export Location
               </h3>
             </div>
-            <p className="text-gray-700 mb-2">
+            <p className="text-gray-700 dark:text-gray-300 mb-2">
               Select{" "}
               <span className="font-semibold">Export to this device</span>.
             </p>
-            <p className="text-sm text-gray-600 italic">
+            <p className="text-sm text-gray-600 dark:text-gray-400 italic">
               (Don't choose Google Drive or any external service if you want it
               directly on your device)
             </p>
@@ -272,17 +428,17 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">4</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Customize Information
               </h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">
                 Click on{" "}
                 <span className="font-semibold">Customize information</span>.
               </p>
-              <p className="text-gray-700">Unselect all options.</p>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">Unselect all options.</p>
+              <p className="text-gray-700 dark:text-gray-300">
                 Only select:{" "}
                 <span className="font-semibold text-green-600">
                   ✅ Followers and Following
@@ -298,16 +454,16 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">5</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Select Date Range
               </h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">
                 If you want data for all time → choose{" "}
                 <span className="font-semibold">All time</span>.
               </p>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">
                 If you only want a specific period → set a custom date range.
               </p>
             </div>
@@ -319,11 +475,11 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">6</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Choose File Format
               </h3>
             </div>
-            <p className="text-gray-700">
+            <p className="text-gray-700 dark:text-gray-300">
               Select <span className="font-semibold">JSON</span> (not HTML).
             </p>
           </div>
@@ -334,11 +490,11 @@ export function Upload() {
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">7</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Start Export
               </h3>
             </div>
-            <p className="text-gray-700">
+            <p className="text-gray-700 dark:text-gray-300">
               Click on <span className="font-semibold">Export</span>.
             </p>
           </div>
@@ -349,13 +505,13 @@ export function Upload() {
               <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">8</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Wait for Processing
               </h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-700">Instagram will prepare your file.</p>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">Instagram will prepare your file.</p>
+              <p className="text-gray-700 dark:text-gray-300">
                 This usually takes{" "}
                 <span className="font-semibold">10–20 minutes</span> (sometimes
                 longer depending on account size).
@@ -369,18 +525,18 @@ export function Upload() {
               <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
                 <span className="text-sm font-bold text-white">9</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Download the File
               </h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">
                 Come back to the same link after 10–20 min.
               </p>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">
                 You will see your export ready for download.
               </p>
-              <p className="text-gray-700">
+              <p className="text-gray-700 dark:text-gray-300">
                 Click <span className="font-semibold">Download</span> → it will
                 save the file directly to your device.
               </p>
@@ -389,14 +545,14 @@ export function Upload() {
         </div>
 
         {/* Privacy Section */}
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="flex items-start space-x-3">
             <CheckCircle className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-blue-800 font-semibold text-lg mb-2">
+              <p className="text-blue-800 dark:text-blue-300 font-semibold text-lg mb-2">
                 🔒 Privacy First
               </p>
-              <p className="text-blue-700">
+              <p className="text-blue-700 dark:text-blue-400">
                 Your data is processed locally and automatically deleted after
                 analysis. We never store your personal information or follower
                 data on our servers.
@@ -406,9 +562,9 @@ export function Upload() {
         </div>
 
         {/* Quick Summary */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-semibold text-gray-900 mb-2">📋 Quick Summary</h4>
-          <p className="text-sm text-gray-700">
+        <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">📋 Quick Summary</h4>
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             1. Visit Instagram's data export page → 2. Create new export → 3.
             Export to device → 4. Select only "Followers and Following" → 5.
             Choose JSON format → 6. Wait 10-20 minutes → 7. Download and upload

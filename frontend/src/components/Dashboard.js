@@ -7,13 +7,15 @@ import {
   Search,
   Download,
   AlertCircle,
-  Loader,
   UserMinus,
   X,
 } from "lucide-react";
 import axios from "axios";
 import { TimelineChart } from "./TimelineChart";
 import RecentlyUnfollowed from "./RecentlyUnfollowed";
+import { UserRow } from "./UserRow";
+import { InstagramConnect } from "./InstagramConnect";
+import { ApiInsights } from "./ApiInsights";
 
 export function Dashboard() {
   const { sessionId } = useParams();
@@ -33,6 +35,7 @@ export function Dashboard() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [loadingExport, setLoadingExport] = useState(false);
+  const [igApiConnected, setIgApiConnected] = useState(false);
 
   useEffect(() => {
     const loadTimelineData = async () => {
@@ -243,7 +246,7 @@ export function Dashboard() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="spinner mb-4"></div>
-          <p className="text-gray-600">Loading analysis...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading analysis...</p>
         </div>
       </div>
     );
@@ -253,10 +256,10 @@ export function Dashboard() {
     return (
       <div className="max-w-2xl mx-auto text-center">
         <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Analysis Not Found
         </h2>
-        <p className="text-gray-600 mb-6">{error}</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
         <a
           href="/"
           className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -273,36 +276,36 @@ export function Dashboard() {
       label: "Mutual Followers",
       icon: UserCheck,
       count: analysis?.summary.mutualCount || 0,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      borderColor: "border-green-200",
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+      borderColor: "border-green-200 dark:border-green-700",
     },
     {
       id: "followers_only",
       label: "Followers Only",
       icon: Users,
       count: analysis?.summary.followersOnlyCount || 0,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+      borderColor: "border-blue-200 dark:border-blue-700",
     },
     {
       id: "following_only",
       label: "Following Only",
       icon: UserPlus,
       count: analysis?.summary.followingOnlyCount || 0,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      borderColor: "border-orange-200",
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20",
+      borderColor: "border-orange-200 dark:border-orange-700",
     },
     {
       id: "unfollowed",
       label: "Recently Unfollowed",
       icon: UserMinus,
       count: analysis?.summary.unfollowedCount || 0,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20",
+      borderColor: "border-purple-200 dark:border-purple-700",
     },
   ];
 
@@ -328,38 +331,23 @@ export function Dashboard() {
       : searchResults.pagination.totalFound
     : totalUsers;
   const GrowthStats = ({ statistics }) => (
-    <div className="grid grid-cols-3 gap-4 mb-8">
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-sm font-medium text-gray-500">Daily Growth</h3>
-        <p
-          className={`text-2xl font-bold ${
-            statistics.dailyGrowth >= 0 ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {statistics.dailyGrowth > 0 ? "+" : ""}
-          {statistics.dailyGrowth}
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Daily Growth</h3>
+        <p className={`text-xl sm:text-2xl font-bold ${statistics.dailyGrowth >= 0 ? "text-green-600" : "text-red-600"}`}>
+          {statistics.dailyGrowth > 0 ? "+" : ""}{statistics.dailyGrowth}
         </p>
       </div>
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-sm font-medium text-gray-500">Weekly Growth</h3>
-        <p
-          className={`text-2xl font-bold ${
-            statistics.weeklyGrowth >= 0 ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {statistics.weeklyGrowth > 0 ? "+" : ""}
-          {statistics.weeklyGrowth}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Weekly Growth</h3>
+        <p className={`text-xl sm:text-2xl font-bold ${statistics.weeklyGrowth >= 0 ? "text-green-600" : "text-red-600"}`}>
+          {statistics.weeklyGrowth > 0 ? "+" : ""}{statistics.weeklyGrowth}
         </p>
       </div>
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-sm font-medium text-gray-500">Monthly Growth</h3>
-        <p
-          className={`text-2xl font-bold ${
-            statistics.monthlyGrowth >= 0 ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {statistics.monthlyGrowth > 0 ? "+" : ""}
-          {statistics.monthlyGrowth}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Growth</h3>
+        <p className={`text-xl sm:text-2xl font-bold ${statistics.monthlyGrowth >= 0 ? "text-green-600" : "text-red-600"}`}>
+          {statistics.monthlyGrowth > 0 ? "+" : ""}{statistics.monthlyGrowth}
         </p>
       </div>
     </div>
@@ -368,46 +356,38 @@ export function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
           Your Instagram Analysis
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Analysis completed on{" "}
           {new Date(analysis.processedAt).toLocaleDateString()}
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <div
               key={tab.id}
-              className={`${tab.bgColor} ${
-                tab.borderColor
-              } border rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg ${
+              className={`${tab.bgColor} ${tab.borderColor} border rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg ${
                 activeTab === tab.id ? "ring-2 ring-purple-500" : ""
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
               <div className="flex items-center justify-between mb-4">
                 <Icon className={`w-8 h-8 ${tab.color}`} />
-                <span className={`text-2xl font-bold ${tab.color}`}>
-                  {tab.count}
-                </span>
+                <span className={`text-2xl font-bold ${tab.color}`}>{tab.count}</span>
               </div>
-              <h3 className="font-semibold text-gray-900">{tab.label}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {tab.id === "mutual" &&
-                  "People who follow you and you follow back"}
-                {tab.id === "followers_only" &&
-                  "People who follow you but you don't follow back"}
-                {tab.id === "following_only" &&
-                  "People you follow but don't follow you back"}
-                {tab.id === "unfollowed" &&
-                  "People you have recently unfollowed"}
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{tab.label}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {tab.id === "mutual" && "People who follow you and you follow back"}
+                {tab.id === "followers_only" && "People who follow you but you don't follow back"}
+                {tab.id === "following_only" && "People you follow but don't follow you back"}
+                {tab.id === "unfollowed" && "People you have recently unfollowed"}
               </p>
             </div>
           );
@@ -416,12 +396,10 @@ export function Dashboard() {
 
       {/* Timeline Chart */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Growth Timeline
-          </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Growth Timeline</h2>
           <select
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
             onChange={(e) => setTimelineView(e.target.value)}
             defaultValue="all"
           >
@@ -435,49 +413,55 @@ export function Dashboard() {
       </div>
 
       {/* Account Insights */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-sm text-gray-500 mb-1">Follow-back Rate</p>
-          <p className="text-2xl font-bold text-purple-600">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Follow-back Rate</p>
+          <p className="text-xl sm:text-2xl font-bold text-purple-600">
             {analysis?.summary?.totalFollowing > 0
               ? Math.round((analysis.summary.mutualCount / analysis.summary.totalFollowing) * 100)
               : 0}%
           </p>
-          <p className="text-xs text-gray-400">of people you follow, follow back</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">of people you follow, follow back</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-sm text-gray-500 mb-1">Fan Rate</p>
-          <p className="text-2xl font-bold text-blue-600">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Fan Rate</p>
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">
             {analysis?.summary?.totalFollowers > 0
               ? Math.round((analysis.summary.followersOnlyCount / analysis.summary.totalFollowers) * 100)
               : 0}%
           </p>
-          <p className="text-xs text-gray-400">of followers are fans only</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">of followers are fans only</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-sm text-gray-500 mb-1">Close Friends</p>
-          <p className="text-2xl font-bold text-green-600">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Close Friends</p>
+          <p className="text-xl sm:text-2xl font-bold text-green-600">
             {analysis?.relationshipCounts?.close_friend || 0}
           </p>
-          <p className="text-xs text-gray-400">on your close friends list</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">on your close friends list</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-sm text-gray-500 mb-1">Relationship Lists</p>
-          <p className="text-2xl font-bold text-orange-600">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 sm:p-4 text-center">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Relationship Lists</p>
+          <p className="text-xl sm:text-2xl font-bold text-orange-600">
             {analysis?.relationshipCounts
               ? Object.values(analysis.relationshipCounts).reduce((s, c) => s + c, 0)
               : 0}
           </p>
-          <p className="text-xs text-gray-400">total profiles across all lists</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">total profiles across all lists</p>
         </div>
       </div>
 
       {/* Growth Statistics */}
       {analysis?.statistics && <GrowthStats statistics={analysis.statistics} />}
 
+      {/* Instagram Graph API — optional Pro account integration */}
+      <div className="mb-8 space-y-4">
+        <InstagramConnect onStatusChange={(s) => setIgApiConnected(s?.connected || false)} />
+        {igApiConnected && <ApiInsights />}
+      </div>
+
       {/* Search and Export */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
           <div className="relative flex-grow max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -485,7 +469,7 @@ export function Dashboard() {
               placeholder="Search usernames..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
             {searchQuery && (
               <button
@@ -498,10 +482,10 @@ export function Dashboard() {
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => exportData(activeTab)}
-              className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               <Download className="w-4 h-4 mr-2" />
               Export Current
@@ -518,9 +502,9 @@ export function Dashboard() {
       </div>
 
       {/* User List */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
             {searchResults
               ? `Search Results (${
                   searchResults.category
@@ -530,18 +514,19 @@ export function Dashboard() {
               : tabs.find((t) => t.id === activeTab)?.label}
           </h2>
           {activeTab !== "unfollowed" && (
-            <span className="text-gray-500">
+            <span className="text-gray-500 dark:text-gray-400 text-sm">
               {searchResults
                 ? `${currentUsers.length} of ${currentTotalUsers} users`
                 : `${currentUsers.length} users`}
             </span>
           )}
           {activeTab === "unfollowed" && (
-            <span className="text-gray-500">
+            <span className="text-gray-500 dark:text-gray-400 text-sm">
               {analysis?.summary.unfollowedCount || 0} users
             </span>
           )}
-        </div>{" "}
+        </div>
+
         {activeTab === "unfollowed" ? (
           <RecentlyUnfollowed
             sessionId={sessionId}
@@ -550,63 +535,31 @@ export function Dashboard() {
           />
         ) : currentUsers.length > 0 ? (
           <>
-            <div className="grid gap-3">
+            <div className="divide-y dark:divide-gray-700">
               {currentUsers.map((user, index) => (
-                <div
+                <UserRow
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold">
-                        {(user.username || "?").charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        @{user.username}
-                      </p>
-                      {searchResults && (
-                        <p className="text-sm text-gray-500 capitalize">
-                          {user.category.replace("_", " ")}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {user.href && (
-                    <a
-                      href={user.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                    >
-                      View Profile
-                    </a>
-                  )}
-                </div>
+                  username={user.username || "?"}
+                  href={user.href}
+                />
               ))}
             </div>
             {/* Pagination Controls */}
             <div className="flex justify-center items-center mt-6 gap-2">
               <button
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm dark:text-gray-300"
                 disabled={page === 1}
                 onClick={() => setPage(page > 1 ? page - 1 : 1)}
               >
                 Prev
               </button>
-              <span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 Page {page} of {currentTotalPages}
               </span>
               <button
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm dark:text-gray-300"
                 disabled={page >= currentTotalPages}
-                onClick={() =>
-                  setPage(
-                    page < currentTotalPages ? page + 1 : currentTotalPages
-                  )
-                }
+                onClick={() => setPage(page < currentTotalPages ? page + 1 : currentTotalPages)}
               >
                 Next
               </button>
@@ -614,11 +567,9 @@ export function Dashboard() {
           </>
         ) : (
           <div className="text-center py-12">
-            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">
-              {searchQuery
-                ? "No users found matching your search."
-                : "No users in this category."}
+            <Users className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">
+              {searchQuery ? "No users found matching your search." : "No users in this category."}
             </p>
           </div>
         )}

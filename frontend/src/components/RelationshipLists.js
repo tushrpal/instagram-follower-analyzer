@@ -46,39 +46,39 @@ function RelationshipCard({ sessionId, listType, count }) {
   if (!meta) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <div className="flex items-center space-x-3">
           <span className="text-2xl">{meta.icon}</span>
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900">{meta.label}</h3>
-            <p className="text-sm text-gray-500">{meta.description}</p>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{meta.label}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{meta.description}</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <span className="bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-full text-sm">
+          <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold px-3 py-1 rounded-full text-sm">
             {count}
           </span>
           {expanded ? (
-            <ChevronUp className="w-5 h-5 text-gray-400" />
+            <ChevronUp className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-gray-400" />
+            <ChevronDown className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           )}
         </div>
       </button>
 
       {expanded && (
-        <div className="border-t px-5 pb-5">
+        <div className="border-t border-gray-200 dark:border-gray-700 px-5 pb-5">
           {loading ? (
-            <div className="py-8 text-center text-gray-400">Loading...</div>
+            <div className="py-8 text-center text-gray-400 dark:text-gray-500">Loading...</div>
           ) : profiles.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">No profiles found</div>
+            <div className="py-8 text-center text-gray-400 dark:text-gray-500">No profiles found</div>
           ) : (
             <>
-              <div className="divide-y">
+              <div className="divide-y divide-gray-100 dark:divide-gray-700">
                 {profiles.map((p) => (
                   <div key={p.id} className="flex items-center justify-between py-3">
                     <div className="flex items-center space-x-3">
@@ -88,18 +88,18 @@ function RelationshipCard({ sessionId, listType, count }) {
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 text-sm">@{p.username}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">@{p.username}</p>
                         {p.display_name && (
-                          <p className="text-xs text-gray-500">{p.display_name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{p.display_name}</p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3 text-sm text-gray-400">
+                    <div className="flex items-center space-x-3 text-sm text-gray-400 dark:text-gray-500">
                       {p.timestamp && (
                         <span>{formatDistanceToNow(new Date(p.timestamp * 1000), { addSuffix: true })}</span>
                       )}
                       {p.profile_url && (
-                        <a href={p.profile_url} target="_blank" rel="noopener noreferrer" className="text-purple-500 hover:text-purple-700">
+                        <a href={p.profile_url} target="_blank" rel="noopener noreferrer" className="text-purple-500 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300">
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       )}
@@ -110,13 +110,13 @@ function RelationshipCard({ sessionId, listType, count }) {
               {totalPages > 1 && (
                 <div className="flex justify-center items-center mt-4 gap-2">
                   <button
-                    className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-sm"
+                    className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 text-sm"
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
                   >Prev</button>
-                  <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Page {page} of {totalPages}</span>
                   <button
-                    className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-sm"
+                    className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 text-sm"
                     disabled={page >= totalPages}
                     onClick={() => setPage(page + 1)}
                   >Next</button>
@@ -155,7 +155,7 @@ export function RelationshipLists() {
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
           <div className="spinner mb-4"></div>
-          <p className="text-gray-600">Loading relationships...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading relationships...</p>
         </div>
       </div>
     );
@@ -165,7 +165,7 @@ export function RelationshipLists() {
     return (
       <div className="max-w-2xl mx-auto text-center py-16">
         <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-        <p className="text-gray-600">{error}</p>
+        <p className="text-gray-600 dark:text-gray-400">{error}</p>
       </div>
     );
   }
@@ -175,9 +175,9 @@ export function RelationshipLists() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Relationship Lists</h1>
-        <p className="text-gray-600">{totalProfiles} profiles across {Object.keys(counts).length} lists</p>
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Relationship Lists</h1>
+        <p className="text-gray-600 dark:text-gray-400">{totalProfiles} profiles across {Object.keys(counts).length} lists</p>
       </div>
 
       <div className="space-y-4">

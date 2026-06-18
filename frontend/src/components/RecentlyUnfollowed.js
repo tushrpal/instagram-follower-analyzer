@@ -3,7 +3,7 @@ import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 
 const UnfollowedUser = React.memo(({ user }) => (
-  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
     <div className="flex items-center space-x-3">
       <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
         <span className="text-white font-semibold">
@@ -11,13 +11,8 @@ const UnfollowedUser = React.memo(({ user }) => (
         </span>
       </div>
       <div>
-        <p className="font-medium text-gray-900">@{user.username}</p>
-        {/* {user.last_seen_category && (
-          <p className="text-sm text-gray-500">
-            Last seen as: {user.last_seen_category}
-          </p>
-        )} */}
-        <p className="text-xs text-gray-400">
+        <p className="font-medium text-gray-900 dark:text-gray-100">@{user.username}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">
           Unfollowed {formatDistanceToNow(new Date(user.unfollowed_at))} ago
         </p>
       </div>
@@ -27,7 +22,7 @@ const UnfollowedUser = React.memo(({ user }) => (
         href={user.profile_url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+        className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm font-medium"
       >
         View Profile
       </a>
@@ -68,13 +63,6 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
           const profiles = response.data.data;
           const pagination = response.data.pagination;
 
-          console.log("API Response:", {
-            profilesLength: profiles.length,
-            pagination,
-            firstProfile: profiles[0],
-            params,
-          });
-
           setTotalPages(pagination.totalPages);
           setTotalItems(pagination.totalItems);
           setUnfollowedProfiles(profiles);
@@ -98,26 +86,11 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
     setPage(1);
   }, [fetchUnfollowedProfiles, searchQuery]);
 
-  // Fetch data when page changes
   useEffect(() => {
     if (page > 1) {
       fetchUnfollowedProfiles(page, searchQuery);
     }
   }, [page, fetchUnfollowedProfiles, searchQuery]);
-
-  const clearSearch = () => {
-    if (onSearchChange) {
-      onSearchChange("");
-    }
-  };
-
-  // Debug log for current state
-  useEffect(() => {
-    console.log("Current profiles:", unfollowedProfiles.length);
-    console.log("Current page:", page);
-    console.log("Total pages:", totalPages);
-    console.log("Total items:", totalItems);
-  }, [unfollowedProfiles, page, totalPages, totalItems]);
 
   const renderedProfiles = useMemo(
     () =>
@@ -132,20 +105,20 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
         <div className="text-red-500 p-4">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Recently Unfollowed</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Recently Unfollowed</h2>
       </div>
 
       {searchQuery && (
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
           {loading
             ? "Searching..."
             : `${totalItems} results found for "${searchQuery}"`}
@@ -155,27 +128,26 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
       {loading && page === 1 ? (
         <div className="text-center p-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
-          <p className="text-gray-500">Loading unfollowed profiles...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading unfollowed profiles...</p>
         </div>
       ) : unfollowedProfiles.length > 0 ? (
         <>
           <div className="space-y-4">{renderedProfiles}</div>
 
-          {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-6 gap-2">
               <button
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={page === 1 || loading}
                 onClick={() => setPage(page > 1 ? page - 1 : 1)}
               >
                 Prev
               </button>
-              <span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 Page {page} of {totalPages}
               </span>
               <button
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={page >= totalPages || loading}
                 onClick={() =>
                   setPage(page < totalPages ? page + 1 : totalPages)
@@ -193,7 +165,7 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
           )}
         </>
       ) : (
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           {searchQuery
             ? `No unfollowed profiles found matching "${searchQuery}"`
             : "No unfollowed profiles found"}

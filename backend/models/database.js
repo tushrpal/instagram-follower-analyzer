@@ -19,6 +19,13 @@ class Database {
 
   async createTables() {
     const ddl = `
+      CREATE TABLE IF NOT EXISTS app_users (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS analysis_sessions (
         id TEXT PRIMARY KEY,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -27,8 +34,31 @@ class Database {
         mutual_count INTEGER,
         followers_only_count INTEGER,
         following_only_count INTEGER,
-        processed_at TIMESTAMP
+        processed_at TIMESTAMP,
+        name TEXT,
+        user_id INTEGER REFERENCES app_users(id)
       );
+
+      CREATE TABLE IF NOT EXISTS instagram_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES app_users(id) UNIQUE,
+        access_token TEXT NOT NULL,
+        token_type TEXT DEFAULT 'bearer',
+        expires_at TIMESTAMP,
+        instagram_user_id TEXT,
+        instagram_username TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS user_annotations (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        note TEXT,
+        tags TEXT[],
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_annotations_username ON user_annotations(username);
 
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -141,82 +171,136 @@ class Database {
     return rows || [];
   }
 
-  async saveAnalysis(sessionId, analysisData) {
+  async saveAnalysis(sessionId, analysisData, userId = null) {
     const { followers, following, mutual, followersOnly, followingOnly } = analysisData;
     await this.pool.query(
       `INSERT INTO analysis_sessions
-       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count, processed_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-      [sessionId, followers.length, following.length, mutual.length, followersOnly.length, followingOnly.length]
+       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count, processed_at, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)`,
+      [sessionId, followers.length, following.length, mutual.length, followersOnly.length, followingOnly.length, userId]
     );
   }
 
   async saveBatchUsers(sessionId, users, category) {
     if (!users || users.length === 0) return;
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      for (const user of users) {
-        await client.query(
-          "INSERT INTO users (session_id, username, category, href) VALUES ($1, $2, $3, $4)",
-          [sessionId, user.value || user.username, category, user.href]
-        );
-      }
-      await client.query("COMMIT");
-    } catch (err) {
-      await client.query("ROLLBACK");
-      throw err;
-    } finally {
-      client.release();
-    }
+    const usernames = users.map((u) => u.value || u.username);
+    const hrefs = users.map((u) => u.href || null);
+    await this.pool.query(
+      `INSERT INTO users (session_id, username, category, href)
+       SELECT $1, u, $2, h
+       FROM unnest($3::text[], $4::text[]) AS t(u, h)`,
+      [sessionId, category, usernames, hrefs]
+    );
   }
 
   async saveBatchFollowerEvents(sessionId, events) {
     if (!events || events.length === 0) return;
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      for (const event of events) {
-        let eventTimestamp;
-        try {
-          if (typeof event.timestamp === "number") {
-            eventTimestamp = new Date(event.timestamp * 1000).toISOString();
-          } else if (event.timestamp instanceof Date) {
-            eventTimestamp = event.timestamp.toISOString();
-          } else if (typeof event.timestamp === "string") {
-            const unix = parseInt(event.timestamp);
-            eventTimestamp = !isNaN(unix)
-              ? new Date(unix * 1000).toISOString()
-              : new Date(event.timestamp).toISOString();
-          } else {
-            eventTimestamp = new Date().toISOString();
-          }
-        } catch {
-          eventTimestamp = new Date().toISOString();
+    const timestamps = events.map((e) => {
+      try {
+        if (typeof e.timestamp === "number") return new Date(e.timestamp * 1000).toISOString();
+        if (e.timestamp instanceof Date) return e.timestamp.toISOString();
+        if (typeof e.timestamp === "string") {
+          const unix = parseInt(e.timestamp);
+          return !isNaN(unix) ? new Date(unix * 1000).toISOString() : new Date(e.timestamp).toISOString();
         }
+      } catch {}
+      return new Date().toISOString();
+    });
+    const followersCounts = events.map((e) => Math.max(0, e.followersCount || 0));
+    const followingCounts = events.map((e) => Math.max(0, e.followingCount || 0));
+    const directions = events.map((e) => e.direction);
+    const usernames = events.map((e) => e.username);
+    await this.pool.query(
+      `INSERT INTO follower_events
+         (session_id, event_timestamp, followers_count, following_count, direction, username)
+       SELECT $1, ts::timestamptz, fc, fwc, dir, u
+       FROM unnest($2::text[], $3::int[], $4::int[], $5::text[], $6::text[]) AS t(ts, fc, fwc, dir, u)
+       ON CONFLICT DO NOTHING`,
+      [sessionId, timestamps, followersCounts, followingCounts, directions, usernames]
+    );
+  }
 
-        await client.query(
-          `INSERT INTO follower_events
-           (session_id, event_timestamp, followers_count, following_count, direction, username)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           ON CONFLICT DO NOTHING`,
-          [
-            sessionId,
-            eventTimestamp,
-            Math.max(0, event.followersCount || 0),
-            Math.max(0, event.followingCount || 0),
-            event.direction,
-            event.username,
-          ]
-        );
-      }
-      await client.query("COMMIT");
-    } catch (err) {
-      await client.query("ROLLBACK");
-      throw err;
-    } finally {
-      client.release();
-    }
+  async saveInstagramToken(userId, tokenData) {
+    await this.pool.query(
+      `INSERT INTO instagram_tokens (user_id, access_token, token_type, expires_at, instagram_user_id, instagram_username, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+       ON CONFLICT (user_id) DO UPDATE SET
+         access_token = $2, token_type = $3, expires_at = $4,
+         instagram_user_id = $5, instagram_username = $6, updated_at = NOW()`,
+      [userId, tokenData.accessToken, tokenData.tokenType || "bearer",
+       tokenData.expiresAt || null, tokenData.instagramUserId || null, tokenData.instagramUsername || null]
+    );
+  }
+
+  async getInstagramToken(userId) {
+    const { rows } = await this.pool.query(
+      "SELECT * FROM instagram_tokens WHERE user_id = $1",
+      [userId]
+    );
+    return rows[0] || null;
+  }
+
+  async deleteInstagramToken(userId) {
+    await this.pool.query("DELETE FROM instagram_tokens WHERE user_id = $1", [userId]);
+  }
+
+  async createUser(email, passwordHash) {
+    const { rows } = await this.pool.query(
+      "INSERT INTO app_users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at",
+      [email, passwordHash]
+    );
+    return rows[0];
+  }
+
+  async getUserByEmail(email) {
+    const { rows } = await this.pool.query(
+      "SELECT * FROM app_users WHERE email = $1",
+      [email]
+    );
+    return rows[0] || null;
+  }
+
+  async getUserById(id) {
+    const { rows } = await this.pool.query(
+      "SELECT id, email, created_at FROM app_users WHERE id = $1",
+      [id]
+    );
+    return rows[0] || null;
+  }
+
+  async updateSessionName(sessionId, name) {
+    await this.pool.query(
+      "UPDATE analysis_sessions SET name = $1 WHERE id = $2",
+      [name, sessionId]
+    );
+  }
+
+  async getAnnotation(username) {
+    const { rows } = await this.pool.query(
+      "SELECT username, note, tags, updated_at FROM user_annotations WHERE username = $1",
+      [username]
+    );
+    return rows[0] || null;
+  }
+
+  async upsertAnnotation(username, note, tags) {
+    await this.pool.query(
+      `INSERT INTO user_annotations (username, note, tags, updated_at)
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (username) DO UPDATE SET note = $2, tags = $3, updated_at = NOW()`,
+      [username, note || null, tags || []]
+    );
+  }
+
+  async getAnnotations(usernames) {
+    if (!usernames || usernames.length === 0) return {};
+    const { rows } = await this.pool.query(
+      "SELECT username, note, tags FROM user_annotations WHERE username = ANY($1)",
+      [usernames]
+    );
+    const map = {};
+    rows.forEach((r) => { map[r.username] = { note: r.note, tags: r.tags }; });
+    return map;
   }
 
   async getAnalysis(sessionId) {
@@ -252,25 +336,20 @@ class Database {
 
   async saveRelationshipProfiles(sessionId, profiles) {
     if (!profiles || profiles.length === 0) return;
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      for (const p of profiles) {
-        await client.query(
-          `INSERT INTO relationship_profiles
-           (session_id, username, display_name, list_type, profile_url, fbid, timestamp)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           ON CONFLICT DO NOTHING`,
-          [sessionId, p.username, p.displayName || null, p.listType, p.profileUrl || null, p.fbid || null, p.timestamp || null]
-        );
-      }
-      await client.query("COMMIT");
-    } catch (err) {
-      await client.query("ROLLBACK");
-      throw err;
-    } finally {
-      client.release();
-    }
+    const usernames = profiles.map((p) => p.username);
+    const displayNames = profiles.map((p) => p.displayName || null);
+    const listTypes = profiles.map((p) => p.listType);
+    const profileUrls = profiles.map((p) => p.profileUrl || null);
+    const fbids = profiles.map((p) => p.fbid || null);
+    const timestamps = profiles.map((p) => p.timestamp || null);
+    await this.pool.query(
+      `INSERT INTO relationship_profiles
+         (session_id, username, display_name, list_type, profile_url, fbid, timestamp)
+       SELECT $1, u, dn, lt, pu, fb, ts
+       FROM unnest($2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::bigint[]) AS t(u, dn, lt, pu, fb, ts)
+       ON CONFLICT DO NOTHING`,
+      [sessionId, usernames, displayNames, listTypes, profileUrls, fbids, timestamps]
+    );
   }
 
   async getRelationshipProfiles(sessionId, listType, limit = 20, offset = 0, search = null) {
@@ -403,45 +482,39 @@ class Database {
 
   async savePendingRequests(sessionId, requests) {
     if (!requests || requests.length === 0) return;
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      for (const request of requests) {
-        let username = null, href = null, timestamp = null;
-
-        if (request.string_list_data && request.string_list_data[0]) {
-          const sld = request.string_list_data[0];
-          username = sld.value;
-          href = sld.href || null;
-          timestamp = sld.timestamp || null;
-        } else if (Array.isArray(request.label_values)) {
-          const uEntry = request.label_values.find((lv) => lv.label === "Username");
-          const urlEntry = request.label_values.find((lv) => lv.label === "URL");
-          username = uEntry?.value || null;
-          href = urlEntry?.value || null;
-          timestamp = request.timestamp || null;
-        } else {
-          username = request.title || request.value || request.username || null;
-          href = request.href || null;
-          timestamp = request.timestamp || null;
-        }
-
-        if (username) {
-          await client.query(
-            `INSERT INTO pending_requests (session_id, username, profile_url, request_timestamp)
-             VALUES ($1, $2, $3, $4)
-             ON CONFLICT (session_id, username) DO UPDATE SET profile_url = $3, request_timestamp = $4`,
-            [sessionId, username, href, timestamp]
-          );
-        }
+    const usernames = [], hrefs = [], timestamps = [];
+    for (const request of requests) {
+      let username = null, href = null, timestamp = null;
+      if (request.string_list_data && request.string_list_data[0]) {
+        const sld = request.string_list_data[0];
+        username = sld.value;
+        href = sld.href || null;
+        timestamp = sld.timestamp || null;
+      } else if (Array.isArray(request.label_values)) {
+        const uEntry = request.label_values.find((lv) => lv.label === "Username");
+        const urlEntry = request.label_values.find((lv) => lv.label === "URL");
+        username = uEntry?.value || null;
+        href = urlEntry?.value || null;
+        timestamp = request.timestamp || null;
+      } else {
+        username = request.title || request.value || request.username || null;
+        href = request.href || null;
+        timestamp = request.timestamp || null;
       }
-      await client.query("COMMIT");
-    } catch (err) {
-      await client.query("ROLLBACK");
-      throw err;
-    } finally {
-      client.release();
+      if (username) {
+        usernames.push(username);
+        hrefs.push(href);
+        timestamps.push(timestamp);
+      }
     }
+    if (usernames.length === 0) return;
+    await this.pool.query(
+      `INSERT INTO pending_requests (session_id, username, profile_url, request_timestamp)
+       SELECT $1, u, h, ts
+       FROM unnest($2::text[], $3::text[], $4::bigint[]) AS t(u, h, ts)
+       ON CONFLICT (session_id, username) DO UPDATE SET profile_url = EXCLUDED.profile_url, request_timestamp = EXCLUDED.request_timestamp`,
+      [sessionId, usernames, hrefs, timestamps]
+    );
   }
 
   async getPendingRequests(sessionId) {
@@ -481,11 +554,16 @@ class Database {
     return rows[0] ? parseInt(rows[0].count) : 0;
   }
 
-  async getAnalysisSessions(limit = 10) {
-    const { rows } = await this.pool.query(
-      "SELECT * FROM analysis_sessions ORDER BY created_at DESC LIMIT $1",
-      [limit]
-    );
+  async getAnalysisSessions(limit = 10, userId = null) {
+    let query = "SELECT * FROM analysis_sessions";
+    const params = [];
+    if (userId !== null) {
+      query += " WHERE user_id = $1";
+      params.push(userId);
+    }
+    query += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
+    params.push(limit);
+    const { rows } = await this.pool.query(query, params);
     return rows || [];
   }
 

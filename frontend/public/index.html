@@ -1,17 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NQJ6VCL86R"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-NQJ6VCL86R');
+    </script>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="IAnalyser" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Instagram Follower Analyzer - Analyze your Instagram followers and following"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Instagram Follower Analyzer</title>
+    <meta name="theme-color" content="#7c3aed" />
+
+    <!-- Primary SEO -->
+    <title>Instagram Follower Tracker - Free Online Tool | Who Unfollowed Me</title>
+    <meta name="description" content="The best free Instagram follower tracker online. Find out who unfollowed you on Instagram, track mutual followers, view non-followers, and analyze follower growth — no app or login required." />
+    <meta name="keywords" content="instagram follower tracker, instagram follower tracker online free, instagram follower tracker app, instagram follower tracker for private account, best instagram follower tracker app, instagram follower tracker who unfollowed me, instagram follower tracker live, best free instagram follower tracker app" />
+    <link rel="canonical" href="https://YOUR_DOMAIN/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://YOUR_DOMAIN/" />
+    <meta property="og:title" content="Instagram Follower Tracker - Free Online Tool | Who Unfollowed Me" />
+    <meta property="og:description" content="The best free Instagram follower tracker online. Find out who unfollowed you, track mutual followers, and get deep insights into your Instagram account — no login required." />
+    <meta property="og:image" content="https://YOUR_DOMAIN/web-app-manifest-512x512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Instagram Follower Tracker - Free Online Tool" />
+    <meta property="og:site_name" content="Instagram Follower Tracker" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://YOUR_DOMAIN/" />
+    <meta name="twitter:title" content="Instagram Follower Tracker - Free Online Tool" />
+    <meta name="twitter:description" content="Find out who unfollowed you on Instagram. Free online follower tracker — no app needed, no Instagram login required." />
+    <meta name="twitter:image" content="https://YOUR_DOMAIN/web-app-manifest-512x512.png" />
+
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Instagram Follower Tracker" />
+
+    <!-- Structured Data: WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Instagram Follower Tracker",
+      "url": "https://YOUR_DOMAIN/",
+      "description": "Free online Instagram follower tracker. Discover who unfollowed you, find non-followers, track mutual followers, and analyze your Instagram connections — works for private accounts too.",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Instagram follower tracker online free",
+        "Find who unfollowed you on Instagram",
+        "Instagram follower tracker for private accounts",
+        "Live Instagram follower tracking across sessions",
+        "Mutual followers and non-followers analysis",
+        "Pending follow requests tracker",
+        "CSV export and session history"
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does the Instagram follower tracker work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Download your Instagram data export as a ZIP file from Instagram's official settings page (Settings → Your activity → Download your information), then upload it here. Our tool parses your followers and following lists and instantly shows you who unfollowed you, who doesn't follow back, mutual followers, and more — no Instagram login required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Instagram follower tracker: who unfollowed me and how do I find out?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "To find out who unfollowed you on Instagram, upload your Instagram data export to our tracker. If you upload exports from two different dates, the tool compares both snapshots and shows you a 'Recently Unfollowed' list with every account that was following you before but is no longer. This is the most accurate way to track unfollowers because it uses your official Instagram data — not a third-party API that can miss accounts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are Instagram follower tracker apps safe to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Safety depends entirely on which tool you use. Apps that ask for your Instagram username and password are unsafe — they violate Instagram's Terms of Service and put your account at risk of being hacked or permanently banned. Our tracker is safe because it never asks for your password or Instagram login. You simply upload the data export ZIP file that Instagram gives you, and all analysis happens locally in your browser. Your credentials and personal data are never transmitted to any server."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to find a stalker using an Instagram follower tracker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Instagram does not officially reveal who views your profile or stories to a third-party tracker. However, you can identify suspicious follower behaviour by uploading your data export to our tracker and reviewing accounts that follow you but whom you don't follow back. You can also compare exports over time to spot accounts that repeatedly follow and unfollow you, which is a common pattern associated with profile-viewing bots. For story viewers, Instagram's native app already shows you who watched each story."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the best Instagram follower tracker app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The best Instagram follower tracker is one that is free, requires no Instagram login, and works with your official data export rather than scraping Instagram's API. Our tool meets all three criteria: it's completely free, never asks for your password, works for both public and private accounts, and gives you detailed breakdowns of followers, non-followers, mutual followers, unfollowers across sessions, and pending follow requests. Because it runs in your browser, there's nothing to download or install."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does this Instagram follower tracker work for private accounts?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Because our tracker uses your own downloaded Instagram data export rather than Instagram's public API, it works perfectly for private accounts. Your privacy settings have no effect on what you can analyse."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to give my Instagram password to use this follower tracker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. You never enter your Instagram password or log in through our site. The only thing you upload is the ZIP file that Instagram generates for you through their official 'Download your information' feature. This keeps your account completely secure."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I download my Instagram data for the follower tracker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Open the Instagram app or website, go to Settings → Your activity → Download your information → Request a download. Select 'Followers and following' under the Connections category, choose JSON format, and request the file. Instagram will email you a download link within a few minutes to a few hours. Once you have the ZIP file, upload it directly to our tracker."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will Instagram ban my account for using a follower tracker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Using our tracker carries no risk of an Instagram ban because it does not interact with Instagram's servers at all. You download your own data directly from Instagram, then analyse it offline in our tool. Instagram has no way to detect or flag this activity. By contrast, third-party apps that log into Instagram on your behalf using your credentials do violate Instagram's Terms of Service and can result in account suspension."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I track follower changes over time with this tool?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Our session history feature lets you upload multiple data exports taken at different points in time. The tracker compares them to show you who unfollowed you, who you recently followed back, and how your follower count has changed between each session. Download a fresh export every week or month to build a complete picture of your follower growth."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I track someone else's Instagram followers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Our tool only works with the data export generated by the account owner through Instagram's official settings. You cannot use it to analyse another person's followers without their data export file. This is by design — it protects user privacy and keeps the tool within Instagram's Terms of Service."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the Instagram follower tracker completely free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, the tracker is 100% free with no hidden fees, no premium tier, and no account required. All features — including non-followers, unfollowers, mutual followers, pending requests, session history, and CSV export — are available to every user at no cost."
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

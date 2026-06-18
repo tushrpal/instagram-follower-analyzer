@@ -3,19 +3,42 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
+const { Pool } = require("pg");
 const path = require("path");
 const uploadRoutes = require("./routes/upload");
 const analysisRoutes = require("./routes/analysis");
+const annotationsRoutes = require("./routes/annotations");
+const authRoutes = require("./routes/auth");
+const instagramApiRoutes = require("./routes/instagram-api");
 const { initDatabase } = require("./models/database");
 
 const app = express();
-// When running behind a reverse proxy (nginx in Docker) we need to trust the proxy
-// so that middleware like express-rate-limit can correctly read client IP addresses
-// and not mistake the presence of X-Forwarded-For for a header injection issue.
-// Use a numeric value (number of trusted proxies) instead of `true` which is
-// permissive and triggers express-rate-limit's validation error.
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
+
+// Session store using same Postgres connection
+const sessionPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : false,
+});
+
+app.use(
+  session({
+    store: new pgSession({ pool: sessionPool, tableName: "user_sessions", createTableIfMissing: true }),
+    name: "igfa.sid",
+    secret: process.env.SESSION_SECRET || "change-me-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+  })
+);
 
 // Security middleware
 app.use(
@@ -60,8 +83,11 @@ app.use(express.urlencoded({ limit: "1gb", extended: true }));
 app.use(express.static("uploads"));
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/analysis", analysisRoutes);
+app.use("/api/annotations", annotationsRoutes);
+app.use("/api/instagram", instagramApiRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

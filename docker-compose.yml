@@ -23,6 +23,9 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://analyzer:analyzer@postgres:5432/analyzer
+      - DATABASE_SSL=false
+      - SESSION_SECRET=change-this-to-a-long-random-string-before-deploying
+      - COOKIE_SECURE=false
     volumes:
       - ./uploads:/app/uploads
     depends_on:
