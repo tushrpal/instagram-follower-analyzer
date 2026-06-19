@@ -75,6 +75,12 @@ export function Login() {
           </button>
         </form>
 
+        <div className="text-center mt-3">
+          <Link to="/forgot-password" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+            Forgot password?
+          </Link>
+        </div>
+
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
           No account?{" "}
           <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium">Create one</Link>

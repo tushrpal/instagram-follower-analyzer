@@ -13,6 +13,8 @@ import { SessionHistory } from "./components/SessionHistory";
 import { Processing } from "./components/Processing";
 import { Login } from "./components/Login";
 import { Register } from "./components/Register";
+import { ForgotPassword } from "./components/ForgotPassword";
+import { ResetPassword } from "./components/ResetPassword";
 import { UnfollowHelper } from "./components/UnfollowHelper";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import config from "./config";
@@ -52,6 +54,8 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/" element={<Upload />} />
               <Route path="/processing/:sessionId" element={<Processing />} />
               <Route path="/history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />

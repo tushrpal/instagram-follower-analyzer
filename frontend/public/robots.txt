@@ -1,12 +1,19 @@
 User-agent: *
 Allow: /
 
-# Disallow dynamic session routes
-Disallow: /dashboard/
+# Auth utility pages — no indexing value
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Requires login — crawlers can't see content anyway
+Disallow: /history
+
+# Session-specific dynamic routes — unique per user, not indexable
 Disallow: /processing/
+Disallow: /dashboard/
 Disallow: /unfollow/
 Disallow: /pending-requests/
 Disallow: /relationships/
 Disallow: /insights/
 
-Sitemap: https://YOUR_DOMAIN/sitemap.xml
+Sitemap: https://instafollowtracker.com/sitemap.xml

@@ -36,6 +36,16 @@ class Database {
       );
       CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps(email, expires_at);
 
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES app_users(id),
+        token_hash TEXT NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, created_at);
+
       CREATE TABLE IF NOT EXISTS analysis_sessions (
         id TEXT PRIMARY KEY,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -598,6 +608,41 @@ class Database {
     params.push(limit);
     const { rows } = await this.pool.query(query, params);
     return rows || [];
+  }
+
+  async saveResetToken(userId, tokenHash, expiresAt) {
+    await this.pool.query(
+      "INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)",
+      [userId, tokenHash, expiresAt]
+    );
+  }
+
+  async getResetToken(tokenHash) {
+    const { rows } = await this.pool.query(
+      "SELECT * FROM password_reset_tokens WHERE token_hash = $1 AND used = FALSE AND expires_at > NOW() LIMIT 1",
+      [tokenHash]
+    );
+    return rows[0] || null;
+  }
+
+  async markResetTokenUsed(id) {
+    await this.pool.query("UPDATE password_reset_tokens SET used = TRUE WHERE id = $1", [id]);
+  }
+
+  // Count reset tokens created for a user in the last 72 hours
+  async countRecentResetTokens(userId) {
+    const { rows } = await this.pool.query(
+      "SELECT COUNT(*) as count FROM password_reset_tokens WHERE user_id = $1 AND created_at > NOW() - INTERVAL '72 hours'",
+      [userId]
+    );
+    return rows[0] ? parseInt(rows[0].count) : 0;
+  }
+
+  async updateUserPassword(userId, passwordHash) {
+    await this.pool.query(
+      "UPDATE app_users SET password_hash = $1 WHERE id = $2",
+      [passwordHash, userId]
+    );
   }
 
   async queryRaw(sql, params = []) {

@@ -2,11 +2,13 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { database } = require("../models/database");
-const { sendOtpEmail } = require("../utils/email");
+const { sendOtpEmail, sendPasswordResetEmail } = require("../utils/email");
 
 const router = express.Router();
 const SALT_ROUNDS = 12;
 const OTP_EXPIRY_MINUTES = 10;
+const RESET_TOKEN_EXPIRY_HOURS = 1;
+const RESET_TOKEN_LIMIT_PER_72H = 3;
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -107,6 +109,68 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Login failed" });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !emailRegex.test(email)) {
+      return res.status(400).json({ error: "Valid email is required" });
+    }
+
+    const user = await database.getUserByEmail(email.toLowerCase());
+    // Always respond the same way to avoid user enumeration
+    if (!user) {
+      return res.json({ message: "If an account exists, a reset link has been sent" });
+    }
+
+    const recentCount = await database.countRecentResetTokens(user.id);
+    if (recentCount >= RESET_TOKEN_LIMIT_PER_72H) {
+      return res.status(429).json({ error: "Too many reset requests. You can request up to 3 reset links per 72 hours." });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+
+    await database.saveResetToken(user.id, tokenHash, expiresAt);
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const resetLink = `${frontendUrl}/reset-password?token=${rawToken}`;
+    await sendPasswordResetEmail(user.email, resetLink);
+
+    res.json({ message: "If an account exists, a reset link has been sent" });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: "Reset token is required" });
+    }
+    if (!password || password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const record = await database.getResetToken(tokenHash);
+    if (!record) {
+      return res.status(400).json({ error: "Invalid or expired reset link" });
+    }
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    await database.updateUserPassword(record.user_id, passwordHash);
+    await database.markResetTokenUsed(record.id);
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 
