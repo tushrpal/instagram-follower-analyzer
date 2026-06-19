@@ -660,7 +660,8 @@ async function initDatabase() {
   await database.pool.query(`
     ALTER TABLE analysis_sessions
       ADD COLUMN IF NOT EXISTS name TEXT,
-      ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES app_users(id);
+      ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES app_users(id),
+      ADD COLUMN IF NOT EXISTS processed_at TIMESTAMP;
   `);
   return database;
 }

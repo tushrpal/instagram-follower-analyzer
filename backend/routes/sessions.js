@@ -40,10 +40,26 @@ router.post("/", async (req, res) => {
       ]
     );
 
+    // Build progressive timeline events from timestamped follower/following arrays
+    const allEvents = [];
+    for (const u of [...(mutual || []), ...(followersOnly || [])]) {
+      if (u.timestamp) allEvents.push({ timestamp: u.timestamp, username: u.username || u.value, direction: "follower" });
+    }
+    for (const u of [...(mutual || []), ...(followingOnly || [])]) {
+      if (u.timestamp) allEvents.push({ timestamp: u.timestamp, username: u.username || u.value, direction: "following" });
+    }
+    allEvents.sort((a, b) => a.timestamp - b.timestamp);
+    let fc = 0, fwc = 0;
+    const timelineEvents = allEvents.map((e) => {
+      if (e.direction === "follower") fc++; else fwc++;
+      return { ...e, followersCount: fc, followingCount: fwc };
+    });
+
     await Promise.all([
       database.saveBatchUsers(sessionId, mutual, "mutual"),
       database.saveBatchUsers(sessionId, followersOnly, "followers_only"),
       database.saveBatchUsers(sessionId, followingOnly, "following_only"),
+      timelineEvents.length > 0 ? database.saveBatchFollowerEvents(sessionId, timelineEvents) : Promise.resolve(),
     ]);
 
     if (pendingRequests.length > 0) {

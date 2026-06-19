@@ -173,11 +173,12 @@ export async function parseAndAnalyzeZip(file, onProgress) {
 
   for (const f of raw.followers) {
     const u = extractUsername(f);
-    (followingSet.has(u) ? mutual : followersOnly).push({ username: u, href: extractUrl(f) || `https://www.instagram.com/${u}/` });
+    const ts = extractTimestamp(f) || null;
+    (followingSet.has(u) ? mutual : followersOnly).push({ username: u, href: extractUrl(f) || `https://www.instagram.com/${u}/`, timestamp: ts });
   }
   for (const f of raw.following) {
     const u = extractUsername(f);
-    if (!followerSet.has(u)) followingOnly.push({ username: u, href: extractUrl(f) || `https://www.instagram.com/${u}/` });
+    if (!followerSet.has(u)) followingOnly.push({ username: u, href: extractUrl(f) || `https://www.instagram.com/${u}/`, timestamp: extractTimestamp(f) || null });
   }
 
   const pendingRequests = raw.pendingRequests.map((item) => ({
