@@ -26,6 +26,16 @@ class Database {
         created_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS email_otps (
+        id SERIAL PRIMARY KEY,
+        email TEXT NOT NULL,
+        otp_hash TEXT NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps(email, expires_at);
+
       CREATE TABLE IF NOT EXISTS analysis_sessions (
         id TEXT PRIMARY KEY,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -242,6 +252,29 @@ class Database {
 
   async deleteInstagramToken(userId) {
     await this.pool.query("DELETE FROM instagram_tokens WHERE user_id = $1", [userId]);
+  }
+
+  async saveOtp(email, otpHash, expiresAt) {
+    await this.pool.query(
+      "DELETE FROM email_otps WHERE email = $1",
+      [email]
+    );
+    await this.pool.query(
+      "INSERT INTO email_otps (email, otp_hash, expires_at) VALUES ($1, $2, $3)",
+      [email, otpHash, expiresAt]
+    );
+  }
+
+  async getOtp(email) {
+    const { rows } = await this.pool.query(
+      "SELECT * FROM email_otps WHERE email = $1 AND used = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1",
+      [email]
+    );
+    return rows[0] || null;
+  }
+
+  async markOtpUsed(id) {
+    await this.pool.query("UPDATE email_otps SET used = TRUE WHERE id = $1", [id]);
   }
 
   async createUser(email, passwordHash) {

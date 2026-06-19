@@ -18,8 +18,12 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const register = async (email, password) => {
-    const res = await axios.post("/api/auth/register", { email, password });
+  const sendOtp = async (email) => {
+    await axios.post("/api/auth/send-otp", { email });
+  };
+
+  const register = async (email, password, otp) => {
+    const res = await axios.post("/api/auth/register", { email, password, otp });
     setUser(res.data);
     return res.data;
   };
@@ -30,7 +34,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, sendOtp }}>
       {children}
     </AuthContext.Provider>
   );
