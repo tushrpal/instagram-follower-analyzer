@@ -119,8 +119,21 @@ export function Upload() {
       // Store full analysis in sessionStorage for the dashboard
       sessionStorage.setItem(`session_${sessionId}`, JSON.stringify(result));
 
-      // Save only summary to backend (fire-and-forget, non-blocking)
-      axios.post("/api/sessions", { sessionId, summary: result.summary }).catch(() => {});
+      // Save full data to backend so all pages (timeline, unfollow, etc.) work
+      try {
+        await axios.post("/api/sessions", {
+          sessionId,
+          summary: result.summary,
+          mutual: result.mutual,
+          followersOnly: result.followersOnly,
+          followingOnly: result.followingOnly,
+          pendingRequests: result.pendingRequests,
+          unfollowedProfiles: result.unfollowedProfiles,
+          relationshipProfiles: result.relationshipProfiles,
+        });
+      } catch (e) {
+        console.warn("Failed to persist session to backend:", e);
+      }
 
       navigate(`/dashboard/${sessionId}`);
     } catch (err) {

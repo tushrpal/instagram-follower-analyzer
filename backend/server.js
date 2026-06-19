@@ -12,6 +12,7 @@ const analysisRoutes = require("./routes/analysis");
 const annotationsRoutes = require("./routes/annotations");
 const authRoutes = require("./routes/auth");
 const instagramApiRoutes = require("./routes/instagram-api");
+const sessionsRoutes = require("./routes/sessions");
 const { initDatabase } = require("./models/database");
 
 const app = express();
@@ -88,6 +89,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/analysis", analysisRoutes);
 app.use("/api/annotations", annotationsRoutes);
 app.use("/api/instagram", instagramApiRoutes);
+app.use("/api/sessions", sessionsRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
