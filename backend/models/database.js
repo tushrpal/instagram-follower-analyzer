@@ -656,6 +656,12 @@ const database = new Database();
 async function initDatabase() {
   await database.connect();
   await database.createTables();
+  // Migrate columns added after initial deployment
+  await database.pool.query(`
+    ALTER TABLE analysis_sessions
+      ADD COLUMN IF NOT EXISTS name TEXT,
+      ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES app_users(id);
+  `);
   return database;
 }
 
