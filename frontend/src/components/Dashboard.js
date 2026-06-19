@@ -73,18 +73,27 @@ export function Dashboard() {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get(`/api/analysis/${sessionId}`);
 
-        if (!response.data) {
-          throw new Error("No analysis data received");
+        // Check sessionStorage first (fresh upload processed in browser)
+        const cached = sessionStorage.getItem(`session_${sessionId}`);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          setAnalysis({
+            sessionId,
+            summary: parsed.summary,
+            createdAt: new Date().toISOString(),
+            _local: true,
+          });
+          setLoading(false);
+          return;
         }
 
+        // Fallback: load from backend (returning to an old session)
+        const response = await axios.get(`/api/analysis/${sessionId}`);
+        if (!response.data) throw new Error("No analysis data received");
         setAnalysis(response.data);
-        // Removed the redundant timeline data loading here
       } catch (error) {
-        setError(
-          error.response?.data?.error || "Failed to load analysis results"
-        );
+        setError(error.response?.data?.error || "Failed to load analysis results");
         console.error("Analysis error:", error);
       } finally {
         setLoading(false);
@@ -110,7 +119,6 @@ export function Dashboard() {
   const handleSearch = async (pageNum = 1) => {
     if (!searchQuery.trim()) {
       setSearchResults(null);
-      // Load the current tab's users when search is cleared
       loadUsers(activeTab, 1);
       setPage(1);
       return;
@@ -118,35 +126,34 @@ export function Dashboard() {
 
     try {
       setLoadingSearch(true);
-      const response = await axios.get(
-        `/api/analysis/${sessionId}/search/${encodeURIComponent(searchQuery)}`,
-        {
-          params: {
-            page: pageNum,
-            limit: limit,
-            category: activeTab !== "unfollowed" ? activeTab : null,
-          },
-        }
-      );
 
-      // Handle both category-specific and general search responses
-      const searchData = response.data;
-      let totalPages;
-
-      if (searchData.category) {
-        // Category-specific search
-        totalPages = searchData.pagination.totalPages;
-      } else {
-        // General search (legacy)
-        totalPages = Math.ceil(searchData.pagination.totalFound / limit);
+      const local = getLocalData();
+      if (local) {
+        const categoryMap = { mutual: local.mutual, followers_only: local.followersOnly, following_only: local.followingOnly };
+        const all = categoryMap[activeTab] || [];
+        const q = searchQuery.toLowerCase();
+        const filtered = all.filter((u) => u.username.toLowerCase().includes(q));
+        const start = (pageNum - 1) * limit;
+        setSearchResults({
+          category: activeTab,
+          results: { [activeTab]: filtered.slice(start, start + limit) },
+          pagination: { page: pageNum, limit, totalItems: filtered.length, totalPages: Math.ceil(filtered.length / limit) || 1 },
+          page: pageNum,
+          limit,
+          totalPages: Math.ceil(filtered.length / limit) || 1,
+        });
+        return;
       }
 
-      setSearchResults({
-        ...searchData,
-        page: pageNum,
-        limit: limit,
-        totalPages: totalPages,
-      });
+      const response = await axios.get(
+        `/api/analysis/${sessionId}/search/${encodeURIComponent(searchQuery)}`,
+        { params: { page: pageNum, limit, category: activeTab !== "unfollowed" ? activeTab : null } }
+      );
+      const searchData = response.data;
+      const totalPages = searchData.category
+        ? searchData.pagination.totalPages
+        : Math.ceil(searchData.pagination.totalFound / limit);
+      setSearchResults({ ...searchData, page: pageNum, limit, totalPages });
     } catch (error) {
       console.error("Search failed:", error);
       setError("Search failed. Please try again.");
@@ -173,20 +180,34 @@ export function Dashboard() {
     }
   }, [searchQuery]);
 
+  const getLocalData = () => {
+    const cached = sessionStorage.getItem(`session_${sessionId}`);
+    return cached ? JSON.parse(cached) : null;
+  };
+
   // Update the loadUsers function
   const loadUsers = async (category, pageNum = 1) => {
     try {
       setLoadingUsers(true);
-      const response = await axios.get(
-        `/api/analysis/${sessionId}/${category}?page=${pageNum}&limit=${limit}`
-      );
-      setUsers((prev) => ({
-        ...prev,
-        [category]: response.data.users,
-      }));
-      // console.log("User data:", response.data);
-      setTotalUsers(response.data.total); // total users
-      setTotalPages(response.data.pagination.totalPages || 1); // total pages from backend
+
+      const local = getLocalData();
+      if (local) {
+        const categoryMap = { mutual: local.mutual, followers_only: local.followersOnly, following_only: local.followingOnly };
+        const all = categoryMap[category] || [];
+        const filtered = searchQuery.trim()
+          ? all.filter((u) => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+          : all;
+        const start = (pageNum - 1) * limit;
+        setUsers((prev) => ({ ...prev, [category]: filtered.slice(start, start + limit) }));
+        setTotalUsers(filtered.length);
+        setTotalPages(Math.ceil(filtered.length / limit) || 1);
+        return;
+      }
+
+      const response = await axios.get(`/api/analysis/${sessionId}/${category}?page=${pageNum}&limit=${limit}`);
+      setUsers((prev) => ({ ...prev, [category]: response.data.users }));
+      setTotalUsers(response.data.total);
+      setTotalPages(response.data.pagination.totalPages || 1);
     } catch (error) {
       console.error(`Failed to load ${category} users:`, error);
     } finally {
@@ -205,27 +226,44 @@ export function Dashboard() {
   const exportData = async (category = null) => {
     try {
       setLoadingExport(true);
+
+      const local = getLocalData();
+      if (local) {
+        const categoryMap = { mutual: local.mutual, followers_only: local.followersOnly, following_only: local.followingOnly };
+        let rows = [];
+        if (category && categoryMap[category]) {
+          rows = categoryMap[category].map((u) => ({ ...u, category }));
+        } else {
+          rows = [
+            ...local.mutual.map((u) => ({ ...u, category: "mutual" })),
+            ...local.followersOnly.map((u) => ({ ...u, category: "followers_only" })),
+            ...local.followingOnly.map((u) => ({ ...u, category: "following_only" })),
+          ];
+        }
+        const csv = "Username,Category,Profile URL\n" + rows.map((u) => `"${u.username}","${u.category}","${u.href || ""}"`).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = category ? `instagram_${category}.csv` : "instagram_analysis.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        return;
+      }
+
       const url = category
         ? `/api/analysis/${sessionId}/export?category=${category}`
         : `/api/analysis/${sessionId}/export`;
-
       const response = await axios.get(url, { responseType: "blob" });
-
-      // Create a temporary anchor element
       const downloadUrl = window.URL.createObjectURL(response.data);
-      const fileName = category
-        ? `instagram_${category}_analysis.csv`
-        : "instagram_full_analysis.csv";
-
-      // Use download attribute instead of click event
       const link = document.createElement("a");
       link.setAttribute("href", downloadUrl);
-      link.setAttribute("download", fileName);
+      link.setAttribute("download", category ? `instagram_${category}_analysis.csv` : "instagram_full_analysis.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Clean up the URL object
       setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
     } catch (error) {
       console.error("Export failed:", error);

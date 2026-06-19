@@ -139,9 +139,13 @@ export async function getUsers(env, sessionId, category = null, search = null) {
 export async function saveBatchUsers(env, sessionId, users, category) {
   if (!users || users.length === 0) return;
   const sql = getDb(env);
-  // Insert sequentially — Neon HTTP driver doesn't support manual transactions
-  for (const user of users) {
-    await sql`INSERT INTO users (session_id, username, category, href) VALUES (${sessionId}, ${user.value || user.username}, ${category}, ${user.href || null})`;
+  const rows = users.map((u) => ({ session_id: sessionId, username: u.value || u.username, category, href: u.href || null }));
+  // Chunk to avoid hitting Neon's parameter limit (~65k)
+  for (let i = 0; i < rows.length; i += 500) {
+    const chunk = rows.slice(i, i + 500);
+    const usernames = chunk.map((r) => r.username);
+    const hrefs = chunk.map((r) => r.href);
+    await sql`INSERT INTO users (session_id, username, category, href) SELECT ${sessionId}, u, ${category}, h FROM unnest(${usernames}::text[], ${hrefs}::text[]) AS t(u, h)`;
   }
 }
 
@@ -157,10 +161,16 @@ function toEventTimestamp(ts) {
 export async function saveBatchFollowerEvents(env, sessionId, events) {
   if (!events || events.length === 0) return;
   const sql = getDb(env);
-  for (const event of events) {
-    const ts = toEventTimestamp(event.timestamp);
+  for (let i = 0; i < events.length; i += 500) {
+    const chunk = events.slice(i, i + 500);
+    const timestamps = chunk.map((e) => toEventTimestamp(e.timestamp));
+    const followersCounts = chunk.map((e) => Math.max(0, e.followersCount || 0));
+    const followingCounts = chunk.map((e) => Math.max(0, e.followingCount || 0));
+    const directions = chunk.map((e) => e.direction);
+    const usernames = chunk.map((e) => e.username);
     await sql`INSERT INTO follower_events (session_id, event_timestamp, followers_count, following_count, direction, username)
-      VALUES (${sessionId}, ${ts}, ${Math.max(0, event.followersCount || 0)}, ${Math.max(0, event.followingCount || 0)}, ${event.direction}, ${event.username})
+      SELECT ${sessionId}, ts::timestamptz, fc, fwc, dir, u
+      FROM unnest(${timestamps}::text[], ${followersCounts}::int[], ${followingCounts}::int[], ${directions}::text[], ${usernames}::text[]) AS t(ts, fc, fwc, dir, u)
       ON CONFLICT DO NOTHING`;
   }
 }
@@ -184,6 +194,7 @@ export async function getTimelineData(env, sessionId) {
 export async function savePendingRequests(env, sessionId, requests) {
   if (!requests || requests.length === 0) return;
   const sql = getDb(env);
+  const usernames = [], hrefs = [], timestamps = [];
   for (const request of requests) {
     let username = null, href = null, timestamp = null;
     if (request.string_list_data?.[0]) {
@@ -197,11 +208,13 @@ export async function savePendingRequests(env, sessionId, requests) {
       username = request.title || request.value || request.username || null;
       href = request.href || null; timestamp = request.timestamp || null;
     }
-    if (username) {
-      await sql`INSERT INTO pending_requests (session_id, username, profile_url, request_timestamp) VALUES (${sessionId}, ${username}, ${href}, ${timestamp})
-        ON CONFLICT (session_id, username) DO UPDATE SET profile_url=${href}, request_timestamp=${timestamp}`;
-    }
+    if (username) { usernames.push(username); hrefs.push(href); timestamps.push(timestamp); }
   }
+  if (usernames.length === 0) return;
+  await sql`INSERT INTO pending_requests (session_id, username, profile_url, request_timestamp)
+    SELECT ${sessionId}, u, h, ts
+    FROM unnest(${usernames}::text[], ${hrefs}::text[], ${timestamps}::bigint[]) AS t(u, h, ts)
+    ON CONFLICT (session_id, username) DO UPDATE SET profile_url=EXCLUDED.profile_url, request_timestamp=EXCLUDED.request_timestamp`;
 }
 
 export async function getPendingRequests(env, sessionId) {
@@ -247,11 +260,16 @@ export async function getUnfollowedProfilesCount(env, sessionId, search = null) 
 export async function saveRelationshipProfiles(env, sessionId, profiles) {
   if (!profiles || profiles.length === 0) return;
   const sql = getDb(env);
-  for (const p of profiles) {
-    await sql`INSERT INTO relationship_profiles (session_id, username, display_name, list_type, profile_url, fbid, timestamp)
-      VALUES (${sessionId}, ${p.username}, ${p.displayName || null}, ${p.listType}, ${p.profileUrl || null}, ${p.fbid || null}, ${p.timestamp || null})
-      ON CONFLICT DO NOTHING`;
-  }
+  const usernames = profiles.map((p) => p.username);
+  const displayNames = profiles.map((p) => p.displayName || null);
+  const listTypes = profiles.map((p) => p.listType);
+  const profileUrls = profiles.map((p) => p.profileUrl || null);
+  const fbids = profiles.map((p) => p.fbid || null);
+  const timestamps = profiles.map((p) => p.timestamp || null);
+  await sql`INSERT INTO relationship_profiles (session_id, username, display_name, list_type, profile_url, fbid, timestamp)
+    SELECT ${sessionId}, u, dn, lt, pu, fb, ts
+    FROM unnest(${usernames}::text[], ${displayNames}::text[], ${listTypes}::text[], ${profileUrls}::text[], ${fbids}::text[], ${timestamps}::bigint[]) AS t(u, dn, lt, pu, fb, ts)
+    ON CONFLICT DO NOTHING`;
 }
 
 export async function getRelationshipProfiles(env, sessionId, listType, limit = 20, offset = 0, search = null) {

@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
-import { initDatabase } from "./db.js";
+import { initDatabase, saveAnalysis } from "./db.js";
+import { getSession } from "./routes/auth.js";
 import authRouter from "./routes/auth.js";
 import uploadRouter from "./routes/upload.js";
 import analysisRouter from "./routes/analysis.js";
@@ -54,6 +55,26 @@ app.route("/api/auth", authRouter);
 app.route("/api/upload", uploadRouter);
 app.route("/api/analysis", analysisRouter);
 app.route("/api/annotations", annotationsRouter);
+
+// Lightweight session summary save (browser-side processing)
+app.post("/api/sessions", async (c) => {
+  try {
+    const { sessionId, summary } = await c.req.json();
+    if (!sessionId || !summary) return c.json({ error: "Missing sessionId or summary" }, 400);
+    const session = await getSession(c);
+    const userId = session?.userId || null;
+    await saveAnalysis(c.env, sessionId, {
+      followers: { length: summary.totalFollowers },
+      following: { length: summary.totalFollowing },
+      mutual: { length: summary.mutualCount },
+      followersOnly: { length: summary.followersOnlyCount },
+      followingOnly: { length: summary.followingOnlyCount },
+    }, userId);
+    return c.json({ ok: true });
+  } catch {
+    return c.json({ ok: false });
+  }
+});
 
 // Health check
 app.get("/api/health", (c) => c.json({ status: "OK", timestamp: new Date().toISOString() }));

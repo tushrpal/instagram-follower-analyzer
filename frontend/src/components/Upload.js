@@ -91,59 +91,44 @@ function DownloadGuideModal({ onClose }) {
 }
 
 export function Upload() {
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [processing, setProcessing] = useState(false);
+  const [progressMsg, setProgressMsg] = useState("");
   const [error, setError] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
   const navigate = useNavigate();
 
   const onDrop = async (acceptedFiles) => {
     const file = acceptedFiles[0];
-
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".zip")) {
-      setError(
-        "Please upload a ZIP file containing your Instagram data export."
-      );
+      setError("Please upload a ZIP file containing your Instagram data export.");
       return;
     }
 
     setError(null);
-    setUploading(true);
-    setProgress(0);
-
-    const formData = new FormData();
-    formData.append("instagramData", file);
+    setProcessing(true);
 
     try {
-      const response = await axios.post("/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setProgress(percentCompleted);
-          if (percentCompleted === 100) setProcessing(true);
-        },
-      });
+      const { parseAndAnalyzeZip } = await import("../utils/browserAnalyzer");
+      const result = await parseAndAnalyzeZip(file, setProgressMsg);
 
-      if (response.data.sessionId) {
-        navigate(`/processing/${response.data.sessionId}`);
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      setError(
-        error.response?.data?.error ||
-          "Failed to process your Instagram data. Please try again."
-      );
+      // Generate a session ID locally
+      const sessionId = crypto.randomUUID();
+
+      // Store full analysis in sessionStorage for the dashboard
+      sessionStorage.setItem(`session_${sessionId}`, JSON.stringify(result));
+
+      // Save only summary to backend (fire-and-forget, non-blocking)
+      axios.post("/api/sessions", { sessionId, summary: result.summary }).catch(() => {});
+
+      navigate(`/dashboard/${sessionId}`);
+    } catch (err) {
+      console.error("Analysis error:", err);
+      setError(err.message || "Failed to process your Instagram data. Please try again.");
     } finally {
-      setUploading(false);
       setProcessing(false);
-      setProgress(0);
+      setProgressMsg("");
     }
   };
 
@@ -154,7 +139,7 @@ export function Upload() {
       "application/x-zip-compressed": [".zip"],
     },
     multiple: false,
-    disabled: uploading,
+    disabled: processing,
   });
 
   return (
@@ -198,7 +183,7 @@ export function Upload() {
                 ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
                 : "border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             }
-            ${uploading ? "pointer-events-none opacity-50" : ""}
+            ${processing ? "pointer-events-none opacity-50" : ""}
           `}
         >
           <input {...getInputProps()} />
@@ -210,11 +195,7 @@ export function Upload() {
 
             <div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                {processing
-                  ? "Analyzing your data..."
-                  : uploading
-                  ? "Uploading..."
-                  : "Upload Instagram Data Export"}
+                {processing ? "Analyzing your data..." : "Upload Instagram Data Export"}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {isDragActive
@@ -223,22 +204,10 @@ export function Upload() {
               </p>
             </div>
 
-            {uploading && !processing && (
-              <div className="w-full max-w-md">
-                <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                  <div
-                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  ></div>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{progress}% uploaded</p>
-              </div>
-            )}
-
             {processing && (
               <div className="w-full max-w-md text-center">
                 <div className="spinner mb-2 mx-auto"></div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Parsing followers &amp; building your analysis…</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{progressMsg || "Processing…"}</p>
               </div>
             )}
           </div>
