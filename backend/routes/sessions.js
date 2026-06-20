@@ -65,10 +65,12 @@ router.post("/", async (req, res) => {
     if (pendingRequests.length > 0) {
       const valid = pendingRequests.filter((r) => r.username);
       for (const r of valid) {
+        // requestDate arrives as an ISO string from the browser analyzer; convert to Unix seconds for the bigint column
+        const ts = r.requestDate ? Math.floor(new Date(r.requestDate).getTime() / 1000) : null;
         await database.pool.query(
           `INSERT INTO pending_requests (session_id, username, profile_url, request_timestamp)
            VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
-          [sessionId, r.username, r.profileUrl || null, r.requestDate || null]
+          [sessionId, r.username, r.profileUrl || null, ts]
         );
       }
     }

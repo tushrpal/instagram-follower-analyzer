@@ -120,20 +120,16 @@ export function Upload() {
       sessionStorage.setItem(`session_${sessionId}`, JSON.stringify(result));
 
       // Save full data to backend so all pages (timeline, unfollow, etc.) work
-      try {
-        await axios.post("/api/sessions", {
-          sessionId,
-          summary: result.summary,
-          mutual: result.mutual,
-          followersOnly: result.followersOnly,
-          followingOnly: result.followingOnly,
-          pendingRequests: result.pendingRequests,
-          unfollowedProfiles: result.unfollowedProfiles,
-          relationshipProfiles: result.relationshipProfiles,
-        });
-      } catch (e) {
-        console.warn("Failed to persist session to backend:", e);
-      }
+      await axios.post("/api/sessions", {
+        sessionId,
+        summary: result.summary,
+        mutual: result.mutual,
+        followersOnly: result.followersOnly,
+        followingOnly: result.followingOnly,
+        pendingRequests: result.pendingRequests,
+        unfollowedProfiles: result.unfollowedProfiles,
+        relationshipProfiles: result.relationshipProfiles,
+      });
 
       navigate(`/dashboard/${sessionId}`);
     } catch (err) {
