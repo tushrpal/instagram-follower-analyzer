@@ -291,14 +291,17 @@ async function processFileContent(filename, file, processedData) {
 
     if (basename.startsWith("followers_") && basename.endsWith(".json")) {
       console.log("✅ Processing followers data");
+      let rawEntries = [];
       if (Array.isArray(data)) {
-        const entries = data.filter((item) => extractUsername(item));
-        if (entries.length > 0) {
-          processedData.followers.push(...entries);
-          console.log(
-            `➕ Appended ${entries.length} followers from ${filename}`
-          );
-        }
+        rawEntries = data;
+      } else if (data && typeof data === "object") {
+        const arrayVal = Object.values(data).find((v) => Array.isArray(v));
+        rawEntries = arrayVal || [];
+      }
+      const entries = rawEntries.filter((item) => extractUsername(item));
+      if (entries.length > 0) {
+        processedData.followers.push(...entries);
+        console.log(`➕ Appended ${entries.length} followers from ${filename}`);
       }
     }
 
@@ -401,6 +404,9 @@ async function processFileContent(filename, file, processedData) {
       );
     }
     // Relationship list files — map basename to list_type
+    // Normalize curly apostrophes (’) to straight ones so both export
+    // variants match — Instagram uses ’ in filenames like "profiles_you’ve_favorited.json"
+    const normalizedBasename = basename.replace(/’/g, "'");
     const relationshipFileMap = {
       "close_friends.json": "close_friend",
       "blocked_profiles.json": "blocked",
@@ -412,11 +418,22 @@ async function processFileContent(filename, file, processedData) {
       "recent_follow_requests.json": "recent_request",
     };
 
-    const listType = relationshipFileMap[basename];
+    const listType = relationshipFileMap[normalizedBasename];
     if (listType) {
       console.log(`✅ Processing relationship list: ${basename} → ${listType}`);
-      const entries = Array.isArray(data) ? data : [data];
-      const profiles = entries
+      // Instagram export may wrap the list in an object, e.g.
+      // { "relationships_close_friends": [...] }
+      // Extract the first array value if data is not already an array.
+      let rawEntries;
+      if (Array.isArray(data)) {
+        rawEntries = data;
+      } else if (data && typeof data === "object") {
+        const arrayVal = Object.values(data).find((v) => Array.isArray(v));
+        rawEntries = arrayVal || [data];
+      } else {
+        rawEntries = [data];
+      }
+      const profiles = rawEntries
         .filter((item) => item && typeof item === "object" && extractUsername(item))
         .map((item) => ({
           username: extractUsername(item),
