@@ -4,7 +4,7 @@
   <!-- Home / Upload -->
   <url>
     <loc>https://instafollowtracker.com/</loc>
-    <lastmod>2026-06-18</lastmod>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,39 +12,39 @@
   <!-- Auth -->
   <url>
     <loc>https://instafollowtracker.com/login</loc>
-    <lastmod>2026-06-18</lastmod>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://instafollowtracker.com/register</loc>
-    <lastmod>2026-06-18</lastmod>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Static pages -->
   <url>
-    <loc>https://instafollowtracker.com/about</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://instafollowtracker.com/about/</loc>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://instafollowtracker.com/contact</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://instafollowtracker.com/contact/</loc>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://instafollowtracker.com/privacy-policy</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://instafollowtracker.com/privacy-policy/</loc>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://instafollowtracker.com/terms</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://instafollowtracker.com/terms/</loc>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
