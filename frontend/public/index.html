@@ -8,9 +8,29 @@
     <title>Instagram Follower Tracker & Analytics — Free, No Login</title>
     <meta name="description" content="Free Instagram follower tracker & analytics. See who unfollowed you, non-followers, mutual followers and pending requests — no login, no password, works for private accounts." />
     <link rel="canonical" href="https://instafollowtracker.com/" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="robots" id="robots-meta" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="author" content="Instagram Follower Tracker" />
     <meta name="application-name" content="Instagram Follower Tracker" />
+
+    <!-- Block indexing of dynamic SPA routes (per-user, no static content) -->
+    <script>
+      (function () {
+        var path = window.location.pathname;
+        var noIndexPrefixes = [
+          '/dashboard/', '/processing/', '/unfollow/',
+          '/pending-requests/', '/relationships/', '/insights/',
+          '/history', '/login', '/register',
+          '/forgot-password', '/reset-password'
+        ];
+        for (var i = 0; i < noIndexPrefixes.length; i++) {
+          if (path.indexOf(noIndexPrefixes[i]) === 0) {
+            var m = document.getElementById('robots-meta');
+            if (m) m.setAttribute('content', 'noindex, nofollow');
+            break;
+          }
+        }
+      })();
+    </script>
 
     <!-- Favicons & manifest -->
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -336,17 +356,114 @@
     </script>
   </head>
   <body>
-    <!-- SEO fallback: indexed by Google even if JS fails to render. Hidden visually once React mounts. -->
-    <noscript>
-      <h1>Instagram Follower Tracker — Free Online Tool</h1>
-      <p>The free Instagram follower tracker that shows who unfollowed you on Instagram, who doesn't follow back, your mutual followers, and pending follow requests. No Instagram login or password required. Works for private accounts.</p>
-      <h2>Find Who Unfollowed You on Instagram</h2>
-      <p>Upload two Instagram data exports from different dates and our tracker compares them to show you a precise list of every account that unfollowed you between the two snapshots. Direct profile links included.</p>
-      <h2>Best Free Instagram Follower Tracker</h2>
-      <p>Unlike third-party apps that ask for your Instagram password, our tracker uses only the official data export that Instagram generates for you. Your credentials never leave your device. Works for both public and private accounts.</p>
-      <p><strong>You need to enable JavaScript to use the upload tool.</strong></p>
-    </noscript>
-    <div id="root"></div>
+    <!-- Prerendered SEO content. React replaces #root on mount, so JS users see the live app.
+         Crawlers and AdSense reviewers see substantial, original content. Mirrors the React app's content. -->
+    <style id="prerender-styles">
+      #prerender-content { max-width: 880px; margin: 0 auto; padding: 32px 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.65; color: #1f2937; }
+      #prerender-content h1 { font-size: 2.25rem; line-height: 1.2; margin: 0 0 16px; color: #111827; }
+      #prerender-content h2 { font-size: 1.5rem; margin: 28px 0 12px; color: #111827; }
+      #prerender-content h3 { font-size: 1.15rem; margin: 20px 0 8px; color: #111827; }
+      #prerender-content p { margin: 0 0 14px; color: #374151; }
+      #prerender-content ul, #prerender-content ol { margin: 0 0 14px; padding-left: 22px; color: #374151; }
+      #prerender-content li { margin-bottom: 6px; }
+      #prerender-content a { color: #7c3aed; text-decoration: underline; }
+      #prerender-content .lead { font-size: 1.1rem; color: #4b5563; }
+      #prerender-content table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 0.95rem; }
+      #prerender-content th, #prerender-content td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      #prerender-content nav.subnav a { margin-right: 14px; }
+    </style>
+    <div id="root">
+      <main id="prerender-content">
+        <header>
+          <h1>Instagram Follower Tracker — Free Analytics, No Login Required</h1>
+          <p class="lead">See who unfollowed you on Instagram, find accounts that don't follow back, track mutual followers, and analyse your pending follow requests — all from your own Instagram data export, with no password and no app to install. Works for private accounts too.</p>
+        </header>
+
+        <nav class="subnav" aria-label="Site navigation">
+          <a href="/about/">About</a>
+          <a href="/blog/">Blog</a>
+          <a href="/who-unfollowed-me/">Who unfollowed me</a>
+          <a href="/instagram-non-followers/">Non-followers</a>
+          <a href="/instagram-follower-tracker-private-account/">Private accounts</a>
+          <a href="/how-to-download-instagram-data/">Download Instagram data</a>
+          <a href="/contact/">Contact</a>
+          <a href="/privacy-policy/">Privacy</a>
+        </nav>
+
+        <h2>How the tracker works</h2>
+        <p>The tool runs entirely from the data export that Instagram itself generates for you. You request the export from Instagram's official "Download your information" page, wait between ten and twenty minutes for the file to be prepared, then upload the ZIP here. Your followers and following lists are parsed in your browser. No account is ever scraped, no password is ever entered, and no rate limits apply because nothing is fetched live from Instagram.</p>
+        <p>The dashboard categorises every account in your data into eight clear groups: mutual followers, followers who don't follow you back, accounts you follow that don't follow you back, recently unfollowed (when you compare two exports from different dates), pending requests you have sent, recent follow-backs, accounts you followed but later unfollowed, and the closest non-mutual interactions. Every list is searchable, paginated, and exportable to CSV.</p>
+
+        <h2>Three steps from upload to insight</h2>
+        <ol>
+          <li><strong>Request your data</strong> — open Instagram's settings, choose "Download your information", tick only "Followers and following" under the Connections category, set the date range to All time, and pick JSON as the format.</li>
+          <li><strong>Wait for the email</strong> — Instagram needs anywhere from a few minutes to a few hours to prepare the file. For most accounts it lands within twenty minutes.</li>
+          <li><strong>Upload the ZIP here</strong> — drag and drop the file into the upload area on this page. The tracker parses it in your browser and the dashboard opens immediately.</li>
+        </ol>
+
+        <h2>What you can learn from your follower data</h2>
+        <h3>Who quietly unfollowed you</h3>
+        <p>Instagram does not notify you when someone unfollows you and does not maintain any list of recent unfollowers inside the app. The only way to know is to compare two snapshots of your follower list taken on different dates. Upload an older export and a newer one, and the tracker shows you every account that appears in the older list but is gone from the newer one — that is, by definition, your unfollowers between those two dates.</p>
+
+        <h3>Who doesn't follow you back</h3>
+        <p>The "non-followers" view shows every account you currently follow that does not follow you in return. This is useful for trimming a bloated following list, identifying inactive accounts, or simply understanding the asymmetry in your network. Each entry links directly to the Instagram profile, so you can review the account in one click.</p>
+
+        <h3>Mutual followers</h3>
+        <p>Mutual followers — people you follow who also follow you — are usually your most engaged audience. Surfacing this group helps with audience segmentation: who to message about a new project, who to thank, or who to invest more attention into. The list is fully exportable.</p>
+
+        <h3>Pending follow requests</h3>
+        <p>If you have sent follow requests to private accounts that have not yet been accepted, those requests appear in your data export. The tracker surfaces them in one place so you can decide whether to wait longer or cancel them in the app. Pending requests beyond a certain age often signal that the recipient is no longer active.</p>
+
+        <h2>Why this is safer than password-based trackers</h2>
+        <p>Most "who unfollowed me" apps work by asking for your Instagram username and password, then logging into your account on your behalf to read the follower list. This violates Instagram's Terms of Service, exposes your credentials to a third party you have no relationship with, and can trigger account suspensions or bans. It is also unnecessary, because Instagram already gives every user the right to download a complete copy of their own follower data.</p>
+        <p>The tracker on this site does not authenticate to Instagram in any way. You give it nothing more than the ZIP file Instagram generated for you. There is no OAuth flow, no API key, no scraping, no automation against Instagram's servers. The risk to your account is identical to opening the file in any other program on your computer.</p>
+
+        <h2>Comparison with other tracker types</h2>
+        <table>
+          <thead>
+            <tr><th>Capability</th><th>This tracker</th><th>Password-based apps</th><th>Browser extensions</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Requires Instagram password</td><td>Never</td><td>Yes</td><td>Yes (via session)</td></tr>
+            <tr><td>Works for private accounts</td><td>Yes</td><td>Sometimes</td><td>No</td></tr>
+            <tr><td>Risk of Instagram suspension</td><td>None</td><td>Documented</td><td>Documented</td></tr>
+            <tr><td>Accuracy</td><td>100% (uses official data)</td><td>Subject to rate limits</td><td>Subject to rate limits</td></tr>
+            <tr><td>Compare historical snapshots</td><td>From your first upload</td><td>Only after weeks of use</td><td>Only after weeks of use</td></tr>
+            <tr><td>Price</td><td>Free, no premium tier</td><td>Paywall on key features</td><td>Paywall on key features</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Frequently asked questions</h2>
+        <h3>Does Instagram tell you when someone unfollows you?</h3>
+        <p>No. There is no notification, no activity log entry, and no list inside the app that records past unfollows. The only reliable way to know is to compare two snapshots of your followers list, which is what this tracker does using your official data exports.</p>
+
+        <h3>Will Instagram ban my account for using this tracker?</h3>
+        <p>No. The tracker does not interact with Instagram's servers at all. You download your own data from Instagram via their official feature, then analyse it locally. Instagram has no signal to detect or act on.</p>
+
+        <h3>Does it work for private accounts?</h3>
+        <p>Yes. Privacy settings affect what other people can see about your account on Instagram. They have no effect on what is in your own data export. The followers and following lists in the file are identical whether your account is public or private.</p>
+
+        <h3>Do I need to create an account on this site?</h3>
+        <p>No. The core tracker — upload, dashboard, all eight lists, CSV export — works without any signup. An optional free account is available if you want session history saved across devices, but it is never required.</p>
+
+        <h3>How often should I generate a new data export?</h3>
+        <p>For tracking unfollowers over time, generating an export once a week or once a month and uploading each one builds a useful timeline. The session history view charts your growth and lets you compare any two snapshots side by side.</p>
+
+        <h2>More guides</h2>
+        <ul>
+          <li><a href="/who-unfollowed-me/">Who unfollowed me on Instagram — a complete guide</a></li>
+          <li><a href="/instagram-non-followers/">People who don't follow you back on Instagram</a></li>
+          <li><a href="/instagram-follower-tracker-private-account/">Instagram follower tracker for private accounts</a></li>
+          <li><a href="/how-to-download-instagram-data/">How to download your Instagram data export</a></li>
+          <li><a href="/blog/">All articles and tutorials</a></li>
+        </ul>
+
+        <footer>
+          <p><a href="/about/">About</a> · <a href="/contact/">Contact</a> · <a href="/privacy-policy/">Privacy Policy</a> · <a href="/terms/">Terms</a></p>
+          <p>&copy; 2026 Instagram Follower Tracker. Not affiliated with Instagram or Meta Platforms.</p>
+        </footer>
+      </main>
+    </div>
 
     <!-- Defer all third-party scripts until after first paint -->
     <script>

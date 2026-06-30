@@ -32,8 +32,19 @@ export function Footer() {
               <a href="/how-to-download-instagram-data/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Download Instagram data</a>
             </nav>
           </div>
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 text-center mb-3">From the blog</h3>
+            <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
+              <a href="/blog/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">All articles</a>
+              <a href="/blog/grow-instagram-following-organically/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Organic growth</a>
+              <a href="/blog/why-people-unfollow-on-instagram/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Why people unfollow</a>
+              <a href="/blog/spot-fake-instagram-followers/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Spot fake followers</a>
+              <a href="/blog/instagram-analytics-creator-guide/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Analytics guide</a>
+            </nav>
+          </div>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
             <a href="/about" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">About Us</a>
+            <a href="/blog/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Blog</a>
             <a href="/contact" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact Us</a>
             <a href="/privacy-policy" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Terms &amp; Conditions</a>

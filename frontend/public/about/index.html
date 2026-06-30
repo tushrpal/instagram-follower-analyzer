@@ -83,10 +83,49 @@
         </div>
 
         <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-          Instagram Follower Tracker was built out of a simple frustration: Instagram gives you no way to see who has unfollowed you, and every third-party app that claims to do it asks for your password — putting your account at risk.
+          Instagram Follower Tracker was built out of a simple frustration. Instagram gives you no way to see who has unfollowed you, and almost every third-party app that claims to fix this asks for your Instagram password — which violates Instagram's Terms of Service, exposes you to bans, and hands your credentials to a stranger.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+          We took a different approach. Instagram already gives every user the right to download a complete data export — a ZIP file containing your full followers and following lists, in machine-readable JSON. That export is the most accurate possible source of truth about your account. Our tool reads it, compares snapshots from different dates, and turns it into the dashboard Instagram itself doesn't provide. No password is required, no API scraping happens, and nothing about your Instagram account is ever transmitted anywhere except the file you choose to upload.
         </p>
         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-          We built a better alternative. One that uses only the official data export that Instagram generates for you, processes it entirely in your browser, and never asks for a single credential.
+          We believe the right relationship between you and a follower analytics tool is the simplest possible one: you own your data, you decide when to share it, and you should be able to walk away with no residue left behind. Everything we build is downstream of that principle.
+        </p>
+      </div>
+
+      <!-- Why we exist -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Why we exist</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+          The Instagram follower tracking space has been dominated for years by apps that either ask for your password (unsafe) or hide their core features behind a paywall (annoying), or both. The pattern of "free trial that collects your data, then locks you out" is so common it's become the default user expectation. We thought there was room for something different — a tool that is fully featured, fully free, never asks for credentials, and treats your data with the respect it deserves.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+          The technical approach matters because it forces honesty. A tool that uses only your data export literally cannot do anything to your Instagram account. It can't post, can't follow, can't message, can't leak credentials, can't get you suspended. The trust isn't a promise on a privacy page; it's enforced by the architecture itself.
+        </p>
+      </div>
+
+      <!-- How we work -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">How the analysis actually works</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+          You request a data export from Instagram's official "Download your information" page. Instagram emails you a ZIP file within minutes to a few hours. You upload that ZIP to our site. The ZIP is parsed in your browser — your followers and following lists are extracted from the JSON inside — and only the structural summary (counts, classifications, and a hash-free list of usernames) is sent to our server, and only if you want session history saved across visits. The raw data export file is never stored.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+          The dashboard then categorises every account in your data: mutual followers, accounts you follow that don't follow back, accounts that follow you but you don't follow back, pending follow requests you've sent, and — when you upload two exports from different dates — accounts that unfollowed you between those snapshots.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+          We chose this architecture because it works for private accounts (your privacy settings don't affect what's in your own export), it's not subject to rate limits (we're not making requests to Instagram), and it's safe (you never give us anything you wouldn't give to any other program on your computer).
+        </p>
+      </div>
+
+      <!-- Who we serve -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Who the tool is for</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+          The tracker is useful to several different kinds of users. Casual users curious about follower changes use it once or twice and move on. Creators and small-account growers run it monthly to monitor structural metrics that Instagram's own dashboard doesn't expose — mutual follower count, asymmetric audience, churn patterns. Brand-side professionals use it to audit influencer accounts before working with them, since the data export shows the audience structure honestly.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+          What the tool is not is a growth hack, an engagement bot, a "follow then unfollow" automator, or anything else that touches your Instagram account directly. We've stayed deliberately on one side of the line: pure analysis of data you already own, with no automation against the platform itself.
         </p>
       </div>
 
