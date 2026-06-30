@@ -164,9 +164,15 @@ export function Upload() {
             Tracker
           </span>
         </h1>
-        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8">
-          The free Instagram follower tracker that shows who unfollowed you, who doesn't follow back, and your mutual followers — no Instagram login or password required.
+        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-4 sm:mb-6">
+          The free Instagram follower tracker &amp; analytics tool that shows who unfollowed you, who doesn't follow back, and your mutual followers — no Instagram login or password required.
         </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 mb-6 sm:mb-8">
+          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> Trusted by 100+ users</span>
+          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> Founded 2026</span>
+          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> 100% free</span>
+          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> No login required</span>
+        </div>
         <button
           onClick={() => setShowGuide(true)}
           className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold text-base sm:text-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
@@ -227,6 +233,103 @@ export function Upload() {
             <p className="text-red-700 dark:text-red-400">{error}</p>
           </div>
         )}
+      </div>
+
+      {/* How It Works — 60 second flow */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+          How It Works in 60 Seconds
+        </h2>
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
+          Three steps to a complete Instagram follower analysis. No login, no app, no password.
+        </p>
+        <div className="grid sm:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">1</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Download your data</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Request a "Followers and following" export from Instagram's official Download Your Information page. Takes 10–20 minutes.</p>
+          </div>
+          <div className="text-center">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">2</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Upload the ZIP</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Drag and drop the ZIP file into the upload box above. Files are processed instantly and never stored on our servers.</p>
+          </div>
+          <div className="text-center">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">3</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">See your dashboard</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">View unfollowers, non-followers, mutual followers, pending requests, and full follower analytics — all in one place.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Comparison vs other trackers */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 mb-8 overflow-x-auto">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+          Why This Beats Other Instagram Trackers
+        </h2>
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+          Most Instagram follower trackers ask for your password or only show partial data. Here's how we compare to typical alternatives.
+        </p>
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b dark:border-gray-700">
+              <th className="py-3 pr-4 font-semibold text-gray-900 dark:text-white">Feature</th>
+              <th className="py-3 px-4 font-semibold text-purple-600 dark:text-purple-400 text-center">InstaFollowTracker</th>
+              <th className="py-3 px-4 font-semibold text-gray-500 dark:text-gray-400 text-center">Password-based apps</th>
+              <th className="py-3 pl-4 font-semibold text-gray-500 dark:text-gray-400 text-center">Chrome extensions</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-700 dark:text-gray-300">
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">No Instagram password required</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-red-500">No</td>
+              <td className="py-3 pl-4 text-center text-red-500">No</td>
+            </tr>
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">Works for private accounts</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-gray-400">Sometimes</td>
+              <td className="py-3 pl-4 text-center text-red-500">No</td>
+            </tr>
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">Zero risk of Instagram ban</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-red-500">No</td>
+              <td className="py-3 pl-4 text-center text-red-500">No</td>
+            </tr>
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">100% accurate follower data</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-gray-400">Rate-limited</td>
+              <td className="py-3 pl-4 text-center text-gray-400">Rate-limited</td>
+            </tr>
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">Compare dated snapshots</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-gray-400">Only after long use</td>
+              <td className="py-3 pl-4 text-center text-gray-400">Only after long use</td>
+            </tr>
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">Free with all features</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-red-500">Paywall</td>
+              <td className="py-3 pl-4 text-center text-red-500">Paywall</td>
+            </tr>
+            <tr className="border-b dark:border-gray-700">
+              <td className="py-3 pr-4">No install or extension required</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-red-500">App download</td>
+              <td className="py-3 pl-4 text-center text-red-500">Extension install</td>
+            </tr>
+            <tr>
+              <td className="py-3 pr-4">CSV export</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-gray-400">Sometimes paid</td>
+              <td className="py-3 pl-4 text-center text-gray-400">Sometimes paid</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* Video Tutorial Section */}
