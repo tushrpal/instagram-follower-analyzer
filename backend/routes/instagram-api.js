@@ -100,8 +100,6 @@ router.get("/callback", async (req, res) => {
       return res.redirect("/?igauth=error");
     }
 
-    const igUserId = String(shortTokenData.user_id || "");
-
     // Exchange for long-lived token (60-day)
     const longTokenData = await httpsGet(
       `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${encodeURIComponent(APP_SECRET)}&access_token=${encodeURIComponent(shortTokenData.access_token)}`
@@ -112,15 +110,19 @@ router.get("/callback", async (req, res) => {
       return res.redirect("/?igauth=error");
     }
 
-    // Fetch the username for display
+    // Fetch the IG-scoped user_id (the one usable in subsequent Graph calls)
+    // and the username. The `user_id` returned from token exchange is app-scoped
+    // and cannot be queried directly.
+    let igUserId = null;
     let igUsername = null;
     try {
       const me = await httpsGet(
         `https://graph.instagram.com/v21.0/me?fields=user_id,username&access_token=${encodeURIComponent(longTokenData.access_token)}`
       );
+      igUserId = me?.user_id ? String(me.user_id) : null;
       igUsername = me?.username || null;
     } catch (err) {
-      console.warn("Failed to fetch IG username:", err.message);
+      console.warn("Failed to fetch IG account info:", err.message);
     }
 
     const expiresAt = longTokenData.expires_in
@@ -204,7 +206,7 @@ router.get("/insights/overview", requireAuth, async (req, res) => {
     if (!token) return res.status(404).json({ error: "No Instagram account connected" });
     if (!token.instagram_user_id) return res.status(422).json({ error: "No Instagram account linked" });
 
-    const url = `https://graph.instagram.com/v21.0/${token.instagram_user_id}?fields=followers_count,follows_count,media_count,profile_picture_url,username,website&access_token=${encodeURIComponent(token.access_token)}`;
+    const url = `https://graph.instagram.com/v21.0/me?fields=followers_count,follows_count,media_count,profile_picture_url,username,website&access_token=${encodeURIComponent(token.access_token)}`;
     const data = await httpsGet(url);
     if (data.error) return res.status(400).json({ error: data.error.message });
     res.json(data);
@@ -223,7 +225,7 @@ router.get("/insights/reach", requireAuth, async (req, res) => {
 
     const since = Math.floor(Date.now() / 1000) - 30 * 86400;
     const until = Math.floor(Date.now() / 1000);
-    const url = `https://graph.instagram.com/v21.0/${token.instagram_user_id}/insights?metric=reach&period=day&since=${since}&until=${until}&access_token=${encodeURIComponent(token.access_token)}`;
+    const url = `https://graph.instagram.com/v21.0/me/insights?metric=reach&period=day&since=${since}&until=${until}&access_token=${encodeURIComponent(token.access_token)}`;
     const data = await httpsGet(url);
     if (data.error) return res.status(400).json({ error: data.error.message });
     res.json(data);
@@ -240,7 +242,7 @@ router.get("/insights/activity", requireAuth, async (req, res) => {
     if (!token) return res.status(404).json({ error: "No Instagram account connected" });
     if (!token.instagram_user_id) return res.status(422).json({ error: "No Instagram account linked" });
 
-    const url = `https://graph.instagram.com/v21.0/${token.instagram_user_id}/insights?metric=online_followers&period=lifetime&access_token=${encodeURIComponent(token.access_token)}`;
+    const url = `https://graph.instagram.com/v21.0/me/insights?metric=online_followers&period=lifetime&access_token=${encodeURIComponent(token.access_token)}`;
     const data = await httpsGet(url);
     if (data.error) return res.status(400).json({ error: data.error.message });
     res.json(data);
@@ -257,7 +259,7 @@ router.get("/insights/audience", requireAuth, async (req, res) => {
     if (!token) return res.status(404).json({ error: "No Instagram account connected" });
     if (!token.instagram_user_id) return res.status(422).json({ error: "No Instagram account linked" });
 
-    const url = `https://graph.instagram.com/v21.0/${token.instagram_user_id}/insights?metric=engaged_audience_demographics&period=lifetime&breakdown=age,gender,country,city&metric_type=total_value&access_token=${encodeURIComponent(token.access_token)}`;
+    const url = `https://graph.instagram.com/v21.0/me/insights?metric=engaged_audience_demographics&period=lifetime&breakdown=age,gender,country,city&metric_type=total_value&access_token=${encodeURIComponent(token.access_token)}`;
     const data = await httpsGet(url);
     if (data.error) return res.status(400).json({ error: data.error.message });
     res.json(data);
