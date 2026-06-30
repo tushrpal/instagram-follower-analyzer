@@ -4,49 +4,61 @@
   <!-- Home / Upload -->
   <url>
     <loc>https://instafollowtracker.com/</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Auth -->
+  <!-- Long-tail landing pages -->
   <url>
-    <loc>https://instafollowtracker.com/login</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://instafollowtracker.com/who-unfollowed-me/</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://instafollowtracker.com/register</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://instafollowtracker.com/instagram-non-followers/</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://instafollowtracker.com/instagram-follower-tracker-private-account/</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://instafollowtracker.com/how-to-download-instagram-data/</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- Static pages -->
   <url>
     <loc>https://instafollowtracker.com/about/</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://instafollowtracker.com/contact/</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://instafollowtracker.com/privacy-policy/</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
   <url>
     <loc>https://instafollowtracker.com/terms/</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
 
 </urlset>

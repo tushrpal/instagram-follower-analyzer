@@ -1,7 +1,9 @@
 User-agent: *
 Allow: /
 
-# Auth utility pages — no indexing value
+# Auth utility pages — low SEO value
+Disallow: /login
+Disallow: /register
 Disallow: /forgot-password
 Disallow: /reset-password
 
@@ -15,5 +17,13 @@ Disallow: /unfollow/
 Disallow: /pending-requests/
 Disallow: /relationships/
 Disallow: /insights/
+
+# Allow Googlebot to fully crawl JS/CSS for rendering
+User-agent: Googlebot
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.svg$
 
 Sitemap: https://instafollowtracker.com/sitemap.xml

@@ -24,17 +24,17 @@ export function Header() {
     <header className="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-700">
       <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-2">
-          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 min-w-0" aria-label="Instagram Follower Tracker — Home">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Instagram className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate">
-                Instagram Follower Analyzer
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
-                Analyze your follower relationships
-              </p>
+              <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block">
+                Instagram Follower Tracker
+              </span>
+              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
+                Find who unfollowed you — free, no login
+              </span>
             </div>
           </Link>
 

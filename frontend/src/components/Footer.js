@@ -23,13 +23,22 @@ export function Footer() {
         </div>
 
         <div className="mt-6 pt-6 border-t dark:border-gray-700">
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 text-center mb-3">Guides</h3>
+            <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
+              <a href="/who-unfollowed-me/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Who unfollowed me</a>
+              <a href="/instagram-non-followers/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Non-followers</a>
+              <a href="/instagram-follower-tracker-private-account/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Private account tracker</a>
+              <a href="/how-to-download-instagram-data/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Download Instagram data</a>
+            </nav>
+          </div>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
             <a href="/about" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">About Us</a>
             <a href="/contact" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact Us</a>
             <a href="/privacy-policy" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Terms &amp; Conditions</a>
           </nav>
-          <p className="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Analyzer. Not affiliated with Instagram or Meta.</p>
+          <p className="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Tracker. Not affiliated with Instagram or Meta.</p>
         </div>
       </div>
     </footer>

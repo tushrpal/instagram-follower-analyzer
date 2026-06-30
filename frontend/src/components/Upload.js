@@ -161,12 +161,11 @@ export function Upload() {
           Instagram Follower
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
             {" "}
-            Analyzer
+            Tracker
           </span>
         </h1>
         <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8">
-          Discover who follows you back, who doesn't, and gain insights into
-          your Instagram connections.
+          The free Instagram follower tracker that shows who unfollowed you, who doesn't follow back, and your mutual followers — no Instagram login or password required.
         </p>
         <button
           onClick={() => setShowGuide(true)}
@@ -322,9 +321,19 @@ export function Upload() {
         <p className="text-gray-700 dark:text-gray-300 mb-4">
           There are plenty of paid tools and sketchy apps that ask for your password. What makes this the <strong>best free Instagram follower tracker app</strong> is the combination of depth, safety, and zero cost. You get eight different relationship list types, cross-session comparison, a batch unfollow helper, search and pagination, CSV exports, private account compatibility, and full dark mode — completely free. There's no premium tier hiding the important features, no account required to get started, and no app to download. It runs entirely in your browser.
         </p>
-        <p className="text-gray-700 dark:text-gray-300 mb-2">
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
           Whether you're a creator tracking audience loyalty, a brand monitoring follower quality, or just curious who quietly unfollowed you, this <strong>best Instagram follower tracker app</strong> gives you the data you need in under a minute. Upload your Instagram data export above to get started.
         </p>
+
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+          More Guides
+        </h3>
+        <ul className="space-y-2 mb-2 not-prose">
+          <li><a href="/who-unfollowed-me/" className="text-purple-600 dark:text-purple-400 hover:underline">Who Unfollowed Me on Instagram — Free Tracker</a></li>
+          <li><a href="/instagram-non-followers/" className="text-purple-600 dark:text-purple-400 hover:underline">People Who Don't Follow You Back on Instagram</a></li>
+          <li><a href="/instagram-follower-tracker-private-account/" className="text-purple-600 dark:text-purple-400 hover:underline">Instagram Follower Tracker for Private Accounts</a></li>
+          <li><a href="/how-to-download-instagram-data/" className="text-purple-600 dark:text-purple-400 hover:underline">How to Download Your Instagram Data Export</a></li>
+        </ul>
       </article>
 
       {/* Instructions */}
