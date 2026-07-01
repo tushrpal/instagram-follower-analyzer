@@ -21,8 +21,55 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = { darkMode: 'class' }
-      try { if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark'); } catch(e) {}
+      tailwind.config = { darkMode: 'class' };
+      const themeStorageKey = 'theme';
+      const root = document.documentElement;
+      const setTheme = (theme) => {
+        const isDark = theme === 'dark';
+        root.classList.toggle('dark', isDark);
+        root.style.colorScheme = isDark ? 'dark' : 'light';
+        try { localStorage.setItem(themeStorageKey, isDark ? 'dark' : 'light'); } catch (e) {}
+      };
+      const getStoredTheme = () => {
+        try { return localStorage.getItem(themeStorageKey) === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; }
+      };
+      setTheme(getStoredTheme());
+    </script>
+    <style>
+      :root { color-scheme: light; }
+      html.dark { color-scheme: dark; }
+      body { transition: background-color .2s ease, color .2s ease; }
+      .dark body { background-color: #111827; }
+      .dark .text-gray-500 { color: #cbd5e1 !important; }
+      .dark .text-gray-600 { color: #e5e7eb !important; }
+      .dark .text-gray-700 { color: #f3f4f6 !important; }
+      .dark .text-gray-900 { color: #f9fafb !important; }
+      .dark .text-purple-600 { color: #e9d5ff !important; }
+      .dark .text-purple-100 { color: #f5e8ff !important; }
+      .dark .bg-white { background-color: #111827 !important; }
+      .dark .bg-gray-50 { background-color: #1f2937 !important; }
+      .dark .border-gray-200, .dark .border-gray-300, .dark .border-gray-700 { border-color: #374151 !important; }
+      .dark .prose :where(a):not(:where([class~="not-prose"] *)) { color: #e9d5ff !important; }
+      .dark .prose :where(code):not(:where([class~="not-prose"] *)) { background-color: #1f2937 !important; color: #fef3c7 !important; }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('theme-toggle');
+        const updateToggle = () => {
+          if (!toggle) return;
+          const isDark = document.documentElement.classList.contains('dark');
+          toggle.setAttribute('aria-pressed', String(isDark));
+          toggle.innerHTML = isDark ? '<span class="text-base" aria-hidden="true">☀️</span>' : '<span class="text-base" aria-hidden="true">🌙</span>';
+        };
+        if (toggle) {
+          toggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            setTheme(nextTheme);
+            updateToggle();
+          });
+        }
+        updateToggle();
+      });
     </script>
 
     <script type="application/ld+json">
@@ -54,7 +101,11 @@
               <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">Guides &amp; tutorials</span>
             </div>
           </a>
-          <nav class="flex items-center gap-4 text-sm">
+          <nav class="flex items-center gap-2 sm:gap-3 text-sm">
+            <button id="theme-toggle" type="button" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white/90 px-3 py-2 text-gray-700 shadow-sm transition hover:border-purple-400 hover:text-purple-600 dark:border-gray-700 dark:bg-gray-800/90 dark:text-gray-200 dark:hover:border-purple-500 dark:hover:text-purple-300" aria-label="Toggle dark mode" title="Toggle dark mode">
+              <span class="sr-only">Toggle dark mode</span>
+              <span class="text-base" aria-hidden="true">🌙</span>
+            </button>
             <a href="/about/" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors hidden sm:inline">About</a>
             <a href="/blog/" class="text-purple-600 dark:text-purple-400 font-medium">Blog</a>
             <a href="/" class="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">Open Tracker</a>
