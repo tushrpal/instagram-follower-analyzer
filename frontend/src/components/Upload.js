@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 import {
@@ -13,15 +13,19 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
-const INSTAGRAM_EXPORT_URL = "https://accountscenter.instagram.com/info_and_permissions/dyi/";
+const INSTAGRAM_EXPORT_URL =
+  "https://accountscenter.instagram.com/info_and_permissions/dyi/";
 
 function DownloadGuideModal({ onClose }) {
   const steps = [
     { num: 1, text: 'Click "Create new export"' },
     { num: 2, text: 'Choose "Export to this device"' },
-    { num: 3, text: 'Click "Customize information" → unselect all → select only "Followers and Following"' },
+    {
+      num: 3,
+      text: 'Click "Customize information" → unselect all → select only "Followers and Following"',
+    },
     { num: 4, text: 'Set date range to "All time"' },
-    { num: 5, text: 'Select format: JSON (not HTML)' },
+    { num: 5, text: "Select format: JSON (not HTML)" },
     { num: 6, text: 'Click "Export" and wait 10–20 minutes' },
     { num: 7, text: "Come back to this page and download the file when ready" },
   ];
@@ -56,8 +60,12 @@ function DownloadGuideModal({ onClose }) {
             <Download className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">What to do on Instagram</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Follow these steps after the site opens</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              What to do on Instagram
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Follow these steps after the site opens
+            </p>
           </div>
         </div>
 
@@ -68,13 +76,16 @@ function DownloadGuideModal({ onClose }) {
               <span className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {s.num}
               </span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">{s.text}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                {s.text}
+              </span>
             </li>
           ))}
         </ol>
 
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          💡 Instagram takes <strong>10–20 minutes</strong> to prepare the file. Come back here once it's downloaded and upload the ZIP.
+          💡 Instagram takes <strong>10–20 minutes</strong> to prepare the file.
+          Come back here once it's downloaded and upload the ZIP.
         </p>
 
         {/* CTA */}
@@ -97,12 +108,41 @@ export function Upload() {
   const [showGuide, setShowGuide] = useState(false);
   const navigate = useNavigate();
 
+  // Add Video Schema markup for Google Search Console
+  useEffect(() => {
+    const videoSchema = {
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      name: "How to Download Instagram Data Export",
+      description:
+        "Step-by-step video guide showing how to download your Instagram data export and use it with the follower tracker",
+      thumbnailUrl: "https://img.youtube.com/vi/JwBRvOBlCJc/maxresdefault.jpg",
+      uploadDate: "2024-01-01",
+      duration: "PT5M",
+      contentUrl: "https://www.youtube.com/embed/JwBRvOBlCJc",
+      embedUrl: "https://www.youtube-nocookie.com/embed/JwBRvOBlCJc",
+    };
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify(videoSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      if (script.parentNode === document.head) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
   const onDrop = async (acceptedFiles) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".zip")) {
-      setError("Please upload a ZIP file containing your Instagram data export.");
+      setError(
+        "Please upload a ZIP file containing your Instagram data export.",
+      );
       return;
     }
 
@@ -134,7 +174,10 @@ export function Upload() {
       navigate(`/dashboard/${sessionId}`);
     } catch (err) {
       console.error("Analysis error:", err);
-      setError(err.message || "Failed to process your Instagram data. Please try again.");
+      setError(
+        err.message ||
+          "Failed to process your Instagram data. Please try again.",
+      );
     } finally {
       setProcessing(false);
       setProgressMsg("");
@@ -209,7 +252,9 @@ export function Upload() {
 
             <div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                {processing ? "Analyzing your data..." : "Upload Instagram Data Export"}
+                {processing
+                  ? "Analyzing your data..."
+                  : "Upload Instagram Data Export"}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {isDragActive
@@ -221,7 +266,9 @@ export function Upload() {
             {processing && (
               <div className="w-full max-w-md text-center">
                 <div className="spinner mb-2 mx-auto"></div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{progressMsg || "Processing…"}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {progressMsg || "Processing…"}
+                </p>
               </div>
             )}
           </div>
@@ -384,43 +431,95 @@ export function Upload() {
           A safer way to analyse your Instagram followers
         </h2>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          Instagram doesn't tell you when someone unfollows you, and it doesn't expose useful metrics like mutual-follower counts or non-follower counts in its built-in dashboard. The information is there — it's in your account data — but the app doesn't surface it. This tool reads your official Instagram data export and turns it into a real dashboard.
+          If you've ever wondered who stopped following you or why your follower
+          count quietly dropped overnight, you need a reliable{" "}
+          <strong>Instagram follower tracker</strong>. Our tool gives you a
+          complete picture of your Instagram audience — for free, without
+          installing anything, and without handing over your Instagram password.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
           How it works
         </h3>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          You download your own Instagram data export — a ZIP file Instagram generates for you on request, containing your followers and following lists in JSON. You upload that ZIP here. The file is parsed in your browser, classified into clear groups, and displayed in a dashboard you can search, filter, and export from. No password is ever entered. Nothing scrapes your account.
+          Unlike third-party apps that require your Instagram credentials, our{" "}
+          <strong>Instagram follower tracker online free</strong> tool works
+          differently. You simply download your own data export directly from
+          Instagram — a ZIP file containing your followers and following lists
+          in JSON format — and upload it here. No passwords, no OAuth tokens, no
+          risk to your account. Everything is analyzed server-side in seconds
+          and the raw data is deleted after processing.
         </p>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          Once uploaded, the dashboard breaks every account into the categories that matter: mutual followers, accounts you follow that don't follow back, accounts that follow you but you don't follow back, and pending follow requests you've sent. You can search across thousands of accounts, export any list to CSV, and leave private notes against specific profiles.
+          Once uploaded, the dashboard instantly categorizes every account:
+          mutual followers, people you follow who don't follow back, followers
+          who you haven't followed back, and pending follow requests. You can
+          search and filter across thousands of accounts, export any list to
+          CSV, and leave private notes on specific profiles.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
           Seeing who unfollowed you
         </h3>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          When you upload two data exports from different dates, the tool compares the two snapshots and shows you every account that appears in the older export but is gone from the newer one. That's your unfollowers list — generated from your own data, with direct profile links, with no guessing involved.
+          The most common reason people look for an{" "}
+          <strong>Instagram follower tracker — who unfollowed me</strong> — is
+          to understand audience churn. Our session comparison feature does
+          exactly that. Upload a second export a week or a month later, and the
+          tool compares the two snapshots side by side. It shows you a precise
+          list of accounts that unfollowed you between sessions, along with
+          direct profile links so you can review them instantly. No guessing, no
+          approximations — just the actual data from Instagram itself.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
           Works for private accounts
         </h3>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          Many follower-tracking apps rely on scraping Instagram's public surface, which doesn't work for private accounts. This tool uses your own data export, so the contents are identical regardless of whether your account is public, private, or business. Your privacy settings don't affect anything.
+          Most <strong>Instagram follower tracker apps</strong> fail for private
+          accounts because they rely on scraping public profile pages or
+          Instagram's API, neither of which exposes follower data for private
+          accounts. Our approach is fundamentally different. Because you're
+          working with your own downloaded data export, it works perfectly as an{" "}
+          <strong>Instagram follower tracker for private accounts</strong> —
+          your privacy settings are irrelevant. The data comes straight from
+          Instagram to your device to our analyzer, nothing more.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
           Tracking changes over time
         </h3>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          The session history view lets you upload exports at different points in time and builds a timeline of how your follower and following counts have changed. You can compare any two sessions to see what changed between them, which is more useful than the headline follower number on its own.
+          Want to monitor your growth over time? Our{" "}
+          <strong>Instagram follower tracker live</strong> session history lets
+          you build up a timeline by uploading new exports regularly. Each
+          session is saved under a custom name you choose, and the dashboard
+          charts your follower and following counts over time using a growth
+          timeline. You can compare any two sessions to see exactly what changed
+          — who came in, who left, and how your mutual follower ratio shifted.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
           Read more
         </h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
+          There are plenty of paid tools and sketchy apps that ask for your
+          password. What makes this the{" "}
+          <strong>best free Instagram follower tracker app</strong> is the
+          combination of depth, safety, and zero cost. You get eight different
+          relationship list types, cross-session comparison, a batch unfollow
+          helper, search and pagination, CSV exports, private account
+          compatibility, and full dark mode — completely free. There's no
+          premium tier hiding the important features, no account required to get
+          started, and no app to download. It runs entirely in your browser.
+        </p>
+        <p className="text-gray-700 dark:text-gray-300 mb-2">
+          Whether you're a creator tracking audience loyalty, a brand monitoring
+          follower quality, or just curious who quietly unfollowed you, this{" "}
+          <strong>best Instagram follower tracker app</strong> gives you the
+          data you need in under a minute. Upload your Instagram data export
+          above to get started.
+        </p>
         <ul className="space-y-2 mb-2 not-prose">
           <li><a href="/blog/" className="text-purple-600 dark:text-purple-400 hover:underline">All guides and articles</a></li>
           <li><a href="/blog/why-people-unfollow-on-instagram/" className="text-purple-600 dark:text-purple-400 hover:underline">Why people actually unfollow on Instagram</a></li>
@@ -521,7 +620,9 @@ export function Upload() {
                 Click on{" "}
                 <span className="font-semibold">Customize information</span>.
               </p>
-              <p className="text-gray-700 dark:text-gray-300">Unselect all options.</p>
+              <p className="text-gray-700 dark:text-gray-300">
+                Unselect all options.
+              </p>
               <p className="text-gray-700 dark:text-gray-300">
                 Only select:{" "}
                 <span className="font-semibold text-green-600">
@@ -594,7 +695,9 @@ export function Upload() {
               </h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-700 dark:text-gray-300">Instagram will prepare your file.</p>
+              <p className="text-gray-700 dark:text-gray-300">
+                Instagram will prepare your file.
+              </p>
               <p className="text-gray-700 dark:text-gray-300">
                 This usually takes{" "}
                 <span className="font-semibold">10–20 minutes</span> (sometimes
@@ -647,7 +750,9 @@ export function Upload() {
 
         {/* Quick Summary */}
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">📋 Quick Summary</h4>
+          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+            📋 Quick Summary
+          </h4>
           <p className="text-sm text-gray-700 dark:text-gray-300">
             1. Visit Instagram's data export page → 2. Create new export → 3.
             Export to device → 4. Select only "Followers and Following" → 5.
