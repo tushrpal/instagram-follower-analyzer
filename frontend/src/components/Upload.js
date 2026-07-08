@@ -606,11 +606,6 @@ export function Upload() {
           <strong>Instagram follower tracker</strong>. Our tool gives you a
           complete picture of your Instagram audience — for free, without
           installing anything, and without handing over your Instagram password.
-          If you've ever wondered who stopped following you or why your follower
-          count quietly dropped overnight, you need a reliable{" "}
-          <strong>Instagram follower tracker</strong>. Our tool gives you a
-          complete picture of your Instagram audience — for free, without
-          installing anything, and without handing over your Instagram password.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
@@ -623,13 +618,6 @@ export function Upload() {
           Instagram — a ZIP file containing your followers and following lists
           in JSON format — and upload it here. No passwords, no OAuth tokens, no
           risk to your account. Everything is analyzed server-side in seconds
-          and the raw data is deleted after processing. Unlike third-party apps
-          that require your Instagram credentials, our{" "}
-          <strong>Instagram follower tracker online free</strong> tool works
-          differently. You simply download your own data export directly from
-          Instagram — a ZIP file containing your followers and following lists
-          in JSON format — and upload it here. No passwords, no OAuth tokens, no
-          risk to your account. Everything is analyzed server-side in seconds
           and the raw data is deleted after processing.
         </p>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -637,12 +625,7 @@ export function Upload() {
           mutual followers, people you follow who don't follow back, followers
           who you haven't followed back, and pending follow requests. You can
           search and filter across thousands of accounts, export any list to
-          CSV, and leave private notes on specific profiles. Once uploaded, the
-          dashboard instantly categorizes every account: mutual followers,
-          people you follow who don't follow back, followers who you haven't
-          followed back, and pending follow requests. You can search and filter
-          across thousands of accounts, export any list to CSV, and leave
-          private notes on specific profiles.
+          CSV, and leave private notes on specific profiles.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
@@ -650,14 +633,6 @@ export function Upload() {
         </h3>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
           The most common reason people look for an{" "}
-          <strong>Instagram follower tracker — who unfollowed me</strong> — is
-          to understand audience churn. Our session comparison feature does
-          exactly that. Upload a second export a week or a month later, and the
-          tool compares the two snapshots side by side. It shows you a precise
-          list of accounts that unfollowed you between sessions, along with
-          direct profile links so you can review them instantly. No guessing, no
-          approximations — just the actual data from Instagram itself. The most
-          common reason people look for an{" "}
           <strong>Instagram follower tracker — who unfollowed me</strong> — is
           to understand audience churn. Our session comparison feature does
           exactly that. Upload a second export a week or a month later, and the
@@ -678,14 +653,6 @@ export function Upload() {
           working with your own downloaded data export, it works perfectly as an{" "}
           <strong>Instagram follower tracker for private accounts</strong> —
           your privacy settings are irrelevant. The data comes straight from
-          Instagram to your device to our analyzer, nothing more. Most{" "}
-          <strong>Instagram follower tracker apps</strong> fail for private
-          accounts because they rely on scraping public profile pages or
-          Instagram's API, neither of which exposes follower data for private
-          accounts. Our approach is fundamentally different. Because you're
-          working with your own downloaded data export, it works perfectly as an{" "}
-          <strong>Instagram follower tracker for private accounts</strong> —
-          your privacy settings are irrelevant. The data comes straight from
           Instagram to your device to our analyzer, nothing more.
         </p>
 
@@ -693,13 +660,6 @@ export function Upload() {
           Tracking changes over time
         </h3>
         <p className="text-gray-700 dark:text-gray-300 mb-4">
-          Want to monitor your growth over time? Our{" "}
-          <strong>Instagram follower tracker live</strong> session history lets
-          you build up a timeline by uploading new exports regularly. Each
-          session is saved under a custom name you choose, and the dashboard
-          charts your follower and following counts over time using a growth
-          timeline. You can compare any two sessions to see exactly what changed
-          — who came in, who left, and how your mutual follower ratio shifted.
           Want to monitor your growth over time? Our{" "}
           <strong>Instagram follower tracker live</strong> session history lets
           you build up a timeline by uploading new exports regularly. Each
@@ -722,24 +682,10 @@ export function Upload() {
           compatibility, and full dark mode — completely free. There's no
           premium tier hiding the important features, no account required to get
           started, and no app to download. It runs entirely in your browser.
-          There are plenty of paid tools and sketchy apps that ask for your
-          password. What makes this the{" "}
-          <strong>best free Instagram follower tracker app</strong> is the
-          combination of depth, safety, and zero cost. You get eight different
-          relationship list types, cross-session comparison, a batch unfollow
-          helper, search and pagination, CSV exports, private account
-          compatibility, and full dark mode — completely free. There's no
-          premium tier hiding the important features, no account required to get
-          started, and no app to download. It runs entirely in your browser.
         </p>
         <p className="text-gray-700 dark:text-gray-300 mb-2">
           Whether you're a creator tracking audience loyalty, a brand monitoring
           follower quality, or just curious who quietly unfollowed you, this{" "}
-          <strong>best Instagram follower tracker app</strong> gives you the
-          data you need in under a minute. Upload your Instagram data export
-          above to get started. Whether you're a creator tracking audience
-          loyalty, a brand monitoring follower quality, or just curious who
-          quietly unfollowed you, this{" "}
           <strong>best Instagram follower tracker app</strong> gives you the
           data you need in under a minute. Upload your Instagram data export
           above to get started.
@@ -1036,9 +982,6 @@ export function Upload() {
 
         {/* Quick Summary */}
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-            📋 Quick Summary
-          </h4>
           <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
             📋 Quick Summary
           </h4>
