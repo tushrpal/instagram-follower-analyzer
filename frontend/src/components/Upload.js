@@ -108,8 +108,23 @@ export function Upload() {
   const [showGuide, setShowGuide] = useState(false);
   const navigate = useNavigate();
 
-  // Add Video Schema markup for Google Search Console
+  // Add SEO Schema markup for Google Search Console
   useEffect(() => {
+    // 1. Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement("meta");
+      metaDesc.name = "description";
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.content =
+      "Upload your Instagram data export to instantly see who unfollowed you, find non-followers, and analyze mutual followers — free, no password required, works for private accounts.";
+
+    // Update page title
+    document.title =
+      "Upload Instagram Data - Free Follower Tracker | IAnalyser";
+
+    // 2. Video Schema
     const videoSchema = {
       "@context": "https://schema.org",
       "@type": "VideoObject",
@@ -123,15 +138,93 @@ export function Upload() {
       embedUrl: "https://www.youtube-nocookie.com/embed/JwBRvOBlCJc",
     };
 
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify(videoSchema);
-    document.head.appendChild(script);
+    // 3. FAQ Schema from Instructions section
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "Do I need to give my Instagram password to use this tracker?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "No. You never enter your Instagram password. You simply download your data export from Instagram's official settings page and upload the ZIP file here. Everything is analyzed locally in your browser.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "How long does it take to download my Instagram data?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Instagram typically takes 10-20 minutes to prepare your data export file. After requesting, you'll receive a notification when it's ready for download. Then upload the ZIP file to our tool for instant analysis.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Does this work for private Instagram accounts?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes, completely. Since you're uploading your own data export, the tool works perfectly for private accounts. Your privacy settings don't matter because the data comes directly from your account to our analyzer.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Will Instagram ban my account for using this tracker?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "No. This tool never interacts with Instagram's servers. You download your own data and analyze it locally. There's zero risk of account suspension, unlike third-party apps that require your login credentials.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "What information do I need to select when exporting my data?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Select only 'Followers and Following' from the customization options when requesting your export. You can deselect everything else. Choose JSON format and 'All time' for the date range to get complete follower history.",
+          },
+        },
+      ],
+    };
 
+    // 4. Breadcrumb Schema
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: window.location.origin,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Upload",
+          item: `${window.location.origin}/upload`,
+        },
+      ],
+    };
+
+    // Create and append schema scripts
+    const schemas = [videoSchema, faqSchema, breadcrumbSchema];
+    const scripts = [];
+
+    schemas.forEach((schema) => {
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.text = JSON.stringify(schema);
+      document.head.appendChild(script);
+      scripts.push(script);
+    });
+
+    // Cleanup on unmount
     return () => {
-      if (script.parentNode === document.head) {
-        document.head.removeChild(script);
-      }
+      scripts.forEach((script) => {
+        if (script.parentNode === document.head) {
+          document.head.removeChild(script);
+        }
+      });
     };
   }, []);
 
@@ -208,13 +301,27 @@ export function Upload() {
           </span>
         </h1>
         <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-4 sm:mb-6">
-          See who unfollowed you, find accounts that don't follow back, and analyse your mutual followers — using your official Instagram data export. No login, no password.
+          See who unfollowed you, find accounts that don't follow back, and
+          analyse your mutual followers — using your official Instagram data
+          export. No login, no password.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 mb-6 sm:mb-8">
-          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> No password required</span>
-          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> Works for private accounts</span>
-          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> Free, no signup needed</span>
-          <span className="inline-flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> Runs in your browser</span>
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle className="w-4 h-4 text-green-500" /> No password
+            required
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle className="w-4 h-4 text-green-500" /> Works for private
+            accounts
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle className="w-4 h-4 text-green-500" /> Free, no signup
+            needed
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle className="w-4 h-4 text-green-500" /> Runs in your
+            browser
+          </span>
         </div>
         <button
           onClick={() => setShowGuide(true)}
@@ -288,23 +395,45 @@ export function Upload() {
           How It Works in 60 Seconds
         </h2>
         <p className="text-center text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
-          Three steps to a complete Instagram follower analysis. No login, no app, no password.
+          Three steps to a complete Instagram follower analysis. No login, no
+          app, no password.
         </p>
         <div className="grid sm:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">1</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Download your data</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Request a "Followers and following" export from Instagram's official Download Your Information page. Takes 10–20 minutes.</p>
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">
+              1
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              Download your data
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Request a "Followers and following" export from Instagram's
+              official Download Your Information page. Takes 10–20 minutes.
+            </p>
           </div>
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">2</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Upload the ZIP</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Drag and drop the ZIP file into the upload box above. Files are processed instantly and never stored on our servers.</p>
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">
+              2
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              Upload the ZIP
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Drag and drop the ZIP file into the upload box above. Files are
+              processed instantly and never stored on our servers.
+            </p>
           </div>
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">3</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">See your dashboard</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">View unfollowers, non-followers, mutual followers, pending requests, and full follower analytics — all in one place.</p>
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xl font-bold flex items-center justify-center mx-auto mb-3">
+              3
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              See your dashboard
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              View unfollowers, non-followers, mutual followers, pending
+              requests, and full follower analytics — all in one place.
+            </p>
           </div>
         </div>
       </div>
@@ -315,65 +444,106 @@ export function Upload() {
           Why This Beats Other Instagram Trackers
         </h2>
         <p className="text-center text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
-          Most Instagram follower trackers ask for your password or only show partial data. Here's how we compare to typical alternatives.
+          Most Instagram follower trackers ask for your password or only show
+          partial data. Here's how we compare to typical alternatives.
         </p>
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b dark:border-gray-700">
-              <th className="py-3 pr-4 font-semibold text-gray-900 dark:text-white">Feature</th>
-              <th className="py-3 px-4 font-semibold text-purple-600 dark:text-purple-400 text-center">InstaFollowTracker</th>
-              <th className="py-3 px-4 font-semibold text-gray-500 dark:text-gray-400 text-center">Password-based apps</th>
-              <th className="py-3 pl-4 font-semibold text-gray-500 dark:text-gray-400 text-center">Chrome extensions</th>
+              <th className="py-3 pr-4 font-semibold text-gray-900 dark:text-white">
+                Feature
+              </th>
+              <th className="py-3 px-4 font-semibold text-purple-600 dark:text-purple-400 text-center">
+                InstaFollowTracker
+              </th>
+              <th className="py-3 px-4 font-semibold text-gray-500 dark:text-gray-400 text-center">
+                Password-based apps
+              </th>
+              <th className="py-3 pl-4 font-semibold text-gray-500 dark:text-gray-400 text-center">
+                Chrome extensions
+              </th>
             </tr>
           </thead>
           <tbody className="text-gray-700 dark:text-gray-300">
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">No Instagram password required</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
               <td className="py-3 px-4 text-center text-red-500">No</td>
               <td className="py-3 pl-4 text-center text-red-500">No</td>
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">Works for private accounts</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
               <td className="py-3 px-4 text-center text-gray-400">Sometimes</td>
               <td className="py-3 pl-4 text-center text-red-500">No</td>
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">Zero risk of Instagram ban</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
               <td className="py-3 px-4 text-center text-red-500">No</td>
               <td className="py-3 pl-4 text-center text-red-500">No</td>
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">100% accurate follower data</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
-              <td className="py-3 px-4 text-center text-gray-400">Rate-limited</td>
-              <td className="py-3 pl-4 text-center text-gray-400">Rate-limited</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
+              <td className="py-3 px-4 text-center text-gray-400">
+                Rate-limited
+              </td>
+              <td className="py-3 pl-4 text-center text-gray-400">
+                Rate-limited
+              </td>
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">Compare dated snapshots</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
-              <td className="py-3 px-4 text-center text-gray-400">Only after long use</td>
-              <td className="py-3 pl-4 text-center text-gray-400">Only after long use</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
+              <td className="py-3 px-4 text-center text-gray-400">
+                Only after long use
+              </td>
+              <td className="py-3 pl-4 text-center text-gray-400">
+                Only after long use
+              </td>
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">Free with all features</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
               <td className="py-3 px-4 text-center text-red-500">Paywall</td>
               <td className="py-3 pl-4 text-center text-red-500">Paywall</td>
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-3 pr-4">No install or extension required</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
-              <td className="py-3 px-4 text-center text-red-500">App download</td>
-              <td className="py-3 pl-4 text-center text-red-500">Extension install</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
+              <td className="py-3 px-4 text-center text-red-500">
+                App download
+              </td>
+              <td className="py-3 pl-4 text-center text-red-500">
+                Extension install
+              </td>
             </tr>
             <tr>
               <td className="py-3 pr-4">CSV export</td>
-              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Yes</td>
-              <td className="py-3 px-4 text-center text-gray-400">Sometimes paid</td>
-              <td className="py-3 pl-4 text-center text-gray-400">Sometimes paid</td>
+              <td className="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">
+                Yes
+              </td>
+              <td className="py-3 px-4 text-center text-gray-400">
+                Sometimes paid
+              </td>
+              <td className="py-3 pl-4 text-center text-gray-400">
+                Sometimes paid
+              </td>
             </tr>
           </tbody>
         </table>
@@ -521,14 +691,70 @@ export function Upload() {
           above to get started.
         </p>
         <ul className="space-y-2 mb-2 not-prose">
-          <li><a href="/blog/" className="text-purple-600 dark:text-purple-400 hover:underline">All guides and articles</a></li>
-          <li><a href="/blog/why-people-unfollow-on-instagram/" className="text-purple-600 dark:text-purple-400 hover:underline">Why people actually unfollow on Instagram</a></li>
-          <li><a href="/blog/grow-instagram-following-organically/" className="text-purple-600 dark:text-purple-400 hover:underline">How to grow your Instagram following organically</a></li>
-          <li><a href="/blog/instagram-analytics-creator-guide/" className="text-purple-600 dark:text-purple-400 hover:underline">A creator's guide to reading Instagram analytics</a></li>
-          <li><a href="/who-unfollowed-me/" className="text-purple-600 dark:text-purple-400 hover:underline">Who unfollowed me on Instagram — complete guide</a></li>
-          <li><a href="/instagram-non-followers/" className="text-purple-600 dark:text-purple-400 hover:underline">People who don't follow you back on Instagram</a></li>
-          <li><a href="/instagram-follower-tracker-private-account/" className="text-purple-600 dark:text-purple-400 hover:underline">Tracker for private accounts</a></li>
-          <li><a href="/how-to-download-instagram-data/" className="text-purple-600 dark:text-purple-400 hover:underline">How to download your Instagram data</a></li>
+          <li>
+            <a
+              href="/blog/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              All guides and articles
+            </a>
+          </li>
+          <li>
+            <a
+              href="/blog/why-people-unfollow-on-instagram/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              Why people actually unfollow on Instagram
+            </a>
+          </li>
+          <li>
+            <a
+              href="/blog/grow-instagram-following-organically/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              How to grow your Instagram following organically
+            </a>
+          </li>
+          <li>
+            <a
+              href="/blog/instagram-analytics-creator-guide/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              A creator's guide to reading Instagram analytics
+            </a>
+          </li>
+          <li>
+            <a
+              href="/who-unfollowed-me/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              Who unfollowed me on Instagram — complete guide
+            </a>
+          </li>
+          <li>
+            <a
+              href="/instagram-non-followers/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              People who don't follow you back on Instagram
+            </a>
+          </li>
+          <li>
+            <a
+              href="/instagram-follower-tracker-private-account/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              Tracker for private accounts
+            </a>
+          </li>
+          <li>
+            <a
+              href="/how-to-download-instagram-data/"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
+              How to download your Instagram data
+            </a>
+          </li>
         </ul>
       </article>
 
