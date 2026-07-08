@@ -350,7 +350,10 @@ export function Upload() {
             ${processing ? "pointer-events-none opacity-50" : ""}
           `}
         >
-          <input {...getInputProps()} />
+          <input
+            {...getInputProps()}
+            aria-label="Upload Instagram data export file"
+          />
 
           <div className="flex flex-col items-center space-y-4">
             <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">

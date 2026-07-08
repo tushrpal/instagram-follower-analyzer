@@ -112,9 +112,11 @@ export function Header() {
               href="https://www.linkedin.com/in/tushrpal"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Visit LinkedIn profile"
               className="hidden md:flex items-center space-x-1.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
             >
               <Linkedin className="w-5 h-5" />
+              <span className="text-sm">LinkedIn</span>
             </a>
           </div>
         </div>

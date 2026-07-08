@@ -4,8 +4,8 @@
 Instagram Follower Tracker is a free online tool that helps users analyze their Instagram followers and identify who has unfollowed them, without requiring an Instagram login or password.
 
 ## Core Features
-1. **Who Unfollowed You** - Compare Instagram data exports from different dates to see who unfollowed you
-2. **Non-Followers** - Find accounts you follow that don't follow you back
+1. **Who Unfollowed You** - Compare Instagram data exports from different dates to see who unfollowed you. Learn more at https://instafollowtracker.com/who-unfollowed-me/
+2. **Non-Followers** - Find accounts you follow that don't follow you back. Visit https://instafollowtracker.com/instagram-non-followers/
 3. **Mutual Followers** - See accounts that mutually follow each other
 4. **Pending Requests** - View follow requests you've sent that haven't been accepted
 5. **Session History** - Save and compare multiple data exports over time
@@ -17,6 +17,16 @@ Instagram Follower Tracker is a free online tool that helps users analyze their 
 - Users upload the ZIP file to the tracker
 - All analysis happens locally in the browser - no server-side processing
 - No Instagram authentication or API calls required
+
+## Resources
+- [Home](https://instafollowtracker.com/)
+- [Who Unfollowed Me Guide](https://instafollowtracker.com/who-unfollowed-me/)
+- [Instagram Non-Followers Tool](https://instafollowtracker.com/instagram-non-followers/)
+- [Privacy Policy](https://instafollowtracker.com/privacy-policy/)
+- [Contact Us](https://instafollowtracker.com/contact/)
+- [Blog - Why People Unfollow](https://instafollowtracker.com/blog/why-people-unfollow-on-instagram/)
+- [Blog - Grow Following Organically](https://instafollowtracker.com/blog/grow-instagram-following-organically/)
+- [Blog - Instagram Analytics Guide](https://instafollowtracker.com/blog/instagram-analytics-creator-guide/)
 
 ## Key Differentiators
 - **No Password Required** - Never asks for Instagram credentials
