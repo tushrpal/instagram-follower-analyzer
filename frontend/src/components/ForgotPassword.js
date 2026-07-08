@@ -17,7 +17,10 @@ export function ForgotPassword() {
       await axios.post("/api/auth/forgot-password", { email });
       setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to send reset link. Please try again.");
+      setError(
+        err.response?.data?.error ||
+          "Failed to send reset link. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -31,7 +34,9 @@ export function ForgotPassword() {
             <Instagram className="w-7 h-7 text-white" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">Forgot password?</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">
+          Forgot password?
+        </h1>
         <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">
           Enter your email and we'll send you a reset link
         </p>
@@ -47,7 +52,8 @@ export function ForgotPassword() {
           <div className="flex flex-col items-center gap-3 py-4">
             <CheckCircle className="w-12 h-12 text-green-500" />
             <p className="text-gray-700 dark:text-gray-300 text-center text-sm">
-              If an account exists for <strong>{email}</strong>, you'll receive a password reset link shortly.
+              If an account exists for <strong>{email}</strong>, you'll receive
+              a password reset link shortly.
             </p>
             <p className="text-gray-500 dark:text-gray-400 text-center text-xs mt-1">
               You can request up to 3 reset links per 72 hours.
@@ -56,8 +62,14 @@ export function ForgotPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <label
+                htmlFor="forgot-email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Email
+              </label>
               <input
+                id="forgot-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -77,7 +89,12 @@ export function ForgotPassword() {
         )}
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-          <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">← Back to sign in</Link>
+          <Link
+            to="/login"
+            className="text-purple-600 hover:text-purple-700 font-medium"
+          >
+            ← Back to sign in
+          </Link>
         </p>
       </div>
     </div>

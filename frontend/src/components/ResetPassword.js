@@ -31,7 +31,10 @@ export function ResetPassword() {
       setSuccess(true);
       setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to reset password. The link may have expired.");
+      setError(
+        err.response?.data?.error ||
+          "Failed to reset password. The link may have expired.",
+      );
     } finally {
       setLoading(false);
     }
@@ -42,8 +45,13 @@ export function ResetPassword() {
       <div className="max-w-md mx-auto mt-12 px-4">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-700 dark:text-gray-300 mb-4">Invalid or missing reset link.</p>
-          <Link to="/forgot-password" className="text-purple-600 hover:text-purple-700 font-medium text-sm">
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            Invalid or missing reset link.
+          </p>
+          <Link
+            to="/forgot-password"
+            className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+          >
             Request a new reset link
           </Link>
         </div>
@@ -59,8 +67,12 @@ export function ResetPassword() {
             <Instagram className="w-7 h-7 text-white" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">Set new password</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">Choose a new password for your account</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">
+          Set new password
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">
+          Choose a new password for your account
+        </p>
 
         {error && (
           <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4 text-sm text-red-700 dark:text-red-400">
@@ -79,8 +91,14 @@ export function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New password</label>
+              <label
+                htmlFor="new-password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                New password
+              </label>
               <input
+                id="new-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -91,8 +109,14 @@ export function ResetPassword() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm password</label>
+              <label
+                htmlFor="confirm-new-password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Confirm password
+              </label>
               <input
+                id="confirm-new-password"
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
@@ -112,7 +136,12 @@ export function ResetPassword() {
         )}
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-          <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">← Back to sign in</Link>
+          <Link
+            to="/login"
+            className="text-purple-600 hover:text-purple-700 font-medium"
+          >
+            ← Back to sign in
+          </Link>
         </p>
       </div>
     </div>

@@ -33,8 +33,12 @@ export function Login() {
             <Instagram className="w-7 h-7 text-white" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">Welcome back</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">Sign in to your account</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">
+          Welcome back
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">
+          Sign in to your account
+        </p>
 
         {error && (
           <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4 text-sm text-red-700 dark:text-red-400">
@@ -45,8 +49,14 @@ export function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+            <label
+              htmlFor="login-email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Email
+            </label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -56,8 +66,14 @@ export function Login() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+            <label
+              htmlFor="login-password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Password
+            </label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -76,17 +92,28 @@ export function Login() {
         </form>
 
         <div className="text-center mt-3">
-          <Link to="/forgot-password" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+          >
             Forgot password?
           </Link>
         </div>
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
           No account?{" "}
-          <Link to="/register" className="text-purple-600 hover:text-purple-700 font-medium">Create one</Link>
+          <Link
+            to="/register"
+            className="text-purple-600 hover:text-purple-700 font-medium"
+          >
+            Create one
+          </Link>
         </p>
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
-          <Link to="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+          <Link
+            to="/"
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+          >
             ← Continue without signing in
           </Link>
         </div>

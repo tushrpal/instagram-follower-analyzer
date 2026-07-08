@@ -30,7 +30,10 @@ export function Register() {
       await sendOtp(email);
       setStep("otp");
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to send verification code. Please try again.");
+      setError(
+        err.response?.data?.error ||
+          "Failed to send verification code. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -44,7 +47,9 @@ export function Register() {
       await register(email, password, otp);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed. Please try again.");
+      setError(
+        err.response?.data?.error || "Registration failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -74,8 +79,12 @@ export function Register() {
 
         {step === "form" ? (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">Create an account</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">Your sessions will be private to you</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">
+              Create an account
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">
+              Your sessions will be private to you
+            </p>
 
             {error && (
               <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4 text-sm text-red-700 dark:text-red-400">
@@ -86,8 +95,14 @@ export function Register() {
 
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                <label
+                  htmlFor="register-email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Email
+                </label>
                 <input
+                  id="register-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -97,8 +112,14 @@ export function Register() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                <label
+                  htmlFor="register-password"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Password
+                </label>
                 <input
+                  id="register-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -108,8 +129,14 @@ export function Register() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm password</label>
+                <label
+                  htmlFor="register-confirm"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Confirm password
+                </label>
                 <input
+                  id="register-confirm"
                   type="password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
@@ -129,9 +156,14 @@ export function Register() {
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">Check your email</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">
+              Check your email
+            </h1>
             <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-6">
-              We sent a 6-digit code to <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>
+              We sent a 6-digit code to{" "}
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                {email}
+              </span>
             </p>
 
             {error && (
@@ -143,8 +175,14 @@ export function Register() {
 
             <form onSubmit={handleVerify} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Verification code</label>
+                <label
+                  htmlFor="verification-code"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Verification code
+                </label>
                 <input
+                  id="verification-code"
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]{6}"
@@ -177,7 +215,10 @@ export function Register() {
               </button>
               {" · "}
               <button
-                onClick={() => { setStep("form"); setError(null); }}
+                onClick={() => {
+                  setStep("form");
+                  setError(null);
+                }}
                 className="text-purple-600 hover:text-purple-700 font-medium"
               >
                 Change email
@@ -188,10 +229,18 @@ export function Register() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
           Already have an account?{" "}
-          <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">Sign in</Link>
+          <Link
+            to="/login"
+            className="text-purple-600 hover:text-purple-700 font-medium"
+          >
+            Sign in
+          </Link>
         </p>
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
-          <Link to="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+          <Link
+            to="/"
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+          >
             ← Continue without signing in
           </Link>
         </div>

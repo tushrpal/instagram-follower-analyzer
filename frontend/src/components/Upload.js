@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 import {
@@ -16,8 +15,6 @@ import axios from "axios";
 
 const INSTAGRAM_EXPORT_URL =
   "https://accountscenter.instagram.com/info_and_permissions/dyi/";
-const INSTAGRAM_EXPORT_URL =
-  "https://accountscenter.instagram.com/info_and_permissions/dyi/";
 
 function DownloadGuideModal({ onClose }) {
   const steps = [
@@ -27,12 +24,7 @@ function DownloadGuideModal({ onClose }) {
       num: 3,
       text: 'Click "Customize information" → unselect all → select only "Followers and Following"',
     },
-    {
-      num: 3,
-      text: 'Click "Customize information" → unselect all → select only "Followers and Following"',
-    },
     { num: 4, text: 'Set date range to "All time"' },
-    { num: 5, text: "Select format: JSON (not HTML)" },
     { num: 5, text: "Select format: JSON (not HTML)" },
     { num: 6, text: 'Click "Export" and wait 10–20 minutes' },
     { num: 7, text: "Come back to this page and download the file when ready" },
@@ -68,15 +60,9 @@ function DownloadGuideModal({ onClose }) {
             <Download className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               What to do on Instagram
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Follow these steps after the site opens
-            </p>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              What to do on Instagram
-            </h2>
+            </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Follow these steps after the site opens
             </p>
@@ -89,9 +75,6 @@ function DownloadGuideModal({ onClose }) {
             <li key={s.num} className="flex items-start gap-3">
               <span className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {s.num}
-              </span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {s.text}
               </span>
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 {s.text}
@@ -253,9 +236,6 @@ export function Upload() {
       setError(
         "Please upload a ZIP file containing your Instagram data export.",
       );
-      setError(
-        "Please upload a ZIP file containing your Instagram data export.",
-      );
       return;
     }
 
@@ -287,10 +267,6 @@ export function Upload() {
       navigate(`/dashboard/${sessionId}`);
     } catch (err) {
       console.error("Analysis error:", err);
-      setError(
-        err.message ||
-          "Failed to process your Instagram data. Please try again.",
-      );
       setError(
         err.message ||
           "Failed to process your Instagram data. Please try again.",
@@ -386,9 +362,6 @@ export function Upload() {
                 {processing
                   ? "Analyzing your data..."
                   : "Upload Instagram Data Export"}
-                {processing
-                  ? "Analyzing your data..."
-                  : "Upload Instagram Data Export"}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 {isDragActive
@@ -400,9 +373,6 @@ export function Upload() {
             {processing && (
               <div className="w-full max-w-md text-center">
                 <div className="spinner mb-2 mx-auto"></div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {progressMsg || "Processing…"}
-                </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {progressMsg || "Processing…"}
                 </p>
@@ -653,8 +623,8 @@ export function Upload() {
           Instagram — a ZIP file containing your followers and following lists
           in JSON format — and upload it here. No passwords, no OAuth tokens, no
           risk to your account. Everything is analyzed server-side in seconds
-          and the raw data is deleted after processing.
-          Unlike third-party apps that require your Instagram credentials, our{" "}
+          and the raw data is deleted after processing. Unlike third-party apps
+          that require your Instagram credentials, our{" "}
           <strong>Instagram follower tracker online free</strong> tool works
           differently. You simply download your own data export directly from
           Instagram — a ZIP file containing your followers and following lists
@@ -667,12 +637,12 @@ export function Upload() {
           mutual followers, people you follow who don't follow back, followers
           who you haven't followed back, and pending follow requests. You can
           search and filter across thousands of accounts, export any list to
-          CSV, and leave private notes on specific profiles.
-          Once uploaded, the dashboard instantly categorizes every account:
-          mutual followers, people you follow who don't follow back, followers
-          who you haven't followed back, and pending follow requests. You can
-          search and filter across thousands of accounts, export any list to
-          CSV, and leave private notes on specific profiles.
+          CSV, and leave private notes on specific profiles. Once uploaded, the
+          dashboard instantly categorizes every account: mutual followers,
+          people you follow who don't follow back, followers who you haven't
+          followed back, and pending follow requests. You can search and filter
+          across thousands of accounts, export any list to CSV, and leave
+          private notes on specific profiles.
         </p>
 
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
@@ -686,8 +656,8 @@ export function Upload() {
           tool compares the two snapshots side by side. It shows you a precise
           list of accounts that unfollowed you between sessions, along with
           direct profile links so you can review them instantly. No guessing, no
-          approximations — just the actual data from Instagram itself.
-          The most common reason people look for an{" "}
+          approximations — just the actual data from Instagram itself. The most
+          common reason people look for an{" "}
           <strong>Instagram follower tracker — who unfollowed me</strong> — is
           to understand audience churn. Our session comparison feature does
           exactly that. Upload a second export a week or a month later, and the
@@ -708,8 +678,8 @@ export function Upload() {
           working with your own downloaded data export, it works perfectly as an{" "}
           <strong>Instagram follower tracker for private accounts</strong> —
           your privacy settings are irrelevant. The data comes straight from
-          Instagram to your device to our analyzer, nothing more.
-          Most <strong>Instagram follower tracker apps</strong> fail for private
+          Instagram to your device to our analyzer, nothing more. Most{" "}
+          <strong>Instagram follower tracker apps</strong> fail for private
           accounts because they rely on scraping public profile pages or
           Instagram's API, neither of which exposes follower data for private
           accounts. Our approach is fundamentally different. Because you're
@@ -767,9 +737,9 @@ export function Upload() {
           follower quality, or just curious who quietly unfollowed you, this{" "}
           <strong>best Instagram follower tracker app</strong> gives you the
           data you need in under a minute. Upload your Instagram data export
-          above to get started.
-          Whether you're a creator tracking audience loyalty, a brand monitoring
-          follower quality, or just curious who quietly unfollowed you, this{" "}
+          above to get started. Whether you're a creator tracking audience
+          loyalty, a brand monitoring follower quality, or just curious who
+          quietly unfollowed you, this{" "}
           <strong>best Instagram follower tracker app</strong> gives you the
           data you need in under a minute. Upload your Instagram data export
           above to get started.
