@@ -103,8 +103,6 @@ function DownloadGuideModal({ onClose }) {
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
           💡 Instagram takes <strong>10–20 minutes</strong> to prepare the file.
           Come back here once it's downloaded and upload the ZIP.
-          💡 Instagram takes <strong>10–20 minutes</strong> to prepare the file.
-          Come back here once it's downloaded and upload the ZIP.
         </p>
 
         {/* CTA */}
