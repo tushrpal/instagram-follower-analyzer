@@ -239,6 +239,10 @@ router.get("/:sessionId", validateSessionId, async (req, res) => {
       summary: {
         totalFollowers: analysis.followers_count,
         totalFollowing: analysis.following_count,
+        exportFollowersCount: analysis.export_followers_count ?? analysis.followers_count,
+        exportFollowingCount: analysis.export_following_count ?? analysis.following_count,
+        deletedFollowersCount: analysis.deleted_followers_count ?? 0,
+        deletedFollowingCount: analysis.deleted_following_count ?? 0,
         mutualCount: analysis.mutual_count,
         followersOnlyCount: analysis.followers_only_count,
         followingOnlyCount: analysis.following_only_count,

@@ -26,8 +26,10 @@ router.post("/", async (req, res) => {
 
     await database.pool.query(
       `INSERT INTO analysis_sessions
-       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count, processed_at, user_id)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count,
+        export_followers_count, export_following_count, deleted_followers_count, deleted_following_count,
+        processed_at, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
        ON CONFLICT (id) DO NOTHING`,
       [
         sessionId,
@@ -36,6 +38,10 @@ router.post("/", async (req, res) => {
         summary.mutualCount,
         summary.followersOnlyCount,
         summary.followingOnlyCount,
+        summary.exportFollowersCount ?? summary.totalFollowers,
+        summary.exportFollowingCount ?? summary.totalFollowing,
+        summary.deletedFollowersCount ?? 0,
+        summary.deletedFollowingCount ?? 0,
         userId,
       ]
     );

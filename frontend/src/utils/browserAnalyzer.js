@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { filterDeletedAccounts, isDeletedAccount } from "./instagramExport";
 
 // ── Field extractors ──────────────────────────────────────────────────────────
 
@@ -159,6 +160,17 @@ export async function parseAndAnalyzeZip(file, onProgress) {
   raw.followers = normalizeList(raw.followers);
   raw.following = normalizeList(raw.following);
   raw.pendingRequests = normalizeList(raw.pendingRequests);
+  raw.unfollowedProfiles = raw.unfollowedProfiles.filter(
+    (p) => !isDeletedAccount(p.username, p.href)
+  );
+
+  const exportFollowersCount = raw.followers.length;
+  const exportFollowingCount = raw.following.length;
+
+  const followersFiltered = filterDeletedAccounts(raw.followers, extractUsername, extractUrl);
+  const followingFiltered = filterDeletedAccounts(raw.following, extractUsername, extractUrl);
+  raw.followers = followersFiltered.active;
+  raw.following = followingFiltered.active;
 
   if (!raw.followers.length && !raw.following.length && !raw.pendingRequests.length) {
     throw new Error("No valid Instagram data found in the ZIP. Make sure you exported 'Followers and Following' in JSON format.");
@@ -194,10 +206,15 @@ export async function parseAndAnalyzeZip(file, onProgress) {
     summary: {
       totalFollowers: raw.followers.length,
       totalFollowing: raw.following.length,
+      exportFollowersCount,
+      exportFollowingCount,
+      deletedFollowersCount: followersFiltered.deletedCount,
+      deletedFollowingCount: followingFiltered.deletedCount,
       mutualCount: mutual.length,
       followersOnlyCount: followersOnly.length,
       followingOnlyCount: followingOnly.length,
       pendingRequestsCount: pendingRequests.length,
+      unfollowedCount: raw.unfollowedProfiles.length,
     },
     mutual,
     followersOnly,

@@ -192,12 +192,36 @@ class Database {
   }
 
   async saveAnalysis(sessionId, analysisData, userId = null) {
-    const { followers, following, mutual, followersOnly, followingOnly } = analysisData;
+    const {
+      followers,
+      following,
+      mutual,
+      followersOnly,
+      followingOnly,
+      exportFollowersCount,
+      exportFollowingCount,
+      deletedFollowersCount = 0,
+      deletedFollowingCount = 0,
+    } = analysisData;
     await this.pool.query(
       `INSERT INTO analysis_sessions
-       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count, processed_at, user_id)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)`,
-      [sessionId, followers.length, following.length, mutual.length, followersOnly.length, followingOnly.length, userId]
+       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count,
+        export_followers_count, export_following_count, deleted_followers_count, deleted_following_count,
+        processed_at, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)`,
+      [
+        sessionId,
+        followers.length,
+        following.length,
+        mutual.length,
+        followersOnly.length,
+        followingOnly.length,
+        exportFollowersCount ?? followers.length,
+        exportFollowingCount ?? following.length,
+        deletedFollowersCount,
+        deletedFollowingCount,
+        userId,
+      ]
     );
   }
 
@@ -661,7 +685,11 @@ async function initDatabase() {
     ALTER TABLE analysis_sessions
       ADD COLUMN IF NOT EXISTS name TEXT,
       ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES app_users(id),
-      ADD COLUMN IF NOT EXISTS processed_at TIMESTAMP;
+      ADD COLUMN IF NOT EXISTS processed_at TIMESTAMP,
+      ADD COLUMN IF NOT EXISTS export_followers_count INTEGER,
+      ADD COLUMN IF NOT EXISTS export_following_count INTEGER,
+      ADD COLUMN IF NOT EXISTS deleted_followers_count INTEGER DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS deleted_following_count INTEGER DEFAULT 0;
   `);
   return database;
 }

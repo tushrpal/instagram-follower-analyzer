@@ -9,6 +9,7 @@ import {
   AlertCircle,
   UserMinus,
   X,
+  Info,
 } from "lucide-react";
 import axios from "axios";
 import { TimelineChart } from "./TimelineChart";
@@ -16,6 +17,53 @@ import RecentlyUnfollowed from "./RecentlyUnfollowed";
 import { UserRow } from "./UserRow";
 import { InstagramConnect } from "./InstagramConnect";
 import { ApiInsights } from "./ApiInsights";
+
+function ExportCountNote({ summary }) {
+  const exportFollowing = summary.exportFollowingCount ?? summary.totalFollowing;
+  const exportFollowers = summary.exportFollowersCount ?? summary.totalFollowers;
+  const deletedFollowing = summary.deletedFollowingCount ?? 0;
+  const deletedFollowers = summary.deletedFollowersCount ?? 0;
+  const hasDeleted = deletedFollowing > 0 || deletedFollowers > 0;
+  const followingDiff = exportFollowing - summary.totalFollowing;
+  const followersDiff = exportFollowers - summary.totalFollowers;
+
+  if (!hasDeleted && followingDiff === 0 && followersDiff === 0) {
+    return (
+      <p className="mt-3 text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+        Instagram&apos;s app count may be lower than your export if accounts are deactivated
+        but not marked as deleted in the export file.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-4 mx-auto max-w-2xl rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-left">
+      <div className="flex gap-2">
+        <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="text-sm text-amber-900 dark:text-amber-100 space-y-1">
+          {exportFollowing !== summary.totalFollowing && (
+            <p>
+              <strong>{exportFollowing}</strong> following in export →{" "}
+              <strong>{summary.totalFollowing}</strong> analyzed
+              {deletedFollowing > 0 && ` (${deletedFollowing} deleted excluded)`}.
+            </p>
+          )}
+          {exportFollowers !== summary.totalFollowers && (
+            <p>
+              <strong>{exportFollowers}</strong> followers in export →{" "}
+              <strong>{summary.totalFollowers}</strong> analyzed
+              {deletedFollowers > 0 && ` (${deletedFollowers} deleted excluded)`}.
+            </p>
+          )}
+          <p className="text-amber-800 dark:text-amber-200">
+            Instagram&apos;s app count may still be lower — deactivated accounts often stay
+            in your export but aren&apos;t counted in the app.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Dashboard() {
   const { sessionId } = useParams();
@@ -82,6 +130,7 @@ export function Dashboard() {
             sessionId,
             summary: parsed.summary,
             createdAt: new Date().toISOString(),
+            processedAt: new Date().toISOString(),
             _local: true,
           });
           setLoading(false);
@@ -400,8 +449,11 @@ export function Dashboard() {
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Analysis completed on{" "}
-          {new Date(analysis.processedAt).toLocaleDateString()}
+          {new Date(analysis.processedAt || analysis.createdAt).toLocaleDateString()}
         </p>
+        {analysis?.summary && (
+          <ExportCountNote summary={analysis.summary} />
+        )}
       </div>
 
       {/* Summary Cards */}

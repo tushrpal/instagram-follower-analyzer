@@ -6,6 +6,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const { database } = require("../models/database");
 const { analyzeFollowers } = require("../utils/analyzer");
+const { filterDeletedAccounts, isDeletedAccount } = require("../utils/instagramExport");
 const StreamZip = require("node-stream-zip");
 const jobQueue = require("../utils/jobQueue");
 const optionalAuth = require("../middleware/optionalAuth");
@@ -61,6 +62,10 @@ router.post("/", optionalAuth, upload.single("instagramData"), async (req, res) 
         summary: {
           totalFollowers: processedData.followersCount,
           totalFollowing: processedData.followingCount,
+          exportFollowersCount: processedData.exportFollowersCount,
+          exportFollowingCount: processedData.exportFollowingCount,
+          deletedFollowersCount: processedData.deletedFollowersCount,
+          deletedFollowingCount: processedData.deletedFollowingCount,
           mutualCount: processedData.mutualCount,
           followersOnlyCount: processedData.followersOnlyCount,
           followingOnlyCount: processedData.followingOnlyCount,
@@ -155,6 +160,20 @@ async function processInstagramDataOptimized(sessionId, zipPath, userId, onProgr
   processedData.following = normalizeList(processedData.following);
   processedData.pendingRequests = normalizeList(processedData.pendingRequests);
 
+  const exportFollowersCount = processedData.followers.length;
+  const exportFollowingCount = processedData.following.length;
+  const followersFiltered = filterDeletedAccounts(processedData.followers, extractUsername, extractUrl);
+  const followingFiltered = filterDeletedAccounts(processedData.following, extractUsername, extractUrl);
+  processedData.followers = followersFiltered.active;
+  processedData.following = followingFiltered.active;
+  processedData.unfollowedProfiles = processedData.unfollowedProfiles.filter(
+    (p) => !isDeletedAccount(p.username, p.href)
+  );
+  processedData.exportFollowersCount = exportFollowersCount;
+  processedData.exportFollowingCount = exportFollowingCount;
+  processedData.deletedFollowersCount = followersFiltered.deletedCount;
+  processedData.deletedFollowingCount = followingFiltered.deletedCount;
+
   // (use global helpers extractUsername/extractTimestamp)
 
   // Verify we have data
@@ -200,6 +219,10 @@ async function processInstagramDataOptimized(sessionId, zipPath, userId, onProgr
       ...analysisResult,
       followers: processedData.followers,
       following: processedData.following,
+      exportFollowersCount: processedData.exportFollowersCount,
+      exportFollowingCount: processedData.exportFollowingCount,
+      deletedFollowersCount: processedData.deletedFollowersCount,
+      deletedFollowingCount: processedData.deletedFollowingCount,
     }, userId),
     database.saveBatchUsers(sessionId, analysisResult.mutual, "mutual"),
     database.saveBatchUsers(
@@ -241,6 +264,10 @@ async function processInstagramDataOptimized(sessionId, zipPath, userId, onProgr
   return {
     followersCount: processedData.followers.length,
     followingCount: processedData.following.length,
+    exportFollowersCount: processedData.exportFollowersCount,
+    exportFollowingCount: processedData.exportFollowingCount,
+    deletedFollowersCount: processedData.deletedFollowersCount,
+    deletedFollowingCount: processedData.deletedFollowingCount,
     mutualCount: analysisResult.mutual.length,
     followersOnlyCount: analysisResult.followersOnly.length,
     followingOnlyCount: analysisResult.followingOnly.length,
