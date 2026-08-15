@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { database } = require("../models/database");
 const { sendOtpEmail, sendPasswordResetEmail } = require("../utils/email");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
 const SALT_ROUNDS = 12;
@@ -104,6 +105,9 @@ router.post("/login", async (req, res) => {
 
     req.session.userId = user.id;
     req.session.email = user.email;
+    req.session.ip = req.ip;
+    req.session.userAgent = req.headers["user-agent"];
+    req.session.createdAt = new Date().toISOString();
 
     res.json({ id: user.id, email: user.email });
   } catch (error) {
@@ -187,6 +191,37 @@ router.get("/me", (req, res) => {
     return res.status(401).json({ error: "Not authenticated" });
   }
   res.json({ id: req.session.userId, email: req.session.email });
+});
+
+
+router.post("/delete-account", requireAuth, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: "Password is required for confirmation" });
+    }
+
+    const user = await database.getUserWithPasswordById(req.session.userId);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    await database.deleteUserAccount(req.session.userId);
+
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ error: "Account deleted, but logout failed." });
+      res.clearCookie("igfa.sid");
+      res.json({ success: true, message: "Account and all associated data deleted." });
+    });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    res.status(500).json({ error: "Failed to delete account." });
+  }
 });
 
 module.exports = router;

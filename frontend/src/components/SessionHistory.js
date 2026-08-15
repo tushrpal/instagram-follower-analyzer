@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircle, ArrowRight, TrendingUp, TrendingDown, ChevronUp, ChevronDown, Pencil, Check, X, ExternalLink } from "lucide-react";
+import { AlertCircle, ArrowRight, TrendingUp, TrendingDown, ChevronUp, ChevronDown, Pencil, Check, X, ExternalLink, Trash2 } from "lucide-react";
 import axios from "axios";
 
 export function SessionHistory() {
@@ -50,6 +50,19 @@ export function SessionHistory() {
       );
     } catch (err) {
       console.error("Rename failed:", err);
+    }
+  };
+
+  const handleDelete = async (sessionId) => {
+    if (!window.confirm("Delete this saved analysis and all of its stored profile data?")) return;
+    try {
+      await axios.delete(`/api/analysis/${sessionId}`);
+      setSessions((previous) => previous.filter((session) => session.id !== sessionId));
+      if (compareA === sessionId) setCompareA(null);
+      if (compareB === sessionId) setCompareB(null);
+      setComparison(null);
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to delete saved analysis");
     }
   };
 
@@ -151,12 +164,22 @@ export function SessionHistory() {
                         </div>
                       </td>
                       <td className="px-3 sm:px-4 py-3 text-center">
-                        <Link
-                          to={`/dashboard/${s.id}`}
-                          className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                        >
-                          View
-                        </Link>
+                        <div className="flex items-center justify-center gap-3">
+                          <Link
+                            to={`/dashboard/${s.id}`}
+                            className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+                          >
+                            View
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(s.id)}
+                            className="text-gray-400 hover:text-red-600"
+                            title="Delete saved analysis"
+                            aria-label={`Delete ${s.name || "analysis"}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

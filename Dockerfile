@@ -1,7 +1,7 @@
 FROM node:18-alpine AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm install
 COPY frontend/ ./
 # Fix permissions for react-scripts and other binaries
 RUN chmod +x node_modules/.bin/* || true

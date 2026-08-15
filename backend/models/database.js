@@ -18,35 +18,38 @@ class Database {
   }
 
   async createTables() {
-    const ddl = `
-      CREATE TABLE IF NOT EXISTS app_users (
+    const ddlStatements = [
+      `CREATE TABLE IF NOT EXISTS user_sessions (
+        sid TEXT PRIMARY KEY NOT NULL,
+        sess json NOT NULL,
+        expire timestamp(6) NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_user_sessions_expire ON user_sessions(expire)`,
+      `CREATE TABLE IF NOT EXISTS app_users (
         id SERIAL PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS email_otps (
+      )`,
+      `CREATE TABLE IF NOT EXISTS email_otps (
         id SERIAL PRIMARY KEY,
         email TEXT NOT NULL,
         otp_hash TEXT NOT NULL,
         expires_at TIMESTAMP NOT NULL,
         used BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps(email, expires_at);
-
-      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps(email, expires_at)`,
+      `CREATE TABLE IF NOT EXISTS password_reset_tokens (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES app_users(id),
         token_hash TEXT NOT NULL,
         expires_at TIMESTAMP NOT NULL,
         used BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, created_at);
-
-      CREATE TABLE IF NOT EXISTS analysis_sessions (
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, created_at)`,
+      `CREATE TABLE IF NOT EXISTS analysis_sessions (
         id TEXT PRIMARY KEY,
         created_at TIMESTAMP DEFAULT NOW(),
         followers_count INTEGER,
@@ -57,9 +60,8 @@ class Database {
         processed_at TIMESTAMP,
         name TEXT,
         user_id INTEGER REFERENCES app_users(id)
-      );
-
-      CREATE TABLE IF NOT EXISTS instagram_tokens (
+      )`,
+      `CREATE TABLE IF NOT EXISTS instagram_tokens (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES app_users(id) UNIQUE,
         access_token TEXT NOT NULL,
@@ -69,27 +71,26 @@ class Database {
         instagram_username TEXT,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS user_annotations (
+      )`,
+      `CREATE TABLE IF NOT EXISTS user_annotations (
         id SERIAL PRIMARY KEY,
-        username TEXT NOT NULL UNIQUE,
+        user_id INTEGER NOT NULL REFERENCES app_users(id),
+        username TEXT NOT NULL,
         note TEXT,
         tags TEXT[],
-        updated_at TIMESTAMP DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS idx_annotations_username ON user_annotations(username);
-
-      CREATE TABLE IF NOT EXISTS users (
+        updated_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(user_id, username)
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_annotations_username ON user_annotations(username)`,
+      `CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         session_id TEXT REFERENCES analysis_sessions(id),
         username TEXT,
         category TEXT,
         href TEXT,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS follower_events (
+      )`,
+      `CREATE TABLE IF NOT EXISTS follower_events (
         id SERIAL PRIMARY KEY,
         session_id TEXT NOT NULL REFERENCES analysis_sessions(id),
         event_timestamp TIMESTAMP NOT NULL,
@@ -99,9 +100,8 @@ class Database {
         username TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(session_id, username, direction)
-      );
-
-      CREATE TABLE IF NOT EXISTS pending_requests (
+      )`,
+      `CREATE TABLE IF NOT EXISTS pending_requests (
         id SERIAL PRIMARY KEY,
         session_id TEXT NOT NULL REFERENCES analysis_sessions(id),
         username TEXT NOT NULL,
@@ -110,9 +110,8 @@ class Database {
         status TEXT DEFAULT 'Pending',
         created_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(session_id, username)
-      );
-
-      CREATE TABLE IF NOT EXISTS unfollowed_profiles (
+      )`,
+      `CREATE TABLE IF NOT EXISTS unfollowed_profiles (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL,
         unfollowed_at TIMESTAMP DEFAULT NOW(),
@@ -120,9 +119,8 @@ class Database {
         profile_url TEXT,
         source TEXT CHECK(source IN ('detected', 'imported')) DEFAULT 'detected',
         session_id TEXT REFERENCES analysis_sessions(id)
-      );
-
-      CREATE TABLE IF NOT EXISTS relationship_profiles (
+      )`,
+      `CREATE TABLE IF NOT EXISTS relationship_profiles (
         id SERIAL PRIMARY KEY,
         session_id TEXT NOT NULL REFERENCES analysis_sessions(id),
         username TEXT NOT NULL,
@@ -133,24 +131,25 @@ class Database {
         timestamp BIGINT,
         created_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(session_id, username, list_type)
-      );
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_follower_events_session ON follower_events(session_id, event_timestamp)`,
+      `CREATE INDEX IF NOT EXISTS idx_users_session_category ON users(session_id, category)`,
+      `CREATE INDEX IF NOT EXISTS idx_pending_requests_session ON pending_requests(session_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_unfollowed_profiles_session ON unfollowed_profiles(session_id, unfollowed_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
+      `CREATE INDEX IF NOT EXISTS idx_unfollowed_profiles_username ON unfollowed_profiles(username)`,
+      `CREATE INDEX IF NOT EXISTS idx_analysis_sessions_created_at ON analysis_sessions(created_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_follower_events_created_at ON follower_events(created_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_unfollowed_profiles_unfollowed_at ON unfollowed_profiles(unfollowed_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_users_session_username ON users(session_id, username)`,
+      `CREATE INDEX IF NOT EXISTS idx_follower_events_session_direction ON follower_events(session_id, direction)`,
+      `CREATE INDEX IF NOT EXISTS idx_relationship_profiles_session ON relationship_profiles(session_id, list_type)`,
+      `CREATE INDEX IF NOT EXISTS idx_relationship_profiles_username ON relationship_profiles(username)`,
+    ];
 
-      CREATE INDEX IF NOT EXISTS idx_follower_events_session ON follower_events(session_id, event_timestamp);
-      CREATE INDEX IF NOT EXISTS idx_users_session_category ON users(session_id, category);
-      CREATE INDEX IF NOT EXISTS idx_pending_requests_session ON pending_requests(session_id);
-      CREATE INDEX IF NOT EXISTS idx_unfollowed_profiles_session ON unfollowed_profiles(session_id, unfollowed_at);
-      CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-      CREATE INDEX IF NOT EXISTS idx_unfollowed_profiles_username ON unfollowed_profiles(username);
-      CREATE INDEX IF NOT EXISTS idx_analysis_sessions_created_at ON analysis_sessions(created_at);
-      CREATE INDEX IF NOT EXISTS idx_follower_events_created_at ON follower_events(created_at);
-      CREATE INDEX IF NOT EXISTS idx_unfollowed_profiles_unfollowed_at ON unfollowed_profiles(unfollowed_at);
-      CREATE INDEX IF NOT EXISTS idx_users_session_username ON users(session_id, username);
-      CREATE INDEX IF NOT EXISTS idx_follower_events_session_direction ON follower_events(session_id, direction);
-      CREATE INDEX IF NOT EXISTS idx_relationship_profiles_session ON relationship_profiles(session_id, list_type);
-      CREATE INDEX IF NOT EXISTS idx_relationship_profiles_username ON relationship_profiles(username);
-    `;
-
-    await this.pool.query(ddl);
+    for (const statement of ddlStatements) {
+      await this.pool.query(statement);
+    }
   }
 
   async getUnfollowedCount(sessionId) {
@@ -335,35 +334,43 @@ class Database {
     return rows[0] || null;
   }
 
-  async updateSessionName(sessionId, name) {
-    await this.pool.query(
-      "UPDATE analysis_sessions SET name = $1 WHERE id = $2",
-      [name, sessionId]
-    );
-  }
-
-  async getAnnotation(username) {
+  async getUserWithPasswordById(id) {
     const { rows } = await this.pool.query(
-      "SELECT username, note, tags, updated_at FROM user_annotations WHERE username = $1",
-      [username]
+      "SELECT * FROM app_users WHERE id = $1",
+      [id]
     );
     return rows[0] || null;
   }
 
-  async upsertAnnotation(username, note, tags) {
+  async updateSessionName(sessionId, userId, name) {
     await this.pool.query(
-      `INSERT INTO user_annotations (username, note, tags, updated_at)
-       VALUES ($1, $2, $3, NOW())
-       ON CONFLICT (username) DO UPDATE SET note = $2, tags = $3, updated_at = NOW()`,
-      [username, note || null, tags || []]
+      "UPDATE analysis_sessions SET name = $1 WHERE id = $2 AND user_id = $3",
+      [name, sessionId, userId]
     );
   }
 
-  async getAnnotations(usernames) {
+  async getAnnotation(userId, username) {
+    const { rows } = await this.pool.query(
+      "SELECT username, note, tags, updated_at FROM user_annotations WHERE user_id = $1 AND username = $2",
+      [userId, username]
+    );
+    return rows[0] || null;
+  }
+
+  async upsertAnnotation(userId, username, note, tags) {
+    await this.pool.query(
+      `INSERT INTO user_annotations (user_id, username, note, tags, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (user_id, username) DO UPDATE SET note = $3, tags = $4, updated_at = NOW()`,
+      [userId, username, note || null, tags || []]
+    );
+  }
+
+  async getAnnotations(userId, usernames) {
     if (!usernames || usernames.length === 0) return {};
     const { rows } = await this.pool.query(
-      "SELECT username, note, tags FROM user_annotations WHERE username = ANY($1)",
-      [usernames]
+      "SELECT username, note, tags FROM user_annotations WHERE user_id = $1 AND username = ANY($2)",
+      [userId, usernames]
     );
     const map = {};
     rows.forEach((r) => { map[r.username] = { note: r.note, tags: r.tags }; });
@@ -459,19 +466,70 @@ class Database {
     return rows[0] ? parseInt(rows[0].count) : 0;
   }
 
-  async cleanup(olderThanDays = 7) {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-    const iso = cutoffDate.toISOString();
+  async isSessionOwner(sessionId, userId) {
+    if (!sessionId || !userId) return false;
+    const { rows } = await this.pool.query(
+      "SELECT 1 FROM analysis_sessions WHERE id = $1 AND user_id = $2",
+      [sessionId, userId]
+    );
+    return rows.length > 0;
+  }
 
-    await this.pool.query(
-      "DELETE FROM users WHERE session_id IN (SELECT id FROM analysis_sessions WHERE created_at < $1)",
-      [iso]
-    );
-    await this.pool.query(
-      "DELETE FROM analysis_sessions WHERE created_at < $1",
-      [iso]
-    );
+  async deleteAnalysisSession(sessionId, userId) {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const owned = await client.query(
+        "SELECT 1 FROM analysis_sessions WHERE id = $1 AND user_id = $2 FOR UPDATE",
+        [sessionId, userId]
+      );
+      if (owned.rowCount === 0) {
+        await client.query("ROLLBACK");
+        return false;
+      }
+
+      await client.query("DELETE FROM follower_events WHERE session_id = $1", [sessionId]);
+      await client.query("DELETE FROM pending_requests WHERE session_id = $1", [sessionId]);
+      await client.query("DELETE FROM unfollowed_profiles WHERE session_id = $1", [sessionId]);
+      await client.query("DELETE FROM relationship_profiles WHERE session_id = $1", [sessionId]);
+      await client.query("DELETE FROM users WHERE session_id = $1", [sessionId]);
+      await client.query("DELETE FROM analysis_sessions WHERE id = $1 AND user_id = $2", [sessionId, userId]);
+      await client.query("COMMIT");
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteUserAccount(userId) {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const { rows } = await client.query("SELECT id FROM analysis_sessions WHERE user_id = $1", [userId]);
+      const sessionIds = rows.map((row) => row.id);
+      if (sessionIds.length > 0) {
+        await client.query("DELETE FROM follower_events WHERE session_id = ANY($1)", [sessionIds]);
+        await client.query("DELETE FROM pending_requests WHERE session_id = ANY($1)", [sessionIds]);
+        await client.query("DELETE FROM unfollowed_profiles WHERE session_id = ANY($1)", [sessionIds]);
+        await client.query("DELETE FROM relationship_profiles WHERE session_id = ANY($1)", [sessionIds]);
+        await client.query("DELETE FROM users WHERE session_id = ANY($1)", [sessionIds]);
+        await client.query("DELETE FROM analysis_sessions WHERE user_id = $1", [userId]);
+      }
+      await client.query("DELETE FROM user_annotations WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM instagram_tokens WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM user_sessions WHERE (sess ->> 'userId')::int = $1", [userId]);
+      await client.query("DELETE FROM app_users WHERE id = $1", [userId]);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async getTimelineData(sessionId) {
@@ -690,6 +748,16 @@ async function initDatabase() {
       ADD COLUMN IF NOT EXISTS export_following_count INTEGER,
       ADD COLUMN IF NOT EXISTS deleted_followers_count INTEGER DEFAULT 0,
       ADD COLUMN IF NOT EXISTS deleted_following_count INTEGER DEFAULT 0;
+
+    ALTER TABLE user_annotations
+      ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES app_users(id);
+
+    DELETE FROM user_annotations WHERE user_id IS NULL;
+    ALTER TABLE user_annotations ALTER COLUMN user_id SET NOT NULL;
+    ALTER TABLE user_annotations DROP CONSTRAINT IF EXISTS user_annotations_username_key;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_annotations_user_username
+      ON user_annotations(user_id, username);
+    CREATE INDEX IF NOT EXISTS idx_annotations_user ON user_annotations(user_id);
   `);
   return database;
 }

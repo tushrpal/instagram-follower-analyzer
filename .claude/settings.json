@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(cat > *)",
+      "Bash(node -e \"try { require\\('./routes/contact'\\); console.log\\('✓ Contact route loads successfully'\\); } catch \\(e\\) { console.error\\('✗ Error loading contact route:', e.message\\); }\")",
+      "Bash(mv backend/.env ./.env)",
+      "Bash(rm -rf backend/)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

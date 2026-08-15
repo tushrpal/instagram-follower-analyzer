@@ -7,10 +7,10 @@ const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const { Pool } = require("pg");
 const path = require("path");
-const uploadRoutes = require("./routes/upload");
 const analysisRoutes = require("./routes/analysis");
 const annotationsRoutes = require("./routes/annotations");
 const authRoutes = require("./routes/auth");
+const contactRoutes = require("./routes/contact");
 const instagramApiRoutes = require("./routes/instagram-api");
 const sessionsRoutes = require("./routes/sessions");
 const { initDatabase } = require("./models/database");
@@ -136,9 +136,9 @@ app.use(express.static("uploads"));
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/upload", uploadRoutes);
 app.use("/api/analysis", analysisRoutes);
 app.use("/api/annotations", annotationsRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api/instagram", instagramApiRoutes);
 app.use("/api/sessions", sessionsRoutes);
 

@@ -3,64 +3,33 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!-- Google AdSense -->
-    <meta name="google-adsense-account" content="ca-pub-7401169722110446">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7401169722110446"
-     crossorigin="anonymous"></script>
-
     <title>Privacy Policy | Instagram Follower Tracker</title>
-    <meta name="description" content="Privacy Policy for Instagram Follower Tracker. We never ask for your Instagram password. Your data is processed locally and never stored on our servers." />
+    <meta name="description" content="Privacy Policy for Instagram Follower Tracker, including browser-local guest analysis, optional saved history, analytics, advertising, email, and account data." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://instafollowtracker.com/privacy-policy/" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-
-    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://instafollowtracker.com/privacy-policy/" />
     <meta property="og:title" content="Privacy Policy | Instagram Follower Tracker" />
-    <meta property="og:description" content="We never ask for your Instagram password. Your data is processed locally and never stored on our servers." />
+    <meta property="og:description" content="How browser-local analysis, optional saved history, accounts, analytics, advertising, and connected services handle data." />
     <meta property="og:site_name" content="Instagram Follower Tracker" />
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              purple: { 600: '#7c3aed', 700: '#6d28d9' },
-              blue: { 600: '#2563eb' }
-            }
-          }
-        }
-      }
-      // Sync dark mode with main app preference
-      try {
-        if (localStorage.getItem('theme') === 'dark') {
-          document.documentElement.classList.add('dark');
-        }
-      } catch(e) {}
+      tailwind.config = { darkMode: 'class' }
+      try { if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark'); } catch(e) {}
     </script>
-
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "Privacy Policy",
-      "description": "Privacy Policy for Instagram Follower Tracker — how we handle your data.",
+      "description": "Privacy Policy for Instagram Follower Tracker.",
       "url": "https://instafollowtracker.com/privacy-policy/",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "Instagram Follower Tracker",
-        "url": "https://instafollowtracker.com/"
-      }
+      "isPartOf": { "@type": "WebSite", "name": "Instagram Follower Tracker", "url": "https://instafollowtracker.com/" }
     }
     </script>
   </head>
   <body class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 min-h-screen flex flex-col">
-
-    <!-- Header -->
     <header class="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-700">
       <div class="container mx-auto px-4 py-3 sm:py-4">
         <div class="flex items-center justify-between gap-2">
@@ -69,112 +38,98 @@
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             </div>
             <div class="min-w-0">
-              <span class="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block">Instagram Follower Analyzer</span>
-              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">Analyze your follower relationships</span>
+              <span class="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block">Instagram Follower Tracker</span>
+              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">Understand how your data is handled</span>
             </div>
           </a>
           <nav class="flex items-center gap-4 text-sm">
-            <a href="/about" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">About</a>
-            <a href="/contact" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact</a>
-            <a href="/" class="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">Open App</a>
+            <a href="/about/" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">About</a>
+            <a href="/contact/" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Contact</a>
+            <a href="/" class="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Open App</a>
           </nav>
         </div>
       </div>
     </header>
 
-    <!-- Main content -->
     <main class="flex-grow container mx-auto px-4 py-12 max-w-3xl">
       <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12">
-
         <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">Privacy Policy</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">Last updated: June 2026</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">Last updated: July 22, 2026</p>
 
-        <div class="prose prose-gray dark:prose-invert max-w-none space-y-8 text-gray-700 dark:text-gray-300 leading-relaxed">
-
+        <div class="space-y-8 text-gray-700 dark:text-gray-300 leading-relaxed">
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">1. Overview</h2>
-            <p>Instagram Follower Tracker ("we", "our", or "the tool") is a privacy-first web application. We do not collect, store, or transmit your Instagram data. Everything is processed directly in your browser using the official data export file that Instagram provides to you.</p>
-            <p class="mt-3">We never ask for your Instagram username, password, or any credentials.</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">1. Who operates this service</h2>
+            <p>Instagram Follower Tracker is independently developed and operated by <a href="https://www.linkedin.com/in/tushrpal" target="_blank" rel="noopener noreferrer" class="text-purple-600 dark:text-purple-400 hover:underline">Tushr Pal</a> ("we", "us", or "the service"). It is not affiliated with or endorsed by Instagram or Meta Platforms, Inc.</p>
           </section>
 
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">2. Data We Do Not Collect</h2>
-            <ul class="list-disc list-inside space-y-2">
-              <li>Your Instagram username or password</li>
-              <li>Your Instagram followers or following list</li>
-              <li>The ZIP file you upload for analysis</li>
-              <li>Any personal information from your Instagram account</li>
-              <li>Your browsing history on Instagram</li>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">2. ZIP analysis and guest sessions</h2>
+            <p>Your Instagram export ZIP is opened and analysed in your browser. The raw ZIP is not uploaded to our server. When you use the tracker as a guest, the analysis result remains in your browser's <code>sessionStorage</code>; it is not uploaded as a guest result. Browser session data is normally removed when the relevant tab or browser session ends, and you can also clear it through your browser controls.</p>
+            <p class="mt-3">A single export describes the relationships present in that snapshot. Identifying new or lost followers requires comparing two snapshots from different dates.</p>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">3. Optional accounts and saved analyses</h2>
+            <p>If you create an account, we process your email address and store a password hash rather than your plain-text password. Authentication may use a session cookie and browser local storage to keep you signed in. Local storage is also used for preferences such as theme.</p>
+            <p class="mt-3">A signed-in user may explicitly choose to save an analysis. Only then is derived analysis data uploaded: Instagram usernames, available profile details, relationship categories, counts, and analysis or relationship timestamps. This supports dated history and snapshot comparisons. The raw Instagram ZIP is not uploaded or retained.</p>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">4. Optional Instagram professional-account connection</h2>
+            <p>A separate, optional feature may let eligible professional accounts connect through Instagram's official OAuth process. OAuth is not used for ZIP analysis. If you choose this feature, Instagram may provide an access token, account identifier, professional profile information, and the permissions or professional-account metrics you approve. We use that information only to provide the connected feature, and you can disconnect it.</p>
+          </section>
+
+          <section>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">5. Analytics, advertising, video, email, and logs</h2>
+            <ul class="list-disc pl-6 space-y-3">
+              <li><strong>Google Analytics:</strong> may receive page and device information, approximate location derived from IP address, referral information, and interaction events. Google may use cookies or similar technologies.</li>
+              <li><strong>Google AdSense:</strong> advertisements on eligible pages may use cookies or similar identifiers to deliver and measure ads, subject to Google settings and applicable consent requirements. This privacy page does not itself load an AdSense script.</li>
+              <li><strong>YouTube:</strong> the homepage uses a YouTube privacy-enhanced embed. Loading or playing it may send your IP address, browser information, and interaction data to Google/YouTube and may set storage or cookies under their policies.</li>
+              <li><strong>Brevo:</strong> we use Brevo to deliver service emails such as verification, password reset, or other transactional messages. Brevo processes the email address, message delivery details, and related technical events needed to send those messages.</li>
+              <li><strong>Hosting and security logs:</strong> our hosting infrastructure may record IP address, user agent, request path, response status, and timestamp for operation, reliability, abuse prevention, and security.</li>
             </ul>
           </section>
 
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">3. Data We May Collect</h2>
-            <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2">Account Information (optional)</h3>
-            <p>If you choose to create an account, we store your email address and a hashed version of your password. We never store your password in plain text.</p>
-            <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2 mt-4">Session Data</h3>
-            <p>If you are logged in, processed analysis results (follower counts, timestamps, session summaries) may be stored server-side so you can access your history across devices. Raw Instagram data files are never stored.</p>
-            <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2 mt-4">Usage Data</h3>
-            <p>We may collect anonymised analytics such as page views and feature usage via standard server logs. This data contains no personally identifiable information.</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">6. Why data is used and shared</h2>
+            <p>We use data to operate the service, authenticate users, provide explicitly saved history or connected professional-account features, send requested service emails, understand site performance, prevent abuse, comply with law, and display or measure advertising. Data is shared with the service providers described above only as needed for those purposes or when legally required. We do not sell raw Instagram ZIP files.</p>
           </section>
 
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">4. Cookies and Local Storage</h2>
-            <p>We use browser local storage to remember your dark/light mode preference. If you are logged in, a secure session cookie is used to keep you authenticated. We do not use advertising or tracking cookies.</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">7. Retention and deletion</h2>
+            <p>Guest analysis remains only for the browser session unless you clear it sooner. Saved analyses are retained until you delete the saved session or your account. Account information is retained until account deletion, subject to limited records we may need for security, fraud prevention, dispute resolution, or legal obligations. Connected OAuth data is retained until disconnection, account deletion, or expiry where applicable. Provider and hosting logs are kept according to operational and provider retention schedules.</p>
           </section>
 
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">5. Third-Party Services</h2>
-            <p>This tool is not affiliated with, endorsed by, or connected to Instagram or Meta Platforms, Inc. We do not share any data with Instagram, Meta, or any other third party.</p>
-            <p class="mt-3">Our hosting provider may log standard HTTP access logs (IP address, request path, timestamp) for security and operational purposes. These logs are not used for advertising or profiling.</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">8. Your choices and rights</h2>
+            <p>You can use guest ZIP analysis without creating an account, decline to save an analysis, clear session or local storage in your browser, manage cookies through browser and Google controls, avoid playing the YouTube embed, disconnect an optional professional-account connection, and delete saved sessions or your account.</p>
+            <p class="mt-3">Depending on where you live, privacy law may give you rights to request access, correction, deletion, restriction, objection, portability, or withdrawal of consent. These rights are not universal and may be subject to exceptions. Submit a request through the <a href="/contact/" class="text-purple-600 dark:text-purple-400 hover:underline">contact form</a>; we may need to verify your identity before acting.</p>
           </section>
 
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">6. Data Retention</h2>
-            <p>If you have an account, your session analysis data is retained until you delete your account or request deletion. You may delete your account and all associated data at any time by contacting us.</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">9. Security and children</h2>
+            <p>We use safeguards intended to protect account and saved-analysis data, including transport encryption and password hashing. No internet service can guarantee absolute security. Instagram Follower Tracker is not directed to children under 13, and we do not knowingly collect personal information from them.</p>
           </section>
 
           <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">7. Your Rights (GDPR / CCPA)</h2>
-            <p>Depending on your jurisdiction, you may have the right to access, correct, or delete your personal data. To exercise any of these rights, please contact us using the details below. We will respond within 30 days.</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">10. Changes and contact</h2>
+            <p>We may update this policy as the service or legal requirements change. The date above identifies the current version. For privacy questions or requests, use our <a href="/contact/" class="text-purple-600 dark:text-purple-400 hover:underline">Contact page</a>. Please do not include an Instagram password or raw export in your message.</p>
           </section>
-
-          <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">8. Security</h2>
-            <p>We implement industry-standard security practices including HTTPS encryption for all data in transit, hashed password storage, and rate limiting on all API endpoints. However, no system is 100% secure. Please use a strong, unique password if you create an account.</p>
-          </section>
-
-          <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">9. Children's Privacy</h2>
-            <p>This service is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal data, please contact us and we will delete it promptly.</p>
-          </section>
-
-          <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">10. Changes to This Policy</h2>
-            <p>We may update this Privacy Policy from time to time. Changes will be reflected by an updated "Last updated" date at the top of this page. Continued use of the tool after changes constitutes acceptance of the updated policy.</p>
-          </section>
-
-          <section>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">11. Contact</h2>
-            <p>For any privacy-related questions or requests, please visit our <a href="/contact" class="text-purple-600 dark:text-purple-400 hover:underline">Contact Us</a> page.</p>
-          </section>
-
         </div>
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white dark:bg-gray-900 border-t dark:border-gray-700 mt-auto">
       <div class="container mx-auto px-4 py-8">
         <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <a href="/about" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">About Us</a>
-          <a href="/contact" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact Us</a>
-          <a href="/privacy-policy" class="text-purple-600 dark:text-purple-400 font-medium">Privacy Policy</a>
-          <a href="/terms" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Terms &amp; Conditions</a>
+          <a href="/about/" class="hover:text-purple-600 dark:hover:text-purple-400">About</a>
+          <a href="/sample-analysis/" class="hover:text-purple-600 dark:hover:text-purple-400">Sample Analysis</a>
+          <a href="/contact/" class="hover:text-purple-600 dark:hover:text-purple-400">Contact</a>
+          <a href="/privacy-policy/" class="text-purple-600 dark:text-purple-400 font-medium">Privacy Policy</a>
+          <a href="/terms/" class="hover:text-purple-600 dark:hover:text-purple-400">Terms</a>
         </div>
-        <p class="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Analyzer. Not affiliated with Instagram or Meta.</p>
+        <p class="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Tracker. Independently operated by Tushr Pal. Not affiliated with Instagram or Meta.</p>
       </div>
     </footer>
-
   </body>
 </html>

@@ -16,6 +16,9 @@ import { Register } from "./components/Register";
 import { ForgotPassword } from "./components/ForgotPassword";
 import { ResetPassword } from "./components/ResetPassword";
 import { UnfollowHelper } from "./components/UnfollowHelper";
+import { Account } from "./components/Account";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { NotFound } from "./components/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import config from "./config";
 import "./App.css";
@@ -44,33 +47,37 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex flex-col">
-          <Header />
-          <MenuBar />
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex flex-col">
+            <Header />
+            <MenuBar />
 
-          <main className="flex-grow container mx-auto px-4 py-8">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/" element={<Upload />} />
-              <Route path="/processing/:sessionId" element={<Processing />} />
-              <Route path="/history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />
-              <Route path="/dashboard/:sessionId" element={<Dashboard />} />
-              <Route path="/unfollow/:sessionId" element={<UnfollowHelper />} />
-              <Route path="/pending-requests/:sessionId" element={<PendingRequests />} />
-              <Route path="/relationships/:sessionId" element={<RelationshipLists />} />
-              <Route path="/insights/:sessionId" element={<Insights />} />
-            </Routes>
-          </main>
+            <main className="flex-grow container mx-auto px-4 py-8">
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/" element={<Upload />} />
+                <Route path="/processing/:sessionId" element={<Processing />} />
+                <Route path="/history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />
+                <Route path="/dashboard/:sessionId" element={<Dashboard />} />
+                <Route path="/unfollow/:sessionId" element={<UnfollowHelper />} />
+                <Route path="/pending-requests/:sessionId" element={<PendingRequests />} />
+                <Route path="/relationships/:sessionId" element={<RelationshipLists />} />
+                <Route path="/insights/:sessionId" element={<Insights />} />
+                <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
 
-          <Footer />
-        </div>
-      </AuthProvider>
-    </Router>
+            <Footer />
+          </div>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

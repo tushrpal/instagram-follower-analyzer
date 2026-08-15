@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { getLocalAnalysis } from "../utils/localAnalysis";
 
 export function PendingRequests() {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -12,6 +13,15 @@ export function PendingRequests() {
   useEffect(() => {
     const fetchPendingRequests = async () => {
       try {
+        const local = getLocalAnalysis(sessionId);
+        if (local) {
+          setPendingRequests(local.pendingRequests || []);
+          setTotalCount(local.summary?.pendingRequestsCount || 0);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+
         const response = await axios.get(
           `/api/analysis/${sessionId}/pending-requests`
         );

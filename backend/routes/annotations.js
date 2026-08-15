@@ -1,7 +1,9 @@
 const express = require("express");
 const { database } = require("../models/database");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
+router.use(requireAuth);
 
 router.get("/:username", async (req, res) => {
   try {
@@ -9,7 +11,7 @@ router.get("/:username", async (req, res) => {
     if (!username || typeof username !== "string") {
       return res.status(400).json({ error: "Invalid username" });
     }
-    const annotation = await database.getAnnotation(username);
+    const annotation = await database.getAnnotation(req.session.userId, username);
     res.json({ username, note: annotation?.note || null, tags: annotation?.tags || [] });
   } catch (error) {
     console.error("Get annotation error:", error);
@@ -32,9 +34,14 @@ router.put("/:username", async (req, res) => {
     }
     const cleanNote = typeof note === "string" ? note.trim().slice(0, 500) : null;
     const cleanTags = Array.isArray(tags)
-      ? tags.map((t) => String(t).trim().slice(0, 50)).filter(Boolean).slice(0, 20)
+      ? tags.map((tag) => String(tag).trim().slice(0, 50)).filter(Boolean).slice(0, 20)
       : [];
-    await database.upsertAnnotation(username, cleanNote, cleanTags);
+    await database.upsertAnnotation(
+      req.session.userId,
+      username,
+      cleanNote,
+      cleanTags
+    );
     res.json({ success: true, username, note: cleanNote, tags: cleanTags });
   } catch (error) {
     console.error("Upsert annotation error:", error);

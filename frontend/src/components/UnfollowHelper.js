@@ -15,14 +15,43 @@ export function UnfollowHelper() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await axios.get(`/api/analysis/${sessionId}/unfollow-candidates`);
-        setCandidates(res.data.candidates || []);
+        // Check for browser-only session data
+        const cached = sessionStorage.getItem(`session_${sessionId}`);
+
+        if (cached) {
+          // Build candidates from local data
+          const local = JSON.parse(cached);
+          const followingOnly = local.followingOnly || [];
+
+          // Sort by oldest-followed-first (if timestamp exists)
+          const sorted = followingOnly
+            .map(user => ({
+              username: user.username || user.value,
+              href: user.href || `https://www.instagram.com/${user.username || user.value}/`,
+              followed_at: user.timestamp ? new Date(user.timestamp * 1000).toISOString() : null
+            }))
+            .sort((a, b) => {
+              // Put users with no timestamp at the end
+              if (!a.followed_at && !b.followed_at) return 0;
+              if (!a.followed_at) return 1;
+              if (!b.followed_at) return -1;
+              return new Date(a.followed_at) - new Date(b.followed_at);
+            });
+
+          setCandidates(sorted);
+        } else {
+          // Fetch from backend for saved sessions
+          const res = await axios.get(`/api/analysis/${sessionId}/unfollow-candidates`);
+          setCandidates(res.data.candidates || []);
+        }
+
         // Restore checkbox state from localStorage
         const saved = localStorage.getItem(`unfollow-checked-${sessionId}`);
         if (saved) {
           try { setChecked(JSON.parse(saved)); } catch {}
         }
       } catch (err) {
+        console.error("Failed to load unfollow candidates:", err);
         setError("Failed to load unfollow candidates.");
       } finally {
         setLoading(false);

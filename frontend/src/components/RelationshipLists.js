@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { AlertCircle, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
+import { getLocalAnalysis } from "../utils/localAnalysis";
 
 const LIST_TYPE_META = {
   close_friend: { label: "Close Friends", icon: "💚", description: "Your close friends list" },
@@ -28,6 +29,33 @@ function RelationshipCard({ sessionId, listType, count }) {
     const loadProfiles = async () => {
       setLoading(true);
       try {
+        // Check for local data first
+        const local = getLocalAnalysis(sessionId);
+        if (local) {
+          const relationshipProfiles = local.relationshipProfiles || [];
+          const filtered = relationshipProfiles.filter(p => p.listType === listType);
+
+          // Paginate locally
+          const limit = 20;
+          const start = (page - 1) * limit;
+          const paged = filtered.slice(start, start + limit);
+
+          // Convert to expected format
+          const formatted = paged.map(p => ({
+            id: p.username,
+            username: p.username,
+            display_name: p.display_name || null,
+            profile_url: p.profile_url || `https://www.instagram.com/${p.username}/`,
+            timestamp: p.timestamp,
+          }));
+
+          setProfiles(formatted);
+          setTotalPages(Math.max(1, Math.ceil(filtered.length / limit)));
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from backend for saved sessions
         const res = await axios.get(
           `/api/analysis/${sessionId}/relationships/${listType}`,
           { params: { page, limit: 20 } }
@@ -139,6 +167,23 @@ export function RelationshipLists() {
   useEffect(() => {
     const load = async () => {
       try {
+        // Check for local data first
+        const local = getLocalAnalysis(sessionId);
+        if (local) {
+          const relationshipProfiles = local.relationshipProfiles || [];
+
+          // Count by listType
+          const countsMap = {};
+          relationshipProfiles.forEach(p => {
+            countsMap[p.listType] = (countsMap[p.listType] || 0) + 1;
+          });
+
+          setCounts(countsMap);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from backend for saved sessions
         const res = await axios.get(`/api/analysis/${sessionId}/relationships`);
         setCounts(res.data.counts);
       } catch (err) {

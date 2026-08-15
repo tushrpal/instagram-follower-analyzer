@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ExternalLink, StickyNote, X, Tag } from "lucide-react";
 import axios from "axios";
 
-export function UserRow({ username, href }) {
+export function UserRow({ username, href, annotationsEnabled = false }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const [tags, setTags] = useState([]);
@@ -26,6 +26,7 @@ export function UserRow({ username, href }) {
   };
 
   const handleOpen = () => {
+    if (!annotationsEnabled) return;
     setOpen(true);
     loadAnnotation();
   };
@@ -101,15 +102,17 @@ export function UserRow({ username, href }) {
       </div>
 
       <div className="relative flex-shrink-0 ml-2">
-        <button
-          onClick={handleOpen}
-          title="Add note / tags"
-          className="p-1.5 rounded text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <StickyNote className="w-4 h-4" />
-        </button>
+        {annotationsEnabled && (
+          <button
+            onClick={handleOpen}
+            title="Add note / tags"
+            className="p-1.5 rounded text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <StickyNote className="w-4 h-4" />
+          </button>
+        )}
 
-        {open && (
+        {annotationsEnabled && open && (
           <div
             ref={popoverRef}
             className="absolute right-0 top-8 z-50 w-72 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-xl shadow-xl p-4"

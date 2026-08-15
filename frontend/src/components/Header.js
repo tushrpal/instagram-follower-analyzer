@@ -14,6 +14,7 @@ export function Header() {
   const auth = useAuth();
   const user = auth?.user;
 
+
   useEffect(() => {
     if (dark) {
       document.documentElement.classList.add("dark");
@@ -41,7 +42,7 @@ export function Header() {
                 Instagram Follower Tracker
               </span>
               <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
-                Find who unfollowed you — free, no login
+                Analyze exports without your Instagram password
               </span>
             </div>
           </Link>
@@ -61,10 +62,14 @@ export function Header() {
 
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="hidden sm:flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
+                <Link
+                  to="/account"
+                  title="My Account"
+                  className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                >
                   <User className="w-4 h-4" />
-                  <span className="hidden md:inline">{user.email}</span>
-                </span>
+                  <span className="hidden sm:inline">My Account</span>
+                </Link>
                 <button
                   onClick={() => auth.logout()}
                   title="Sign out"

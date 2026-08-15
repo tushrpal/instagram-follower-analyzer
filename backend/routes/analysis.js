@@ -3,12 +3,17 @@ const { database } = require("../models/database");
 const path = require("path");
 const fs = require("fs").promises;
 const requireAuth = require("../middleware/requireAuth");
-const optionalAuth = require("../middleware/optionalAuth");
+const requireSessionOwner = require("../middleware/requireSessionOwner");
 
 const router = express.Router();
 
-// Allow unauthenticated access by default; individual routes enforce auth where needed
-router.use(optionalAuth);
+const MAX_USERS_PER_CATEGORY = 250000;
+const MAX_RELATIONSHIP_PROFILES = 250000;
+
+function validArray(value, maxLength) {
+  return Array.isArray(value) && value.length <= maxLength;
+}
+
 
 // Add input validation middleware
 const validateSessionId = (req, res, next) => {
@@ -61,7 +66,7 @@ router.get("/", requireAuth, async (req, res) => {
 });
 
 // Session comparison (must be before /:sessionId routes)
-router.get("/compare", async (req, res) => {
+router.get("/compare", requireAuth, async (req, res) => {
   try {
     const { a, b } = req.query;
     if (!a || !b) return res.status(400).json({ error: "Both session IDs (a, b) are required" });
@@ -71,7 +76,12 @@ router.get("/compare", async (req, res) => {
       database.getAnalysis(b),
     ]);
 
-    if (!sessionA || !sessionB) {
+    if (
+      !sessionA ||
+      !sessionB ||
+      sessionA.user_id !== req.session.userId ||
+      sessionB.user_id !== req.session.userId
+    ) {
       return res.status(404).json({ error: "One or both sessions not found" });
     }
 
@@ -122,16 +132,14 @@ router.get("/compare", async (req, res) => {
 });
 
 // Rename a session
-router.patch("/:sessionId/name", validateSessionId, async (req, res) => {
+router.patch("/:sessionId/name", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { name } = req.body;
     if (typeof name !== "string") {
       return res.status(400).json({ error: "name must be a string" });
     }
-    const analysis = await database.getAnalysis(sessionId);
-    if (!analysis) return res.status(404).json({ error: "Analysis session not found" });
-    await database.updateSessionName(sessionId, name.trim().slice(0, 120));
+    await database.updateSessionName(sessionId, req.session.userId, name.trim().slice(0, 120));
     res.json({ success: true });
   } catch (error) {
     console.error("Rename session error:", error);
@@ -139,8 +147,19 @@ router.patch("/:sessionId/name", validateSessionId, async (req, res) => {
   }
 });
 
+// Delete one saved analysis and all of its associated records
+router.delete("/:sessionId", validateSessionId, requireSessionOwner, async (req, res) => {
+  try {
+    await database.deleteAnalysisSession(req.params.sessionId, req.session.userId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete session error:", error);
+    res.status(500).json({ error: "Failed to delete session" });
+  }
+});
+
 // Unfollow candidates — following_only sorted by oldest-followed-first
-router.get("/:sessionId/unfollow-candidates", validateSessionId, async (req, res) => {
+router.get("/:sessionId/unfollow-candidates", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const analysis = await database.getAnalysis(sessionId);
@@ -168,6 +187,7 @@ router.get("/:sessionId/unfollow-candidates", validateSessionId, async (req, res
 router.get(
   "/:sessionId/pending-requests",
   validateSessionId,
+  requireSessionOwner,
   async (req, res) => {
     try {
       const { sessionId } = req.params;
@@ -217,7 +237,7 @@ router.get(
 );
 
 // 1. Analysis Summary Route
-router.get("/:sessionId", validateSessionId, async (req, res) => {
+router.get("/:sessionId", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -257,7 +277,7 @@ router.get("/:sessionId", validateSessionId, async (req, res) => {
 });
 
 // 2. Timeline Route
-router.get("/:sessionId/timeline", validateSessionId, async (req, res) => {
+router.get("/:sessionId/timeline", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { timeframe = "all" } = req.query;
@@ -351,7 +371,7 @@ function calculateGrowthForPeriod(events, startDate) {
 }
 
 // 3. Export Route
-router.get("/:sessionId/export", validateSessionId, async (req, res) => {
+router.get("/:sessionId/export", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { category } = req.query;
@@ -405,7 +425,7 @@ router.get("/:sessionId/export", validateSessionId, async (req, res) => {
 });
 
 // Get list of unfollowed profiles
-router.get("/:sessionId/unfollowed", validateSessionId, async (req, res) => {
+router.get("/:sessionId/unfollowed", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const page = parseInt(req.query.page) || 1;
@@ -472,7 +492,7 @@ router.get("/:sessionId/unfollowed", validateSessionId, async (req, res) => {
 });
 
 // Relationship profiles - counts per list type
-router.get("/:sessionId/relationships", validateSessionId, async (req, res) => {
+router.get("/:sessionId/relationships", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const analysis = await database.getAnalysis(sessionId);
@@ -487,7 +507,7 @@ router.get("/:sessionId/relationships", validateSessionId, async (req, res) => {
 });
 
 // Relationship profiles - paginated list for a specific list type
-router.get("/:sessionId/relationships/:listType", validateSessionId, async (req, res) => {
+router.get("/:sessionId/relationships/:listType", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId, listType } = req.params;
     const validTypes = [
@@ -523,7 +543,7 @@ router.get("/:sessionId/relationships/:listType", validateSessionId, async (req,
 });
 
 // Cross-reference insights
-router.get("/:sessionId/insights", validateSessionId, async (req, res) => {
+router.get("/:sessionId/insights", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const analysis = await database.getAnalysis(sessionId);
@@ -614,7 +634,7 @@ router.get("/:sessionId/insights", validateSessionId, async (req, res) => {
 });
 
 // 4. Search Route
-router.get("/:sessionId/search/:query", validateSessionId, async (req, res) => {
+router.get("/:sessionId/search/:query", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId, query } = req.params;
     const { page = 1, limit = 50, category = null } = req.query;
@@ -696,7 +716,7 @@ router.get("/:sessionId/search/:query", validateSessionId, async (req, res) => {
 });
 
 // 5. Category Route (MUST be last)
-router.get("/:sessionId/:category", validateSessionId, async (req, res) => {
+router.get("/:sessionId/:category", validateSessionId, requireSessionOwner, async (req, res) => {
   try {
     const { sessionId, category } = req.params;
     const { search, page = 1, limit = 50 } = req.query;
@@ -846,5 +866,134 @@ function getWeekNumber(date) {
   const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
   return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
 }
+
+// Delete a session
+router.delete("/:sessionId", validateSessionId, requireSessionOwner, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const deleted = await database.deleteAnalysisSession(sessionId, req.session.userId);
+    if (deleted) {
+      res.json({ success: true, message: "Session deleted." });
+    } else {
+      res.status(404).json({ error: "Session not found or not owned by user." });
+    }
+  } catch (error) {
+    console.error("Delete session error:", error);
+    res.status(500).json({ error: "Failed to delete session." });
+  }
+});
+
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    const {
+      sessionId,
+      summary,
+      mutual = [],
+      followersOnly = [],
+      followingOnly = [],
+      pendingRequests = [],
+      unfollowedProfiles = [],
+      relationshipProfiles = [],
+    } = req.body;
+
+    if (!sessionId || typeof sessionId !== "string" || !summary || typeof summary !== "object") {
+      return res.status(400).json({ error: "sessionId and summary are required" });
+    }
+    if (
+      !validArray(mutual, MAX_USERS_PER_CATEGORY) ||
+      !validArray(followersOnly, MAX_USERS_PER_CATEGORY) ||
+      !validArray(followingOnly, MAX_USERS_PER_CATEGORY) ||
+      !validArray(pendingRequests, MAX_USERS_PER_CATEGORY) ||
+      !validArray(unfollowedProfiles, MAX_USERS_PER_CATEGORY) ||
+      !validArray(relationshipProfiles, MAX_RELATIONSHIP_PROFILES)
+    ) {
+      return res.status(400).json({ error: "Invalid or oversized analysis data" });
+    }
+
+    const existing = await database.getAnalysis(sessionId);
+    if (existing) {
+      if (existing.user_id !== req.session.userId) {
+        return res.status(409).json({ error: "Session ID is already in use" });
+      }
+      return res.json({ sessionId, saved: true });
+    }
+
+    await database.pool.query(
+      `INSERT INTO analysis_sessions
+       (id, followers_count, following_count, mutual_count, followers_only_count, following_only_count,
+        export_followers_count, export_following_count, deleted_followers_count, deleted_following_count,
+        processed_at, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)`,
+      [
+        sessionId,
+        summary.totalFollowers,
+        summary.totalFollowing,
+        summary.mutualCount,
+        summary.followersOnlyCount,
+        summary.followingOnlyCount,
+        summary.exportFollowersCount ?? summary.totalFollowers,
+        summary.exportFollowingCount ?? summary.totalFollowing,
+        summary.deletedFollowersCount ?? 0,
+        summary.deletedFollowingCount ?? 0,
+        req.session.userId,
+      ]
+    );
+
+    const allEvents = [];
+    for (const user of [...mutual, ...followersOnly]) {
+      if (user.timestamp) allEvents.push({ timestamp: user.timestamp, username: user.username || user.value, direction: "follower" });
+    }
+    for (const user of [...mutual, ...followingOnly]) {
+      if (user.timestamp) allEvents.push({ timestamp: user.timestamp, username: user.username || user.value, direction: "following" });
+    }
+    allEvents.sort((a, b) => a.timestamp - b.timestamp);
+    let followersCount = 0;
+    let followingCount = 0;
+    const timelineEvents = allEvents.map((event) => {
+      if (event.direction === "follower") followersCount += 1;
+      else followingCount += 1;
+      return { ...event, followersCount, followingCount };
+    });
+
+    await Promise.all([
+      database.saveBatchUsers(sessionId, mutual, "mutual"),
+      database.saveBatchUsers(sessionId, followersOnly, "followers_only"),
+      database.saveBatchUsers(sessionId, followingOnly, "following_only"),
+      timelineEvents.length > 0 ? database.saveBatchFollowerEvents(sessionId, timelineEvents) : Promise.resolve(),
+    ]);
+
+    const validRequests = pendingRequests.filter((request) => request.username);
+    for (const request of validRequests) {
+      const timestamp = request.requestDate
+        ? Math.floor(new Date(request.requestDate).getTime() / 1000)
+        : null;
+      await database.pool.query(
+        `INSERT INTO pending_requests (session_id, username, profile_url, request_timestamp)
+         VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+        [sessionId, request.username, request.profileUrl || null, timestamp]
+      );
+    }
+
+    for (const profile of unfollowedProfiles) {
+      const timestamp = profile.timestamp != null ? Math.floor(profile.timestamp) : null;
+      await database.addUnfollowedProfile(
+        sessionId,
+        profile.username,
+        "imported",
+        profile.href || null,
+        timestamp
+      );
+    }
+
+    if (relationshipProfiles.length > 0) {
+      await database.saveRelationshipProfiles(sessionId, relationshipProfiles);
+    }
+
+    res.status(201).json({ sessionId, saved: true });
+  } catch (error) {
+    console.error("Session save error:", error);
+    res.status(500).json({ error: "Failed to save session" });
+  }
+});
 
 module.exports = router;

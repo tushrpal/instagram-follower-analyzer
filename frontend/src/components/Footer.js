@@ -18,7 +18,7 @@ export function Footer() {
 
           <div className="flex items-center justify-center md:justify-end space-x-2">
             <Lock className="w-5 h-5 text-blue-500" />
-            <span className="text-gray-600 dark:text-gray-400">Data processed locally</span>
+            <span className="text-gray-600 dark:text-gray-400">Guest analysis stays local</span>
           </div>
         </div>
 
@@ -26,7 +26,8 @@ export function Footer() {
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 text-center mb-3">Guides</h3>
             <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
-              <a href="/who-unfollowed-me/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Who unfollowed me</a>
+              <a href="/sample-analysis/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Sample analysis</a>
+              <a href="/who-unfollowed-me/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Compare follower snapshots</a>
               <a href="/instagram-non-followers/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Non-followers</a>
               <a href="/instagram-follower-tracker-private-account/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Private account tracker</a>
               <a href="/how-to-download-instagram-data/" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Download Instagram data</a>

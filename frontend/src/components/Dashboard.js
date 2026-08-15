@@ -10,6 +10,8 @@ import {
   UserMinus,
   X,
   Info,
+  Save,
+  CheckCircle,
 } from "lucide-react";
 import axios from "axios";
 import { TimelineChart } from "./TimelineChart";
@@ -17,6 +19,7 @@ import RecentlyUnfollowed from "./RecentlyUnfollowed";
 import { UserRow } from "./UserRow";
 import { InstagramConnect } from "./InstagramConnect";
 import { ApiInsights } from "./ApiInsights";
+import { useAuth } from "../context/AuthContext";
 
 function ExportCountNote({ summary }) {
   const exportFollowing = summary.exportFollowingCount ?? summary.totalFollowing;
@@ -67,6 +70,7 @@ function ExportCountNote({ summary }) {
 
 export function Dashboard() {
   const { sessionId } = useParams();
+  const { user: authUser } = useAuth();
   const [analysis, setAnalysis] = useState(null);
   const [users, setUsers] = useState({});
   const [activeTab, setActiveTab] = useState("mutual");
@@ -84,12 +88,77 @@ export function Dashboard() {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [loadingExport, setLoadingExport] = useState(false);
   const [igApiConnected, setIgApiConnected] = useState(false);
+  const [savingSession, setSavingSession] = useState(false);
+  const [sessionSaved, setSessionSaved] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   useEffect(() => {
     const loadTimelineData = async () => {
       if (!sessionId) return;
 
       try {
+        // For browser-only sessions, build timeline from local data
+        if (analysis?._local) {
+          const local = getLocalData();
+          if (local) {
+            const allEvents = [];
+
+            // Build follower events
+            for (const user of [...(local.mutual || []), ...(local.followersOnly || [])]) {
+              if (user.timestamp) {
+                allEvents.push({
+                  timestamp: user.timestamp,
+                  username: user.username || user.value,
+                  direction: "follower"
+                });
+              }
+            }
+
+            // Build following events
+            for (const user of [...(local.mutual || []), ...(local.followingOnly || [])]) {
+              if (user.timestamp) {
+                allEvents.push({
+                  timestamp: user.timestamp,
+                  username: user.username || user.value,
+                  direction: "following"
+                });
+              }
+            }
+
+            // Sort by timestamp and build cumulative counts
+            allEvents.sort((a, b) => a.timestamp - b.timestamp);
+            let followersCount = 0;
+            let followingCount = 0;
+            const timelineEvents = allEvents.map((event) => {
+              if (event.direction === "follower") followersCount += 1;
+              else followingCount += 1;
+              return {
+                ...event,
+                followersCount,
+                followingCount,
+                timestamp: new Date(event.timestamp * 1000).toISOString()
+              };
+            });
+
+            // Apply timeframe filter
+            const filtered = filterTimelineEvents(timelineEvents, timelineView);
+
+            setAnalysis((prev) => ({
+              ...prev,
+              timeline: {
+                followEvents: filtered,
+                statistics: {
+                  totalFollowers: local.summary?.totalFollowers || 0,
+                  totalFollowing: local.summary?.totalFollowing || 0,
+                }
+              },
+              statistics: calculateGrowthStats(filtered)
+            }));
+            return;
+          }
+        }
+
+        // For saved sessions, fetch from backend
         const response = await axios.get(
           `/api/analysis/${sessionId}/timeline`,
           {
@@ -264,6 +333,32 @@ export function Dashboard() {
     }
   };
 
+  const saveAnalysis = async () => {
+    const local = getLocalData();
+    if (!local || !authUser) return;
+
+    setSavingSession(true);
+    setSaveError(null);
+    try {
+      await axios.post("/api/sessions", {
+        sessionId,
+        summary: local.summary,
+        mutual: local.mutual,
+        followersOnly: local.followersOnly,
+        followingOnly: local.followingOnly,
+        pendingRequests: local.pendingRequests,
+        unfollowedProfiles: local.unfollowedProfiles,
+        relationshipProfiles: local.relationshipProfiles,
+      });
+      setSessionSaved(true);
+      setAnalysis((previous) => ({ ...previous, _saved: true }));
+    } catch (error) {
+      setSaveError(error.response?.data?.error || "Failed to save this analysis");
+    } finally {
+      setSavingSession(false);
+    }
+  };
+
   // Clear search function
   const clearSearch = () => {
     setSearchQuery("");
@@ -387,7 +482,7 @@ export function Dashboard() {
     },
     {
       id: "unfollowed",
-      label: "Recently Unfollowed",
+      label: "You Recently Unfollowed",
       icon: UserMinus,
       count: analysis?.summary.unfollowedCount || 0,
       color: "text-purple-600 dark:text-purple-400",
@@ -417,6 +512,61 @@ export function Dashboard() {
       ? searchResults.pagination.total
       : searchResults.pagination.totalFound
     : totalUsers;
+  // Helper function to filter timeline events by timeframe
+  const filterTimelineEvents = (events, timeframe) => {
+    if (!events || events.length === 0) return [];
+    if (timeframe === "all") return events;
+
+    const now = new Date();
+    let cutoffDate;
+
+    switch (timeframe) {
+      case "week":
+        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "month":
+        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "year":
+        cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return events;
+    }
+
+    return events.filter((event) => new Date(event.timestamp) >= cutoffDate);
+  };
+
+  // Helper function to calculate growth statistics
+  const calculateGrowthStats = (events) => {
+    if (!events || events.length === 0) {
+      return {
+        dailyGrowth: 0,
+        weeklyGrowth: 0,
+        monthlyGrowth: 0,
+      };
+    }
+
+    const now = new Date();
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const calculatePeriodGrowth = (startDate) => {
+      return events
+        .filter((event) => new Date(event.timestamp) >= startDate)
+        .reduce((acc, event) => {
+          return acc + (event.direction === "follower" ? 1 : -1);
+        }, 0);
+    };
+
+    return {
+      dailyGrowth: calculatePeriodGrowth(dayAgo),
+      weeklyGrowth: calculatePeriodGrowth(weekAgo),
+      monthlyGrowth: calculatePeriodGrowth(monthAgo),
+    };
+  };
+
   const GrowthStats = ({ statistics }) => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -455,6 +605,40 @@ export function Dashboard() {
           <ExportCountNote summary={analysis.summary} />
         )}
       </div>
+
+      {analysis?._local && !sessionSaved && (
+        <div className="mb-8 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="font-semibold text-blue-900 dark:text-blue-100">
+                This analysis is stored only in this browser tab
+              </h2>
+              <p className="mt-1 text-sm text-blue-800 dark:text-blue-200">
+                Your ZIP and results were not uploaded. {authUser
+                  ? "You can explicitly save the derived results to your account for history and snapshot comparisons."
+                  : "Sign in if you want to save derived results for history and snapshot comparisons."}
+              </p>
+            </div>
+            {authUser && (
+              <button
+                onClick={saveAnalysis}
+                disabled={savingSession}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 font-medium whitespace-nowrap"
+              >
+                <Save className="w-4 h-4" />
+                {savingSession ? "Saving…" : "Save to my account"}
+              </button>
+            )}
+          </div>
+          {saveError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{saveError}</p>}
+        </div>
+      )}
+
+      {(sessionSaved || analysis?._saved) && (
+        <div className="mb-8 flex items-center gap-2 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-4 py-3 text-sm text-green-800 dark:text-green-200">
+          <CheckCircle className="w-5 h-5" /> Saved to your account. You can delete it from Session History.
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
@@ -631,6 +815,7 @@ export function Dashboard() {
                   key={index}
                   username={user.username || "?"}
                   href={user.href}
+                  annotationsEnabled={Boolean(authUser && !analysis?._local)}
                 />
               ))}
             </div>

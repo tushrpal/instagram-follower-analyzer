@@ -1,6 +1,8 @@
 {
-  "name": "Insta Analyser",
-  "short_name": "IAnalyser",
+  "name": "Instagram Follower Tracker",
+  "short_name": "Follower Tracker",
+  "description": "Analyse follower relationships from an official Instagram data export and compare dated snapshots.",
+  "start_url": "/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +17,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#7c3aed",
   "background_color": "#ffffff",
   "display": "standalone"
 }

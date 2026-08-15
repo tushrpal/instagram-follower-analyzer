@@ -3,43 +3,38 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>About Us | Instagram Follower Tracker — Free, Safe &amp; Private</title>
-    <meta name="description" content="Learn about Instagram Follower Tracker — a free, privacy-first tool to find who unfollowed you on Instagram. No login required, no password needed." />
+    <title>About | Instagram Follower Tracker</title>
+    <meta name="description" content="Learn how Instagram Follower Tracker analyses official data exports in the browser, how optional saved history works, and who operates the service." />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://YOUR_DOMAIN/about" />
+    <link rel="canonical" href="https://instafollowtracker.com/about/" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-
-    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://YOUR_DOMAIN/about" />
-    <meta property="og:title" content="About Us | Instagram Follower Tracker" />
-    <meta property="og:description" content="A free, privacy-first tool to find who unfollowed you on Instagram. No login required, no password needed." />
+    <meta property="og:url" content="https://instafollowtracker.com/about/" />
+    <meta property="og:title" content="About | Instagram Follower Tracker" />
+    <meta property="og:description" content="A privacy-first follower relationship tool independently developed and operated by Tushr Pal." />
     <meta property="og:site_name" content="Instagram Follower Tracker" />
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' }
       try { if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark'); } catch(e) {}
     </script>
-
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "AboutPage",
       "name": "About Instagram Follower Tracker",
-      "description": "Learn about Instagram Follower Tracker — a free, privacy-first tool to analyse your Instagram followers.",
-      "url": "https://YOUR_DOMAIN/about",
-      "isPartOf": {
-        "@type": "WebSite",
+      "description": "How Instagram Follower Tracker analyses follower relationships and handles optional saved history.",
+      "url": "https://instafollowtracker.com/about/",
+      "mainEntity": {
+        "@type": "SoftwareApplication",
         "name": "Instagram Follower Tracker",
-        "url": "https://YOUR_DOMAIN/"
+        "applicationCategory": "UtilitiesApplication",
+        "url": "https://instafollowtracker.com/"
       }
     }
     </script>
   </head>
   <body class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 min-h-screen flex flex-col">
-
-    <!-- Header -->
     <header class="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-700">
       <div class="container mx-auto px-4 py-3 sm:py-4">
         <div class="flex items-center justify-between gap-2">
@@ -48,137 +43,80 @@
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             </div>
             <div class="min-w-0">
-              <span class="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block">Instagram Follower Analyzer</span>
-              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">Analyze your follower relationships</span>
+              <span class="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block">Instagram Follower Tracker</span>
+              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">Understand follower relationships</span>
             </div>
           </a>
           <nav class="flex items-center gap-4 text-sm">
-            <a href="/about" class="text-purple-600 dark:text-purple-400 font-medium">About</a>
-            <a href="/contact" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact</a>
-            <a href="/" class="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">Open App</a>
+            <a href="/about/" class="text-purple-600 dark:text-purple-400 font-medium">About</a>
+            <a href="/contact/" class="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">Contact</a>
+            <a href="/" class="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Open App</a>
           </nav>
         </div>
       </div>
     </header>
 
-    <!-- Main content -->
     <main class="flex-grow container mx-auto px-4 py-12 max-w-3xl">
+      <section class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
+        <p class="text-sm font-semibold tracking-wide uppercase text-purple-600 dark:text-purple-400 mb-3">About the project</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-5">Follower analysis without handing over your Instagram password</h1>
+        <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">Instagram Follower Tracker is an independent web tool that turns the follower and following lists in your official Instagram data export into understandable relationship categories.</p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">It was created and is operated by <a href="https://www.linkedin.com/in/tushrpal" target="_blank" rel="noopener noreferrer" class="text-purple-600 dark:text-purple-400 hover:underline">Tushr Pal</a>, an independent developer. The service is not affiliated with or endorsed by Instagram or Meta.</p>
+      </section>
 
-      <!-- Hero -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
-        <div class="flex items-center gap-4 mb-6">
-          <div class="w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-          </div>
-          <div>
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">About Us</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">The story behind Instagram Follower Tracker</p>
-          </div>
-        </div>
+      <section class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">How ZIP analysis works</h2>
+        <ol class="list-decimal pl-6 space-y-3 text-gray-700 dark:text-gray-300">
+          <li>You request a JSON export containing followers and following from Instagram.</li>
+          <li>You select the ZIP in Instagram Follower Tracker. The raw archive is read and parsed in your browser.</li>
+          <li>As a guest, the resulting analysis stays in browser <code>sessionStorage</code> and is not uploaded as a guest result.</li>
+          <li>If you sign in, you can explicitly opt in to save derived usernames, available profile details, categories, counts, relationships, and timestamps. The raw ZIP is not saved.</li>
+        </ol>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">Optional Instagram OAuth belongs to a separate professional-account feature. It is not needed for export-based follower analysis.</p>
+      </section>
 
-        <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-          Instagram Follower Tracker was built out of a simple frustration: Instagram gives you no way to see who has unfollowed you, and every third-party app that claims to do it asks for your password — putting your account at risk.
-        </p>
-        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-          We built a better alternative. One that uses only the official data export that Instagram generates for you, processes it entirely in your browser, and never asks for a single credential.
-        </p>
-      </div>
-
-      <!-- Features -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">What the tool does</h2>
+      <section class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 sm:p-12 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">What the results mean</h2>
         <div class="grid sm:grid-cols-2 gap-5">
-          <div class="flex gap-3">
-            <span class="text-2xl">🔍</span>
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">Find unfollowers</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Compare exports over time to see exactly who stopped following you.</p>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <span class="text-2xl">👥</span>
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">Non-followers list</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">See every account you follow that doesn't follow you back.</p>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <span class="text-2xl">🤝</span>
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">Mutual followers</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Identify accounts with a genuine two-way connection.</p>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <span class="text-2xl">⏳</span>
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">Pending requests</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Track follow requests you've sent that haven't been accepted yet.</p>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <span class="text-2xl">📊</span>
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">Session history</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Upload multiple exports to build a timeline of follower growth.</p>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <span class="text-2xl">📥</span>
-            <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">CSV export</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Download any list as a CSV for your own records.</p>
-            </div>
-          </div>
+          <div class="rounded-xl bg-purple-50 dark:bg-purple-900/20 p-5"><h3 class="font-semibold text-gray-900 dark:text-white mb-2">Current relationships</h3><p class="text-sm text-gray-600 dark:text-gray-400">One export can identify mutual followers, accounts you follow that do not follow back, followers you do not follow, and categories present in the export such as pending requests.</p></div>
+          <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-5"><h3 class="font-semibold text-gray-900 dark:text-white mb-2">Changes over time</h3><p class="text-sm text-gray-600 dark:text-gray-400">Two snapshots from different dates are required to infer new and lost followers. A single current export cannot show who unfollowed between dates.</p></div>
         </div>
-      </div>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mt-5">Results depend on the export files supplied, their dates, Instagram's current file format, and account events such as deletion or renaming. The tracker classifies data; it does not reconstruct activity that is absent from a snapshot.</p>
+      </section>
 
-      <!-- Privacy commitment -->
-      <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 sm:p-12 mb-8 text-white">
-        <h2 class="text-2xl font-bold mb-4">Our privacy commitment</h2>
+      <section class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 sm:p-12 mb-8 text-white">
+        <h2 class="text-2xl font-bold mb-4">Privacy choices by design</h2>
         <ul class="space-y-3">
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>We never ask for your Instagram password or login credentials</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>Your Instagram data file is never stored on our servers</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>Works for both public and private accounts</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span>100% free — no subscriptions, no paywalls</span>
-          </li>
+          <li>Core ZIP analysis does not require an Instagram password.</li>
+          <li>Guest analysis stays within the browser session.</li>
+          <li>Account history is uploaded only after a signed-in user chooses to save it.</li>
+          <li>The raw ZIP is not uploaded for saved history.</li>
+          <li>Saved sessions and accounts can be deleted.</li>
         </ul>
-      </div>
+        <a href="/privacy-policy/" class="inline-block mt-5 text-white underline underline-offset-4">Read the full Privacy Policy</a>
+      </section>
 
-      <!-- CTA -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 text-center">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Ready to get started?</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">Upload your Instagram data export and see your results in seconds.</p>
-        <a href="/" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:opacity-90 transition-opacity">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-          Analyse My Followers — Free
-        </a>
-      </div>
+      <section class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-700 p-8 text-center">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">See what an analysis looks like</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Explore a transparent example built from fictional usernames before using your own export.</p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a href="/sample-analysis/" class="px-6 py-3 border border-purple-600 text-purple-700 dark:text-purple-300 rounded-xl font-semibold hover:bg-purple-50 dark:hover:bg-purple-900/20">View Sample Analysis</a>
+          <a href="/" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:opacity-90">Open Instagram Follower Tracker</a>
+        </div>
+      </section>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white dark:bg-gray-900 border-t dark:border-gray-700 mt-auto">
       <div class="container mx-auto px-4 py-8">
         <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <a href="/about" class="text-purple-600 dark:text-purple-400 font-medium">About Us</a>
-          <a href="/contact" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Contact Us</a>
-          <a href="/privacy-policy" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Privacy Policy</a>
-          <a href="/terms" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Terms &amp; Conditions</a>
+          <a href="/about/" class="text-purple-600 dark:text-purple-400 font-medium">About</a>
+          <a href="/sample-analysis/" class="hover:text-purple-600 dark:hover:text-purple-400">Sample Analysis</a>
+          <a href="/contact/" class="hover:text-purple-600 dark:hover:text-purple-400">Contact</a>
+          <a href="/privacy-policy/" class="hover:text-purple-600 dark:hover:text-purple-400">Privacy Policy</a>
+          <a href="/terms/" class="hover:text-purple-600 dark:hover:text-purple-400">Terms</a>
         </div>
-        <p class="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Analyzer. Not affiliated with Instagram or Meta.</p>
+        <p class="text-center text-gray-500 dark:text-gray-500 text-sm">© 2026 Instagram Follower Tracker. Independently operated by Tushr Pal. Not affiliated with Instagram or Meta.</p>
       </div>
     </footer>
-
   </body>
 </html>

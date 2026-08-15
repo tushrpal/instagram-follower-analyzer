@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AlertCircle, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import axios from "axios";
+import { getLocalAnalysis } from "../utils/localAnalysis";
 
 const INSIGHT_CONFIG = [
   {
@@ -129,6 +130,17 @@ export function Insights() {
   useEffect(() => {
     const load = async () => {
       try {
+        // Check for local data first
+        const local = getLocalAnalysis(sessionId);
+        if (local) {
+          // Build insights from local data
+          const insights = computeLocalInsights(local);
+          setData({ sessionId, insights, conversionRate: insights.conversionRate || 0 });
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from backend for saved sessions
         const res = await axios.get(`/api/analysis/${sessionId}/insights`);
         setData(res.data);
       } catch (err) {
@@ -139,6 +151,71 @@ export function Insights() {
     };
     load();
   }, [sessionId]);
+
+  // Helper function to compute insights from local data
+  const computeLocalInsights = (local) => {
+    const relationshipProfiles = local.relationshipProfiles || [];
+    const mutual = new Set((local.mutual || []).map(u => u.username || u.value));
+    const followersOnly = new Set((local.followersOnly || []).map(u => u.username || u.value));
+    const followingOnly = new Set((local.followingOnly || []).map(u => u.username || u.value));
+    const followers = new Set([...mutual, ...followersOnly]);
+    const following = new Set([...mutual, ...followingOnly]);
+
+    const result = {
+      closeFriendsNotFollowingBack: [],
+      closeFriendsYouDontFollow: [],
+      blockedStillInFollowers: [],
+      hiddenStoryMutual: [],
+      requestConversions: [],
+      receivedNotAccepted: [],
+      removedSuggestionsNowFollowing: [],
+    };
+
+    let totalRecentRequests = 0;
+
+    relationshipProfiles.forEach((profile) => {
+      const username = profile.username;
+      const isFollower = followers.has(username);
+      const isFollowing = following.has(username);
+      const isMutual = mutual.has(username);
+
+      const profileData = {
+        username: profile.username,
+        displayName: profile.display_name || null,
+        profileUrl: profile.profile_url || `https://www.instagram.com/${username}/`,
+        timestamp: profile.timestamp,
+      };
+
+      switch (profile.listType) {
+        case "close_friend":
+          if (!isFollower) result.closeFriendsNotFollowingBack.push(profileData);
+          if (!isFollowing) result.closeFriendsYouDontFollow.push(profileData);
+          break;
+        case "blocked":
+          if (isFollower) result.blockedStillInFollowers.push(profileData);
+          break;
+        case "hidden_story":
+          if (isMutual) result.hiddenStoryMutual.push(profileData);
+          break;
+        case "recent_request":
+          totalRecentRequests++;
+          if (isFollower || isFollowing) result.requestConversions.push(profileData);
+          break;
+        case "received_request":
+          if (!isFollower) result.receivedNotAccepted.push(profileData);
+          break;
+        case "removed_suggestion":
+          if (isFollowing) result.removedSuggestionsNowFollowing.push(profileData);
+          break;
+      }
+    });
+
+    result.conversionRate = totalRecentRequests > 0
+      ? Math.round((result.requestConversions.length / totalRecentRequests) * 100)
+      : 0;
+
+    return result;
+  };
 
   if (loading) {
     return (

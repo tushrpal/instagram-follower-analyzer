@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
+import { getLocalAnalysis, paginate } from "../utils/localAnalysis";
 
 const UnfollowedUser = React.memo(({ user }) => (
   <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -13,7 +14,7 @@ const UnfollowedUser = React.memo(({ user }) => (
       <div>
         <p className="font-medium text-gray-900 dark:text-gray-100">@{user.username}</p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          Unfollowed {formatDistanceToNow(new Date(user.unfollowed_at))} ago
+          Export record from {formatDistanceToNow(new Date(user.unfollowed_at))} ago
         </p>
       </div>
     </div>
@@ -45,6 +46,28 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
 
       try {
         setLoading(true);
+
+        const local = getLocalAnalysis(sessionId);
+        if (local) {
+          const query = search ? search.trim().toLowerCase() : "";
+          const all = (local.unfollowedProfiles || [])
+            .filter((profile) => !query || (profile.username || "").toLowerCase().includes(query))
+            .map((profile) => ({
+              username: profile.username,
+              profile_url: profile.href || null,
+              unfollowed_at: profile.timestamp
+                ? new Date(profile.timestamp * 1000).toISOString()
+                : new Date().toISOString(),
+            }));
+          const page = paginate(all, pageNumber, LIMIT);
+          setUnfollowedProfiles(page.items);
+          setTotalPages(page.totalPages);
+          setTotalItems(page.totalItems);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+
         const params = {
           page: pageNumber,
           limit: LIMIT,
@@ -114,7 +137,7 @@ const RecentlyUnfollowed = ({ sessionId, searchQuery, onSearchChange }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Recently Unfollowed</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Profiles You Recently Unfollowed</h2>
       </div>
 
       {searchQuery && (
