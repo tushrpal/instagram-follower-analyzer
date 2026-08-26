@@ -186,11 +186,27 @@ router.post("/logout", (req, res) => {
   });
 });
 
-router.get("/me", (req, res) => {
-  if (!req.session?.userId) {
-    return res.status(401).json({ error: "Not authenticated" });
+router.get("/me", async (req, res) => {
+  try {
+    if (!req.session?.userId || !req.session?.email) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    // Validate that the user still exists in the database
+    const user = await database.getUserById(req.session.userId);
+    if (!user || user.email !== req.session.email) {
+      // Session references a user that no longer exists or has been modified
+      req.session.destroy(() => {
+        res.clearCookie("igfa.sid");
+      });
+      return res.status(401).json({ error: "Invalid session" });
+    }
+
+    res.json({ id: user.id, email: user.email });
+  } catch (error) {
+    console.error("Auth validation error:", error);
+    res.status(500).json({ error: "Authentication check failed" });
   }
-  res.json({ id: req.session.userId, email: req.session.email });
 });
 
 

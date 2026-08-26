@@ -23,6 +23,8 @@ const ForgotPassword = lazy(() => import("./components/ForgotPassword").then(m =
 const ResetPassword = lazy(() => import("./components/ResetPassword").then(m => ({ default: m.ResetPassword })));
 const UnfollowHelper = lazy(() => import("./components/UnfollowHelper").then(m => ({ default: m.UnfollowHelper })));
 const Account = lazy(() => import("./components/Account").then(m => ({ default: m.Account })));
+const About = lazy(() => import("./components/About").then(m => ({ default: m.About })));
+const Contact = lazy(() => import("./components/Contact").then(m => ({ default: m.Contact })));
 const NotFound = lazy(() => import("./components/NotFound").then(m => ({ default: m.NotFound })));
 
 axios.defaults.withCredentials = true;
@@ -76,6 +78,8 @@ function App() {
                   <Route path="/relationships/:sessionId" element={<RelationshipLists />} />
                   <Route path="/insights/:sessionId" element={<Insights />} />
                   <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
