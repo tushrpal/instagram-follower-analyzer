@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   Users,
@@ -77,20 +77,19 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showUnfollowed, setShowUnfollowed] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(20); // You can make this adjustable if you want
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [timelineView, setTimelineView] = useState("all");
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [loadingSearch, setLoadingSearch] = useState(false);
-  const [loadingExport, setLoadingExport] = useState(false);
   const [igApiConnected, setIgApiConnected] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingExport, setLoadingExport] = useState(false);
 
   useEffect(() => {
     const loadTimelineData = async () => {
@@ -183,6 +182,7 @@ export function Dashboard() {
       // Only load timeline data if we have the basic analysis
       loadTimelineData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, timelineView, analysis?.summary]);
 
   useEffect(() => {
@@ -234,7 +234,7 @@ export function Dashboard() {
   }, [searchQuery]);
 
   // Update the search handling
-  const handleSearch = async (pageNum = 1) => {
+  const handleSearch = useCallback(async (pageNum = 1) => {
     if (!searchQuery.trim()) {
       setSearchResults(null);
       loadUsers(activeTab, 1);
@@ -278,7 +278,7 @@ export function Dashboard() {
     } finally {
       setLoadingSearch(false);
     }
-  };
+  }, [searchQuery, activeTab, sessionId, limit, getLocalData, loadUsers]);
 
   // Fetch users or search results when page, tab, search, or session changes
   useEffect(() => {
@@ -287,6 +287,7 @@ export function Dashboard() {
     } else if (activeTab && activeTab !== "unfollowed") {
       loadUsers(activeTab, page);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, activeTab, sessionId]); // Removed searchQuery from dependencies
 
   // Handle search query changes separately
@@ -296,15 +297,16 @@ export function Dashboard() {
     } else if (activeTab && activeTab !== "unfollowed") {
       loadUsers(activeTab, 1); // Load first page when search is cleared
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
-  const getLocalData = () => {
+  const getLocalData = useCallback(() => {
     const cached = sessionStorage.getItem(`session_${sessionId}`);
     return cached ? JSON.parse(cached) : null;
-  };
+  }, [sessionId]);
 
   // Update the loadUsers function
-  const loadUsers = async (category, pageNum = 1) => {
+  const loadUsers = useCallback(async (category, pageNum = 1) => {
     try {
       setLoadingUsers(true);
 
@@ -331,7 +333,7 @@ export function Dashboard() {
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, [sessionId, limit, searchQuery, getLocalData]);
 
   const saveAnalysis = async () => {
     const local = getLocalData();
@@ -360,12 +362,12 @@ export function Dashboard() {
   };
 
   // Clear search function
-  const clearSearch = () => {
+  const clearSearch = useCallback(() => {
     setSearchQuery("");
     setSearchResults(null);
     setPage(1);
     loadUsers(activeTab, 1);
-  };
+  }, [activeTab, loadUsers]);
 
   const exportData = async (category = null) => {
     try {
@@ -416,14 +418,7 @@ export function Dashboard() {
     }
   };
 
-  // Add proper error boundary
-  const handleError = (error) => {
-    console.error("Dashboard error:", error);
-    setError(error.message || "An unexpected error occurred");
-  };
-
-  // Add proper loading state handling
-  if (loading) {
+  const saveAnalysis = async () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { AlertCircle, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import axios from "axios";
@@ -127,33 +127,8 @@ export function Insights() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        // Check for local data first
-        const local = getLocalAnalysis(sessionId);
-        if (local) {
-          // Build insights from local data
-          const insights = computeLocalInsights(local);
-          setData({ sessionId, insights, conversionRate: insights.conversionRate || 0 });
-          setLoading(false);
-          return;
-        }
-
-        // Fetch from backend for saved sessions
-        const res = await axios.get(`/api/analysis/${sessionId}/insights`);
-        setData(res.data);
-      } catch (err) {
-        setError("Failed to load insights");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [sessionId]);
-
   // Helper function to compute insights from local data
-  const computeLocalInsights = (local) => {
+  const computeLocalInsights = useCallback((local) => {
     const relationshipProfiles = local.relationshipProfiles || [];
     const mutual = new Set((local.mutual || []).map(u => u.username || u.value));
     const followersOnly = new Set((local.followersOnly || []).map(u => u.username || u.value));
@@ -207,6 +182,9 @@ export function Insights() {
         case "removed_suggestion":
           if (isFollowing) result.removedSuggestionsNowFollowing.push(profileData);
           break;
+        default:
+          // Other list types not analyzed
+          break;
       }
     });
 
@@ -215,7 +193,32 @@ export function Insights() {
       : 0;
 
     return result;
-  };
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // Check for local data first
+        const local = getLocalAnalysis(sessionId);
+        if (local) {
+          // Build insights from local data
+          const insights = computeLocalInsights(local);
+          setData({ sessionId, insights, conversionRate: insights.conversionRate || 0 });
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from backend for saved sessions
+        const res = await axios.get(`/api/analysis/${sessionId}/insights`);
+        setData(res.data);
+      } catch (err) {
+        setError("Failed to load insights");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [sessionId, computeLocalInsights]);
 
   if (loading) {
     return (

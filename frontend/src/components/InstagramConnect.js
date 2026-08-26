@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link2, Link2Off, ExternalLink, AlertCircle, Loader } from "lucide-react";
 import axios from "axios";
 
@@ -8,7 +8,7 @@ export function InstagramConnect({ onStatusChange }) {
   const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadStatus = async () => {
+  const loadStatus = useCallback(async () => {
     try {
       const res = await axios.get("/api/instagram/status");
       setStatus(res.data);
@@ -16,7 +16,7 @@ export function InstagramConnect({ onStatusChange }) {
     } catch {
       setStatus({ connected: false });
     }
-  };
+  }, [onStatusChange]);
 
   useEffect(() => {
     loadStatus();
@@ -30,7 +30,7 @@ export function InstagramConnect({ onStatusChange }) {
       setError("Instagram connection failed. Make sure you have a Professional (Business/Creator) account.");
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, []);
+  }, [loadStatus]);
 
   const handleConnect = async () => {
     setConnecting(true);
