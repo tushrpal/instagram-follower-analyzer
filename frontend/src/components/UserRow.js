@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ExternalLink, StickyNote, X, Tag } from "lucide-react";
 import axios from "axios";
 
@@ -31,7 +31,7 @@ export function UserRow({ username, href, annotationsEnabled = false }) {
     loadAnnotation();
   };
 
-  const save = async () => {
+  const save = useCallback(async () => {
     setSaving(true);
     try {
       await axios.put(`/api/annotations/${encodeURIComponent(username)}`, { note, tags });
@@ -41,7 +41,7 @@ export function UserRow({ username, href, annotationsEnabled = false }) {
       setSaving(false);
       setOpen(false);
     }
-  };
+  }, [username, note, tags]);
 
   const addTag = () => {
     const t = tagInput.trim();

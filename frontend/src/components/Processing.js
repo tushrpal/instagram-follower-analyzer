@@ -55,7 +55,7 @@ export function Processing() {
     timerRef.current = setInterval(poll, POLL_INTERVAL);
 
     return () => clearInterval(timerRef.current);
-  }, [sessionId]);
+  }, [sessionId, navigate]);
 
   return (
     <div className="max-w-xl mx-auto mt-16 px-4">
