@@ -324,37 +324,6 @@ export function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
-  const getLocalData = useCallback(() => {
-    const cached = sessionStorage.getItem(`session_${sessionId}`);
-    return cached ? JSON.parse(cached) : null;
-  }, [sessionId]);
-
-  // Update the loadUsers function
-  const loadUsers = useCallback(async (category, pageNum = 1) => {
-    try {
-      const local = getLocalData();
-      if (local) {
-        const categoryMap = { mutual: local.mutual, followers_only: local.followersOnly, following_only: local.followingOnly };
-        const all = categoryMap[category] || [];
-        const filtered = searchQuery.trim()
-          ? all.filter((u) => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
-          : all;
-        const start = (pageNum - 1) * limit;
-        setUsers((prev) => ({ ...prev, [category]: filtered.slice(start, start + limit) }));
-        setTotalUsers(filtered.length);
-        setTotalPages(Math.ceil(filtered.length / limit) || 1);
-        return;
-      }
-
-      const response = await axios.get(`/api/analysis/${sessionId}/${category}?page=${pageNum}&limit=${limit}`);
-      setUsers((prev) => ({ ...prev, [category]: response.data.users }));
-      setTotalUsers(response.data.total);
-      setTotalPages(response.data.pagination.totalPages || 1);
-    } catch (error) {
-      console.error(`Failed to load ${category} users:`, error);
-    }
-  }, [sessionId, limit, searchQuery, getLocalData]);
-
   const saveAnalysis = async () => {
     const local = getLocalData();
     if (!local || !authUser) return;

@@ -63,7 +63,7 @@ export function UserRow({ username, href, annotationsEnabled = false }) {
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open, note, tags]);
+  }, [open, save]);
 
   return (
     <div className="flex items-center justify-between py-2 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg group">
