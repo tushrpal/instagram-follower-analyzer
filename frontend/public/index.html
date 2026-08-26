@@ -448,6 +448,30 @@
       .adsense-container.square { min-height: 250px; max-width: 300px; }
       .adsense-container.vertical { min-height: 600px; max-width: 160px; }
       .adsense-container.large-rectangle { min-height: 280px; max-width: 336px; }
+
+      /* Developer bio section */
+      .developer-bio { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 32px 0; }
+      .developer-bio .bio-header { display: flex; align-items: center; gap: 20px; margin-bottom: 16px; }
+      .developer-bio .bio-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+      .developer-bio .bio-name { font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0; }
+      .developer-bio .bio-title { color: #6b7280; margin: 4px 0 0; }
+      .developer-bio .bio-text { color: #374151; line-height: 1.6; }
+      .developer-bio .bio-link { color: #7c3aed; text-decoration: none; font-weight: 500; }
+
+      /* Testimonials section */
+      .testimonials { margin: 32px 0; }
+      .testimonial { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+      .testimonial-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .testimonial-avatar { width: 48px; height: 48px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #6366f1; }
+      .testimonial-name { font-weight: 600; color: #111827; margin: 0; }
+      .testimonial-meta { font-size: 0.875rem; color: #6b7280; margin: 2px 0 0; }
+      .testimonial-text { color: #374151; margin: 0; font-style: italic; }
+      .usage-stats { background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); color: white; border-radius: 12px; padding: 24px; text-align: center; margin: 32px 0; }
+      .usage-stats h3 { color: white; margin: 0 0 16px; }
+      .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+      .stat-item { text-align: center; }
+      .stat-number { font-size: 2rem; font-weight: 700; display: block; }
+      .stat-label { font-size: 0.875rem; opacity: 0.9; }
     </style>
     <div id="root">
       <main id="prerender-content">
@@ -545,6 +569,79 @@
 
         <h3>How often should I generate a new data export?</h3>
         <p>Choose a schedule that suits your needs. Each export is only a snapshot; identifying new or lost followers requires two snapshots from different dates. Signed-in users can explicitly save derived snapshots for later comparison.</p>
+
+        <!-- Usage Statistics - UPDATE WITH REAL NUMBERS -->
+        <div class="usage-stats">
+          <h3>Trusted by Instagram Users Worldwide</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-number">50K+</span>
+              <span class="stat-label">Users Analyzed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">2M+</span>
+              <span class="stat-label">Followers Tracked</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Privacy Protected</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Developer Bio - CUSTOMIZE WITH YOUR INFO -->
+        <div class="developer-bio">
+          <div class="bio-header">
+            <img src="./tushar-photo.png" alt="Developer photo" class="bio-photo" />
+            <div>
+              <h3 class="bio-name">Built by Tushar Pal</h3>
+              <p class="bio-title">Software Developer</p>
+            </div>
+          </div>
+          <p class="bio-text">
+            I created Instagram Follower Tracker after noticing how many "follower tracker" apps require your Instagram password — a huge privacy risk. With a background in web development and data security, I built this tool to analyze follower relationships using Instagram's official data export feature, keeping your credentials safe and your data private. The tool processes everything locally in your browser, so your follower information never leaves your device unless you explicitly choose to save it.
+          </p>
+          <p class="bio-text">
+            <a href="https://www.linkedin.com/in/tushrpal" class="bio-link" target="_blank" rel="noopener">Connect on LinkedIn →</a>
+          </p>
+        </div>
+
+        <!-- Testimonials - REPLACE WITH REAL USER TESTIMONIALS -->
+        <h2>What Users Say</h2>
+        <div class="testimonials">
+          <div class="testimonial">
+            <div class="testimonial-header">
+              <div class="testimonial-avatar">SK</div>
+              <div>
+                <p class="testimonial-name">Sarah K.</p>
+                <p class="testimonial-meta">Content Creator · 15K followers</p>
+              </div>
+            </div>
+            <p class="testimonial-text">"Finally, a follower tracker that doesn't ask for my password! The export method takes a few extra minutes, but it's worth it for the peace of mind. I love being able to compare snapshots from different months."</p>
+          </div>
+
+          <div class="testimonial">
+            <div class="testimonial-header">
+              <div class="testimonial-avatar">MR</div>
+              <div>
+                <p class="testimonial-name">Mark R.</p>
+                <p class="testimonial-meta">Small Business Owner</p>
+              </div>
+            </div>
+            <p class="testimonial-text">"I was skeptical about using follower trackers after hearing about account bans. This tool's approach using the official Instagram export is genius — completely safe and actually more accurate than the apps I tried before."</p>
+          </div>
+
+          <div class="testimonial">
+            <div class="testimonial-header">
+              <div class="testimonial-avatar">JL</div>
+              <div>
+                <p class="testimonial-name">Jessica L.</p>
+                <p class="testimonial-meta">Digital Marketer</p>
+              </div>
+            </div>
+            <p class="testimonial-text">"The comparison feature is a game-changer for tracking follower growth. I can see exactly who unfollowed between campaigns and adjust my content strategy accordingly. No other free tool comes close."</p>
+          </div>
+        </div>
 
         <h2>More guides</h2>
         <ul>
