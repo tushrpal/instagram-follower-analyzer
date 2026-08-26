@@ -49,8 +49,6 @@ app.use(
         defaultSrc: ["'self'"],
         scriptSrc: [
           "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'",
           "https://cdn.tailwindcss.com",
           "https://pagead2.googlesyndication.com",
           "https://*.googlesyndication.com",
@@ -64,7 +62,6 @@ app.use(
         ],
         scriptSrcElem: [
           "'self'",
-          "'unsafe-inline'",
           "https://cdn.tailwindcss.com",
           "https://pagead2.googlesyndication.com",
           "https://*.googlesyndication.com",
