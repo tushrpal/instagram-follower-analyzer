@@ -418,7 +418,7 @@ export function Dashboard() {
     }
   };
 
-  const saveAnalysis = async () => {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
