@@ -174,19 +174,7 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Serve static files from public directory (React build)
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "public")));
-
-  // Handle React routing - serve index.html for all non-API routes
-  app.get("*", (req, res) => {
-    if (!req.path.startsWith("/api")) {
-      res.sendFile(path.join(__dirname, "public", "index.html"));
-    }
-  });
-}
-
-// 404 handler
+// 404 handler for non-API routes
 app.use("*", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
