@@ -110,7 +110,14 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? [process.env.APP_URL || "https://instagram-follower-analyzer.onrender.com", "http://localhost:5000", "http://localhost"]
+        ? [
+            "https://instafollowtracker.com",
+            "https://www.instafollowtracker.com",
+            /https:\/\/.*\.vercel\.app$/,
+            process.env.APP_URL || "https://instagram-follower-analyzer.onrender.com",
+            "http://localhost:5000",
+            "http://localhost:3000"
+          ]
         : ["http://localhost:3000"],
     credentials: true,
   })
