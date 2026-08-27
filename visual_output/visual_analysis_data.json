@@ -1,0 +1,51 @@
+{
+  "url": "https://instafollowtracker.com",
+  "viewports": {},
+  "page_info": {
+    "desktop": {
+      "title": "Instagram Follower Tracker \u2014 Follower Relationship Analytics",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "scrollHeight": 6291
+      },
+      "aboveFold": {
+        "h1": {
+          "text": "Instagram Follower Tracker",
+          "visible": true,
+          "top": 113
+        },
+        "ctaButtons": [
+          {
+            "text": "",
+            "visible": true,
+            "top": 22
+          },
+          {
+            "text": "Download Instagram Data",
+            "visible": true,
+            "top": 357
+          }
+        ],
+        "images": []
+      },
+      "meta": {
+        "description": "Analyse Instagram follower relationships from your official data export. Find non-followers and mutuals from one snapshot; compare two saved snapshots to identify new or lost followers.",
+        "ogImage": "https://instafollowtracker.com/web-app-manifest-512x512.png"
+      }
+    },
+    "mobile": {
+      "viewport": {
+        "width": 375,
+        "height": 812,
+        "scrollWidth": 375
+      },
+      "navigation": {
+        "hasHamburger": false,
+        "navVisible": false
+      },
+      "horizontalScroll": false,
+      "fontSizeBase": "16px"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Linkedin, Github, MessageSquare, Send, CheckCircle } from "lucide-react";
+import { Mail, Linkedin, MessageSquare, Send, CheckCircle } from "lucide-react";
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -145,7 +145,7 @@ export function Contact() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Connect with us</h2>
             <div className="space-y-4">
               <a
-                href="mailto:contact@instafollowtracker.com"
+                href="mailto:instaanalyser@gmail.com"
                 className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
               >
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
@@ -153,7 +153,7 @@ export function Contact() {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Email</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">contact@instafollowtracker.com</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">instaanalyser@gmail.com</p>
                 </div>
               </a>
 
@@ -169,21 +169,6 @@ export function Contact() {
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">LinkedIn</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Connect professionally</p>
-                </div>
-              </a>
-
-              <a
-                href="https://github.com/tushrpal0"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
-              >
-                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
-                  <Github className="w-6 h-6 text-gray-900 dark:text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">GitHub</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">View our projects</p>
                 </div>
               </a>
             </div>

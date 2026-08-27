@@ -1,0 +1,426 @@
+{
+  "block_count": 8,
+  "processed_count": 8,
+  "total_bytes": 16548,
+  "truncated": false,
+  "blocks": [
+    {
+      "index": 1,
+      "size_bytes": 781,
+      "valid": true,
+      "types": [
+        "ContactPoint",
+        "Organization"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Instagram Follower Tracker",
+        "alternateName": "InstaFollowTracker",
+        "url": "https://instafollowtracker.com/",
+        "logo": "https://instafollowtracker.com/web-app-manifest-512x512.png",
+        "foundingDate": "2026-01-01",
+        "description": "Instagram follower relationship tool for analysing official data exports, with browser-local guest results and optional saved snapshot comparisons.",
+        "sameAs": [
+          "https://www.linkedin.com/in/tushrpal"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "url": "https://instafollowtracker.com/contact/",
+          "availableLanguage": [
+            "English"
+          ]
+        }
+      }
+    },
+    {
+      "index": 2,
+      "size_bytes": 190,
+      "valid": true,
+      "types": [
+        "WebSite"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Instagram Follower Tracker",
+        "url": "https://instafollowtracker.com/",
+        "inLanguage": "en"
+      }
+    },
+    {
+      "index": 3,
+      "size_bytes": 1195,
+      "valid": true,
+      "types": [
+        "Offer",
+        "WebApplication"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Instagram Follower Tracker",
+        "url": "https://instafollowtracker.com/",
+        "description": "Analyse current follower relationships from an official Instagram export and compare two saved snapshots to identify new or lost followers.",
+        "applicationCategory": "SocialNetworkingApplication",
+        "applicationSubCategory": "Analytics",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "softwareVersion": "2.0",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Compare two snapshots to identify lost followers",
+          "Find non-followers (people who don't follow you back)",
+          "Track mutual followers",
+          "Instagram follower analytics and growth timeline",
+          "Pending follow requests tracker",
+          "Works for private Instagram accounts",
+          "Session history with dated snapshots",
+          "Compare any two follower snapshots side by side",
+          "CSV export of any list",
+          "No Instagram login or password required"
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "size_bytes": 269,
+      "valid": true,
+      "types": [
+        "BreadcrumbList",
+        "ListItem"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://instafollowtracker.com/"
+          }
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "size_bytes": 969,
+      "valid": true,
+      "types": [
+        "ImageObject",
+        "Organization",
+        "VideoObject"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "How to Download Your Instagram Data Export — Step-by-Step Tutorial",
+        "description": "Learn how to download your Instagram data export ZIP file so you can analyse current follower relationships and compare dated snapshots with Instagram Follower Tracker.",
+        "thumbnailUrl": [
+          "https://i.ytimg.com/vi/JwBRvOBlCJc/maxresdefault.jpg",
+          "https://i.ytimg.com/vi/JwBRvOBlCJc/hqdefault.jpg"
+        ],
+        "uploadDate": "2026-01-15T00:00:00+00:00",
+        "duration": "PT3M30S",
+        "contentUrl": "https://www.youtube.com/watch?v=JwBRvOBlCJc",
+        "embedUrl": "https://www.youtube.com/embed/JwBRvOBlCJc",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Instagram Follower Tracker",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://instafollowtracker.com/web-app-manifest-512x512.png"
+          }
+        }
+      }
+    },
+    {
+      "index": 6,
+      "size_bytes": 565,
+      "valid": true,
+      "types": [
+        "ImageObject",
+        "Organization"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "name": "Instagram Follower Tracker Logo",
+        "contentUrl": "https://instafollowtracker.com/web-app-manifest-512x512.png",
+        "url": "https://instafollowtracker.com/web-app-manifest-512x512.png",
+        "description": "Instagram Follower Tracker logo - analyze followers without passwords",
+        "width": "512",
+        "height": "512",
+        "representativeOfPage": true,
+        "creator": {
+          "@type": "Organization",
+          "name": "Instagram Follower Tracker"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "size_bytes": 2301,
+      "valid": true,
+      "types": [
+        "HowTo",
+        "HowToStep",
+        "HowToTool",
+        "MonetaryAmount"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Download Your Instagram Data Export",
+        "description": "Step-by-step guide to download your Instagram data export so you can track followers and unfollowers",
+        "totalTime": "PT5M",
+        "estimatedCost": {
+          "@type": "MonetaryAmount",
+          "currency": "USD",
+          "value": "0"
+        },
+        "tool": [
+          {
+            "@type": "HowToTool",
+            "name": "Instagram app or website"
+          }
+        ],
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Open Instagram Settings",
+            "text": "Open the Instagram app or website and go to your profile. Tap the three-line menu icon, then select Settings and privacy.",
+            "url": "https://instafollowtracker.com/how-to-download-instagram-data/#step-1"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Navigate to Download Your Information",
+            "text": "Go to Your activity → Download your information → Request a download.",
+            "url": "https://instafollowtracker.com/how-to-download-instagram-data/#step-2"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Select Data to Download",
+            "text": "Under the Connections category, select only 'Followers and following'. Choose JSON as the format and All time as the date range.",
+            "url": "https://instafollowtracker.com/how-to-download-instagram-data/#step-3"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Request the Download",
+            "text": "Submit your request. Instagram will prepare your data file and email you a download link within a few minutes to a few hours.",
+            "url": "https://instafollowtracker.com/how-to-download-instagram-data/#step-4"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 5,
+            "name": "Download and Upload to Tracker",
+            "text": "Once Instagram notifies you, download the ZIP file and upload it to Instagram Follower Tracker to analyze your followers.",
+            "url": "https://instafollowtracker.com/how-to-download-instagram-data/#step-5"
+          }
+        ]
+      }
+    },
+    {
+      "index": 8,
+      "size_bytes": 10278,
+      "valid": true,
+      "types": [
+        "Answer",
+        "FAQPage",
+        "Question"
+      ],
+      "types_truncated": false,
+      "data": {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How does the Instagram follower tracker work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Download your Instagram data export as a ZIP file from Instagram's official settings page, then select it here. The tool parses followers and following in your browser. One snapshot shows current relationships such as non-followers and mutuals; two dated snapshots are required to identify new or lost followers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I find out who unfollowed me on Instagram?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Upload two Instagram data exports from different dates. The tool compares the follower sets and lists accounts present in the older snapshot but absent from the newer one. Results depend on the contents, dates, and format of the exports."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are Instagram follower tracker apps safe to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Avoid giving an unofficial follower tool your Instagram password. The export-based workflow does not ask for Instagram credentials: you select the ZIP that Instagram generated, and guest analysis is processed in your browser session."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the best free Instagram follower tracker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Choose a follower tracker that explains its data source, does not ask for your Instagram password, and clearly distinguishes current relationships from changes between snapshots. Instagram Follower Tracker uses official exports and requires two dated snapshots for new or lost followers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does this Instagram follower tracker work for private accounts?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The tracker can analyse the follower information Instagram includes in an export from your own private account. Results remain limited to the files and snapshot dates you provide."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to give my Instagram password?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. You never enter your Instagram password or log in through our site. The only thing you upload is the ZIP file that Instagram generates for you through their official 'Download your information' feature."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I download my Instagram data for the follower tracker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Open the Instagram app or website, go to Settings → Your activity → Download your information → Request a download. Select 'Followers and following' under the Connections category, choose JSON format, and request the file. Instagram will email you a download link within a few minutes to a few hours."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will Instagram ban my account for using a follower tracker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The ZIP-analysis workflow does not log in to Instagram or automate actions on your account. You download the export directly from Instagram and analyse it in your browser. You remain responsible for handling the export securely and following applicable platform terms."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I track follower changes over time?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Signed-in users may explicitly save derived analysis snapshots from different dates. Comparing two saved snapshots can identify new or lost followers and changes in counts. Guest results remain only in the browser session."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is the Instagram follower tracker completely free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Core guest analysis is available without creating an account. An optional account is used when you choose to save derived analysis history for later snapshot comparisons."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there an Instagram follower tracker online that works without downloading anything?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Our Instagram follower tracker runs entirely online in your web browser — there is nothing to download, no app to install, and no extension to add. Just open instafollowtracker.com on any device, upload your Instagram data export ZIP, and view your full follower dashboard immediately."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What do Reddit users recommend for tracking Instagram followers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Avoid giving an unofficial follower tool your Instagram password. Instagram Follower Tracker instead reads an official export in your browser. Results depend on the completeness, format, and dates of the snapshots supplied."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I track Instagram followers with dates and historical data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When signed in, you can explicitly save derived analysis data as a dated snapshot, then compare two saved snapshots. The raw ZIP is not saved. Tracking only covers the dates represented by snapshots you provide and cannot reconstruct earlier follower lists."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a Chrome extension for the Instagram follower tracker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No, we do not offer a browser extension — and we deliberately chose not to. Extensions that read Instagram data while you're logged in often violate Instagram's Terms of Service and can lead to account suspension. Our web-based approach using your official data export is safer, more accurate, and works on any browser including mobile Safari and Chrome."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does the tracker include Instagram analytics like engagement and reach?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The tracker focuses on follower relationships — who follows you, who you follow, who unfollowed you, mutual followers, and pending requests. It does not include engagement, reach, or impression analytics, because those metrics are not included in the Instagram data export. For engagement analytics, use Instagram's built-in Professional Dashboard inside the app."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there an Instagram follower tracker app for iOS or Android?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We do not ship a dedicated iOS or Android app. The web tracker is designed for modern mobile and desktop browsers, although ZIP handling and browser compatibility can vary by device."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I have to sign in or create an account to use this tracker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No sign-in is required for core guest analysis, which stays in browser session storage. An optional account lets you explicitly save derived analysis history for later access and comparisons."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I have to sign in with Facebook or Instagram to use this?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The export-based tracker does not require Facebook or Instagram sign-in. A separate optional OAuth connection is available only for eligible Instagram professional-account features and is not used for ZIP analysis."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you offer a free trial, or is everything paid?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Core guest analysis is available without a trial or Instagram login. Saving history is optional and requires a signed-in account and an explicit save action."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why can't I find a specific account in my followers list?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "If an account is missing from your followers list inside the tracker, the most common reasons are: (1) the account unfollowed you before you generated this data export, (2) Instagram deactivated or banned the account, or (3) the account was deleted by its owner. Try generating a more recent Instagram data export and uploading it — the tracker only shows what's actually present in your file."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why can't I see historical data from before I started using the tracker?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The tracker can only analyse Instagram data exports that you upload — it cannot reconstruct what your followers list looked like in the past. To build a history going forward, generate a fresh export every week or month and upload each one. After a few sessions, you'll have a complete dated timeline of your follower growth and churn."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
