@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
@@ -18,6 +19,9 @@ const { initDatabase } = require("./models/database");
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
+
+// Enable gzip/brotli compression for all responses
+app.use(compression());
 
 // Session store using same Postgres connection
 const sessionPool = new Pool({
@@ -135,8 +139,25 @@ app.use(limiter);
 app.use(express.json({ limit: "1gb" }));
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
-// Static files
-app.use(express.static("uploads"));
+// Cache control middleware for static assets
+const setCache = (req, res, next) => {
+  // Cache static assets for 1 year (immutable assets with hashed names)
+  if (req.path.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico)$/)) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  }
+  // Cache HTML for 1 hour with revalidation
+  else if (req.path.match(/\.html$/)) {
+    res.setHeader("Cache-Control", "public, max-age=3600, must-revalidate");
+  }
+  // No cache for JSON data
+  else if (req.path.match(/\.json$/)) {
+    res.setHeader("Cache-Control", "no-cache");
+  }
+  next();
+};
+
+// Static files with cache headers
+app.use(express.static("uploads", { maxAge: "1y" }));
 
 // Routes
 app.use("/api/auth", authRoutes);
