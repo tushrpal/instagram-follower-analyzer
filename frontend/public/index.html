@@ -53,6 +53,59 @@
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
+
+      /* Reserve space for header to prevent CLS */
+      #root {
+        min-height: 100vh;
+      }
+      header {
+        min-height: 72px;
+      }
+      @media (max-width: 640px) {
+        header {
+          min-height: 64px;
+        }
+      }
+
+      /* Reserve space for main content to prevent CLS */
+      main {
+        min-height: 400px;
+      }
+
+      /* Reserve space for footer to prevent CLS */
+      footer {
+        min-height: 280px;
+      }
+
+      /* Reserve space for video embed to prevent CLS */
+      #prerender-video .video-wrap {
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        height: auto;
+      }
+
+      /* Prevent icon size shifts */
+      svg {
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+        flex-shrink: 0;
+      }
+
+      /* Prevent button size shifts */
+      button, a[role="button"] {
+        min-height: 36px;
+      }
+
+      /* Ensure consistent spacing */
+      * {
+        box-sizing: border-box;
+      }
+
+      /* Prevent content shift from scroll bar */
+      html {
+        overflow-y: scroll;
+      }
     </style>
 
     <!-- Open Graph / Facebook -->
@@ -448,6 +501,10 @@
     <style id="prerender-styles">
       #prerender-content { max-width: 880px; margin: 0 auto; padding: 32px 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.65; color: #1f2937; }
       #prerender-content .site-logo { display: block; width: 120px; height: 120px; margin: 0 0 24px; }
+
+      /* Explicitly reserve space for images to prevent CLS */
+      img { max-width: 100%; height: auto; }
+      img:not([width]):not([height]) { aspect-ratio: attr(width) / attr(height); }
       #prerender-content h1 { font-size: 2.25rem; line-height: 1.2; margin: 0 0 16px; color: #111827; }
       #prerender-content h2 { font-size: 1.5rem; margin: 28px 0 12px; color: #111827; }
       #prerender-content h3 { font-size: 1.15rem; margin: 20px 0 8px; color: #111827; }
@@ -502,7 +559,7 @@
     <div id="root">
       <main id="prerender-content">
         <header>
-          <img src="/web-app-manifest-512x512.png" alt="Instagram Follower Tracker - Analyze followers without passwords" class="site-logo" width="120" height="120" />
+          <img src="/web-app-manifest-512x512.png" alt="Instagram Follower Tracker - Analyze followers without passwords" class="site-logo" width="120" height="120" loading="eager" fetchpriority="high" />
           <h1>How to See Who Unfollowed You on Instagram (No Password Required)</h1>
           <p class="lead">Analyse non-followers, mutual followers, and pending requests from your own Instagram data export. Compare two dated snapshots to identify new or lost followers. Core guest analysis needs no Instagram password or account on this site.</p>
           <p><strong>Three methods compared:</strong> We'll show you the official Instagram data export method (recommended for privacy), password-based tracker apps, and browser extensions — with honest pros and cons of each approach.</p>

@@ -34,14 +34,23 @@ export function Header() {
             className="flex items-center space-x-2 sm:space-x-3 min-w-0"
             aria-label="Instagram Follower Tracker — Home"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div
+              className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}
+            >
               <Instagram className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div className="min-w-0">
-              <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block">
+            <div className="min-w-0" style={{ minHeight: '40px' }}>
+              <span
+                className="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-tight truncate block"
+                style={{ lineHeight: '1.2' }}
+              >
                 Instagram Follower Tracker
               </span>
-              <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
+              <span
+                className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 hidden sm:block"
+                style={{ lineHeight: '1.4' }}
+              >
                 Analyze exports without your Instagram password
               </span>
             </div>
@@ -60,41 +69,43 @@ export function Header() {
               )}
             </button>
 
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/account"
-                  title="My Account"
-                  className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">My Account</span>
-                </Link>
-                <button
-                  onClick={() => auth.logout()}
-                  title="Sign out"
-                  className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Sign out</span>
-                </button>
-              </div>
-            ) : user === null ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  to="/register"
-                  className="text-sm px-2 sm:px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Register
-                </Link>
-              </div>
-            ) : null}
+            <div className="flex items-center gap-2" style={{ minWidth: '180px', minHeight: '36px' }}>
+              {user ? (
+                <>
+                  <Link
+                    to="/account"
+                    title="My Account"
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="hidden sm:inline">My Account</span>
+                  </Link>
+                  <button
+                    onClick={() => auth.logout()}
+                    title="Sign out"
+                    className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sign out</span>
+                  </button>
+                </>
+              ) : user === null ? (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-sm text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="text-sm px-2 sm:px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap"
+                  >
+                    Register
+                  </Link>
+                </>
+              ) : null}
+            </div>
 
             <nav className="hidden lg:flex items-center gap-1">
               <Link

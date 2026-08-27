@@ -1,43 +1,80 @@
-# Instagram Follower Tracker — Information for AI Agents
+# Instagram Follower Tracker
 
-## Overview
-Instagram Follower Tracker is an independently operated web tool for analysing follower relationships from an official Instagram data export. Core ZIP analysis does not require an Instagram login or password.
+> Instagram Follower Tracker is an independently operated web tool for analysing follower relationships from an official Instagram data export. Core ZIP analysis does not require an Instagram login or password.
 
-## What One Export Can Show
-- Accounts in both followers and following (mutuals)
-- Accounts followed by the user that do not follow back
-- Followers the user does not follow
-- Pending-request or related categories when present in the export
+## What This Tool Does
 
-A single export cannot establish who unfollowed over time. New and lost followers require two snapshots from different dates.
+Instagram Follower Tracker helps users analyse their Instagram follower relationships by parsing official Instagram data export files. The tool works entirely in the browser for guest users, with optional account features for saving historical snapshots.
 
-## How ZIP Analysis Works
-- The user requests followers and following in JSON format through Instagram's Download your information feature.
-- The user selects the ZIP in Instagram Follower Tracker.
-- The raw ZIP is parsed in the browser and is not uploaded.
-- Guest analysis remains in browser sessionStorage and is not uploaded as a guest result.
-- A signed-in user may explicitly save derived username, available profile, category, count, relationship, and timestamp data for history and comparisons. The raw ZIP is not saved.
+From a single export, users can identify:
+- Mutual followers (accounts that follow each other)
+- Non-followers (accounts the user follows that don't follow back)
+- Followers the user doesn't follow back
+- Pending follow requests
 
-## Optional Professional-Account Feature
-A separate optional feature may connect an eligible Instagram professional account through official OAuth. OAuth is not required or used for ZIP analysis.
+Comparing two exports from different dates reveals:
+- New followers since the last snapshot
+- Lost followers (unfollowers) between snapshots
+- Changes in follower counts over time
 
-## Limitations
-- Results depend on the selected export contents, format, and snapshot date.
-- Deleted, deactivated, renamed, missing, or unavailable accounts can affect set comparisons.
-- A relationship category does not measure reach, engagement, or intent.
-- Past follower lists cannot be reconstructed without an older snapshot.
+## How It Works
 
-## Resources
-- Home: https://instafollowtracker.com/
-- Synthetic Sample Analysis: https://instafollowtracker.com/sample-analysis/
-- Two-Snapshot Unfollower Guide: https://instafollowtracker.com/who-unfollowed-me/
-- Non-Followers Guide: https://instafollowtracker.com/instagram-non-followers/
-- Private Account Guide: https://instafollowtracker.com/instagram-follower-tracker-private-account/
-- Download Instagram Data Guide: https://instafollowtracker.com/how-to-download-instagram-data/
-- About: https://instafollowtracker.com/about/
-- Privacy Policy: https://instafollowtracker.com/privacy-policy/
-- Terms: https://instafollowtracker.com/terms/
-- Contact: https://instafollowtracker.com/contact/
+1. User requests an Instagram data export through Instagram's official "Download your information" feature
+2. User selects only "Followers and following" under Connections, JSON format, All time range
+3. Instagram emails a download link within minutes to hours
+4. User uploads the ZIP file to Instagram Follower Tracker
+5. The tool parses the JSON files in the browser (no server upload for guest users)
+6. Results are displayed in a categorized dashboard with search, filter, and CSV export options
+
+## Privacy and Security
+
+- No Instagram password required for core ZIP analysis
+- Guest analysis stays in browser sessionStorage only
+- Signed-in users can explicitly save derived data (usernames, counts, relationships) for history
+- Raw ZIP files are never uploaded or stored on servers
+- An optional OAuth feature exists only for Instagram Professional accounts and is separate from ZIP analysis
+
+## Key Limitations
+
+- Results depend entirely on what Instagram includes in the export
+- A single export cannot show historical unfollowers (requires two dated snapshots)
+- Deleted, deactivated, or renamed accounts may affect accuracy
+- The tool measures follower relationships, not engagement or content performance
+
+## Useful Links
+
+Home page and upload interface:
+https://instafollowtracker.com/
+
+Sample analysis (synthetic demo data):
+https://instafollowtracker.com/sample-analysis/
+
+How to find who unfollowed you:
+https://instafollowtracker.com/who-unfollowed-me/
+
+Instagram non-followers guide:
+https://instafollowtracker.com/instagram-non-followers/
+
+Private account follower tracking:
+https://instafollowtracker.com/instagram-follower-tracker-private-account/
+
+Step-by-step Instagram data export guide:
+https://instafollowtracker.com/how-to-download-instagram-data/
+
+About page:
+https://instafollowtracker.com/about/
+
+Contact form:
+https://instafollowtracker.com/contact/
+
+Privacy policy:
+https://instafollowtracker.com/privacy-policy/
+
+Terms of service:
+https://instafollowtracker.com/terms/
 
 ## Operator
-Instagram Follower Tracker is independently developed and operated by Tushr Pal. It is not affiliated with or endorsed by Instagram or Meta Platforms, Inc.
+
+This tool is independently developed and operated by Tushar Pal. It is not affiliated with, endorsed by, or officially connected to Instagram, Meta Platforms, Inc., or any of their subsidiaries.
+
+For technical questions or support inquiries, use the contact form at https://instafollowtracker.com/contact/
