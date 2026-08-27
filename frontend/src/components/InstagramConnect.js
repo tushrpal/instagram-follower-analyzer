@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link2, Link2Off, ExternalLink, AlertCircle, Loader } from "lucide-react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 export function InstagramConnect({ onStatusChange }) {
+  const { user: authUser } = useAuth();
   const [status, setStatus] = useState(null); // null = loading
   const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -59,6 +61,9 @@ export function InstagramConnect({ onStatusChange }) {
 
   if (status === null) return null;
 
+  // Don't show connect button if user is not authenticated
+  if (!authUser && !status.connected) return null;
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div className="flex-1">
@@ -84,7 +89,7 @@ export function InstagramConnect({ onStatusChange }) {
       {status.connected ? (
         <button
           onClick={handleDisconnect}
-          disabled={disconnecting}
+          disabled={disconnecting || !authUser}
           className="text-xs px-3 py-1.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
         >
           {disconnecting ? "Disconnecting…" : "Disconnect"}
@@ -92,7 +97,7 @@ export function InstagramConnect({ onStatusChange }) {
       ) : (
         <button
           onClick={handleConnect}
-          disabled={connecting}
+          disabled={connecting || !authUser}
           className="text-xs px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
         >
           {connecting ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
