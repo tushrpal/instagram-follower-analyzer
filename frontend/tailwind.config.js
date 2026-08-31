@@ -17,21 +17,12 @@ module.exports = {
     },
   },
   plugins: [],
-  // Purge unused CSS in production
-  purge: {
-    enabled: process.env.NODE_ENV === 'production',
-    content: [
-      './src/**/*.{js,jsx,ts,tsx}',
-      './public/index.html',
-    ],
-    options: {
-      safelist: [
-        'spinner',
-        'dark',
-        'dark:bg-gray-900',
-        'dark:text-gray-100',
-        'dark:border-gray-700',
-      ],
-    },
-  },
+  // Safelist classes that are dynamically generated or used in prerendered content
+  safelist: [
+    'spinner',
+    'dark',
+    'dark:bg-gray-900',
+    'dark:text-gray-100',
+    'dark:border-gray-700',
+  ],
 }

@@ -45,38 +45,28 @@ Comparing two exports from different dates reveals:
 
 ## Useful Links
 
-Home page and upload interface:
-https://instafollowtracker.com/
+[Home page and upload interface](https://instafollowtracker.com/)
 
-Sample analysis (synthetic demo data):
-https://instafollowtracker.com/sample-analysis/
+[Sample analysis (synthetic demo data)](https://instafollowtracker.com/sample-analysis/)
 
-How to find who unfollowed you:
-https://instafollowtracker.com/who-unfollowed-me/
+[How to find who unfollowed you](https://instafollowtracker.com/who-unfollowed-me/)
 
-Instagram non-followers guide:
-https://instafollowtracker.com/instagram-non-followers/
+[Instagram non-followers guide](https://instafollowtracker.com/instagram-non-followers/)
 
-Private account follower tracking:
-https://instafollowtracker.com/instagram-follower-tracker-private-account/
+[Private account follower tracking](https://instafollowtracker.com/instagram-follower-tracker-private-account/)
 
-Step-by-step Instagram data export guide:
-https://instafollowtracker.com/how-to-download-instagram-data/
+[Step-by-step Instagram data export guide](https://instafollowtracker.com/how-to-download-instagram-data/)
 
-About page:
-https://instafollowtracker.com/about/
+[About page](https://instafollowtracker.com/about/)
 
-Contact form:
-https://instafollowtracker.com/contact/
+[Contact form](https://instafollowtracker.com/contact/)
 
-Privacy policy:
-https://instafollowtracker.com/privacy-policy/
+[Privacy policy](https://instafollowtracker.com/privacy-policy/)
 
-Terms of service:
-https://instafollowtracker.com/terms/
+[Terms of service](https://instafollowtracker.com/terms/)
 
 ## Operator
 
 This tool is independently developed and operated by Tushar Pal. It is not affiliated with, endorsed by, or officially connected to Instagram, Meta Platforms, Inc., or any of their subsidiaries.
 
-For technical questions or support inquiries, use the contact form at https://instafollowtracker.com/contact/
+For technical questions or support inquiries, use the [contact form](https://instafollowtracker.com/contact/)

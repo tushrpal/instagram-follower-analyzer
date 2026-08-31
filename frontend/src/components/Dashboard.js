@@ -20,6 +20,7 @@ import { UserRow } from "./UserRow";
 import { InstagramConnect } from "./InstagramConnect";
 import { ApiInsights } from "./ApiInsights";
 import { useAuth } from "../context/AuthContext";
+import { DashboardSkeleton } from "./DashboardSkeleton";
 
 function ExportCountNote({ summary }) {
   const exportFollowing = summary.exportFollowingCount ?? summary.totalFollowing;
@@ -404,14 +405,7 @@ export function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="spinner mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading analysis...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {
