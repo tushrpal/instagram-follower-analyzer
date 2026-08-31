@@ -7,9 +7,19 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined); // undefined = loading, null = logged out
 
   useEffect(() => {
+    // Only check auth status, don't treat 401 as error
     axios.get("/api/auth/me")
       .then((res) => setUser(res.data))
-      .catch(() => setUser(null));
+      .catch((err) => {
+        // Silently handle 401/403 - user is just not logged in
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          setUser(null);
+        } else {
+          // Only log actual errors, not auth failures
+          console.error("Auth check failed:", err);
+          setUser(null);
+        }
+      });
   }, []);
 
   const login = async (email, password) => {

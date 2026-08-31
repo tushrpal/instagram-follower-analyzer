@@ -24,16 +24,14 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#7c3aed" />
 
-    <!-- Performance: DNS prefetch for third parties (lighter than preconnect) -->
+    <!-- Performance: Preconnect to critical origins (faster than dns-prefetch) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- DNS prefetch for non-critical third parties (lighter than preconnect) -->
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
     <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-
-    <!-- Preconnect to critical font origins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Critical CSS: font-display swap to prevent FOIT/FOUT layout shifts -->
     <style>
@@ -747,6 +745,6 @@
     </div>
 
     <!-- Defer all third-party scripts until after first paint -->
-    <script src="/scripts/third-party.js"></script>
+    <script src="/scripts/third-party.js" defer></script>
   </body>
 </html>
