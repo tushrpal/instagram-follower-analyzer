@@ -123,7 +123,15 @@
       html {
         overflow-y: scroll;
       }
+
+      /* Hide prerender content when JS is enabled to prevent flash */
+      .js-enabled #prerender-content {
+        display: none !important;
+      }
     </style>
+
+    <!-- Immediately add js-enabled class to hide prerender content before first paint -->
+    <script>document.documentElement.classList.add('js-enabled');</script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
