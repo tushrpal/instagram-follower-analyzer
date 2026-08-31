@@ -13,7 +13,7 @@
     <meta name="application-name" content="Instagram Follower Tracker" />
 
     <!-- Block indexing of dynamic SPA routes (per-user, no static content) -->
-    <script src="/scripts/robots-handler.js"></script>
+    <script src="/scripts/robots-handler.js" defer></script>
 
     <!-- Favicons & manifest -->
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -27,6 +27,7 @@
     <!-- Performance: Preconnect to critical origins (faster than dns-prefetch) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://instagram-follower-analyzer-6063.onrender.com" />
 
     <!-- DNS prefetch for non-critical third parties (lighter than preconnect) -->
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
@@ -39,6 +40,9 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         font-display: swap;
       }
+      /* Google Fonts with font-display: swap */
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
       /* Prevent layout shift from loading spinner */
       .spinner {
         width: 40px;
@@ -111,7 +115,8 @@
     <meta property="og:url" content="https://instafollowtracker.com/" />
     <meta property="og:title" content="Instagram Follower Tracker — Follower Relationship Analytics" />
     <meta property="og:description" content="Analyse non-followers and mutuals from an Instagram export, or compare two saved snapshots to identify follower changes." />
-    <meta property="og:image" content="https://instafollowtracker.com/web-app-manifest-512x512.png" />
+    <meta property="og:image" content="https://instafollowtracker.com/web-app-manifest-512x512.webp" />
+    <meta property="og:image:type" content="image/webp" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
     <meta property="og:image:alt" content="Instagram Follower Tracker — Free Online Tool" />
@@ -123,7 +128,7 @@
     <meta name="twitter:url" content="https://instafollowtracker.com/" />
     <meta name="twitter:title" content="Instagram Follower Tracker — Follower Relationship Analytics" />
     <meta name="twitter:description" content="Use an official Instagram export to analyse current follower relationships; compare two snapshots for new and lost followers." />
-    <meta name="twitter:image" content="https://instafollowtracker.com/web-app-manifest-512x512.png" />
+    <meta name="twitter:image" content="https://instafollowtracker.com/web-app-manifest-512x512.webp" />
 
     <!-- Google AdSense ownership -->
     <meta name="google-adsense-account" content="ca-pub-7401169722110446">
@@ -564,15 +569,10 @@
         </header>
 
         <figure id="prerender-video">
-          <div class="video-wrap">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/JwBRvOBlCJc"
-              title="How to Download Your Instagram Data Export — Step-by-Step Tutorial"
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allowfullscreen
-            ></iframe>
+          <div class="video-wrap" id="youtube-player" data-video-id="JwBRvOBlCJc">
+            <div style="display: flex; align-items: center; justify-content: center; background: #000; cursor: pointer; height: 100%;" onclick="this.parentElement.innerHTML = '<iframe src=https://www.youtube-nocookie.com/embed/JwBRvOBlCJc?autoplay=1 title=\'How to Download Your Instagram Data Export\' loading=lazy allow=\'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\' referrerpolicy=\'strict-origin-when-cross-origin\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\'></iframe>'">
+              <svg width="68" height="48" viewBox="0 0 68 48" fill="none"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="white"/></svg>
+            </div>
           </div>
           <figcaption>
             Watch: How to download your Instagram data export so you can find unfollowers, non-followers and mutuals — full step-by-step tutorial.
