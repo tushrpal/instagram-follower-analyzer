@@ -105,6 +105,7 @@ export function Upload() {
   const [progressMsg, setProgressMsg] = useState("");
   const [error, setError] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const navigate = useNavigate();
 
   const onDrop = async (acceptedFiles) => {
@@ -130,6 +131,9 @@ export function Upload() {
 
       // Guest analysis stays in this browser tab. Nothing is uploaded automatically.
       sessionStorage.setItem(`session_${sessionId}`, JSON.stringify(result));
+
+      // Set navigating state to show loading and prevent flash
+      setNavigating(true);
       navigate(`/dashboard/${sessionId}`);
     } catch (err) {
       console.error("Analysis error:", err);
@@ -155,6 +159,17 @@ export function Upload() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {navigating && (
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="spinner mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+          </div>
+        </div>
+      )}
+
+      {!navigating && (
+        <>
       {showGuide && <DownloadGuideModal onClose={() => setShowGuide(false)} />}
 
       {/* Hero Section */}
@@ -859,6 +874,8 @@ export function Upload() {
           </p>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
