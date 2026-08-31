@@ -28,20 +28,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://instagram-follower-analyzer-6063.onrender.com" />
+    <link rel="preconnect" href="https://i.ytimg.com" />
 
     <!-- DNS prefetch for non-critical third parties (lighter than preconnect) -->
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
     <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
 
+    <!-- Preload critical fonts -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2" crossorigin />
+
     <!-- Critical CSS: font-display swap to prevent FOIT/FOUT layout shifts -->
     <style>
+      /* Load Google Fonts with font-display swap via preload for better performance */
       @font-face {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 400;
         font-display: swap;
+        src: url('https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2') format('woff2');
       }
-      /* Google Fonts with font-display: swap */
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
       /* Prevent layout shift from loading spinner */
       .spinner {
@@ -74,9 +80,9 @@
         min-height: 400px;
       }
 
-      /* Footer - no min-height to prevent CLS from empty space */
+      /* Footer - reserve space to prevent CLS */
       footer {
-        /* Removed min-height to prevent layout shift */
+        min-height: 80px;
       }
 
       /* Reserve space for video embed to prevent CLS */
@@ -570,9 +576,14 @@
 
         <figure id="prerender-video">
           <div class="video-wrap" id="youtube-player" data-video-id="JwBRvOBlCJc">
-            <div style="display: flex; align-items: center; justify-content: center; background: #000; cursor: pointer; height: 100%;" onclick="this.parentElement.innerHTML = '<iframe src=https://www.youtube-nocookie.com/embed/JwBRvOBlCJc?autoplay=1 title=\'How to Download Your Instagram Data Export\' loading=lazy allow=\'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\' referrerpolicy=\'strict-origin-when-cross-origin\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\'></iframe>'">
+            <!-- YouTube facade - no iframe loads until user clicks (saves 841 KiB) -->
+            <button
+              class="youtube-facade"
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; background: #000 url('https://i.ytimg.com/vi/JwBRvOBlCJc/maxresdefault.jpg') center/cover no-repeat; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+              onclick="this.parentElement.innerHTML = '<iframe src=\'https://www.youtube-nocookie.com/embed/JwBRvOBlCJc?autoplay=1\' title=\'How to Download Your Instagram Data Export\' loading=\'lazy\' allow=\'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\' referrerpolicy=\'strict-origin-when-cross-origin\' allowfullscreen style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:0\'></iframe>'"
+              aria-label="Play video: How to Download Your Instagram Data Export">
               <svg width="68" height="48" viewBox="0 0 68 48" fill="none"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="white"/></svg>
-            </div>
+            </button>
           </div>
           <figcaption>
             Watch: How to download your Instagram data export so you can find unfollowers, non-followers and mutuals — full step-by-step tutorial.
