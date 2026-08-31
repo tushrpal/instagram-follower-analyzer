@@ -74,9 +74,9 @@
         min-height: 400px;
       }
 
-      /* Reserve space for footer to prevent CLS */
+      /* Footer - no min-height to prevent CLS from empty space */
       footer {
-        min-height: 280px;
+        /* Removed min-height to prevent layout shift */
       }
 
       /* Reserve space for video embed to prevent CLS */

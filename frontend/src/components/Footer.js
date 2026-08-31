@@ -3,7 +3,7 @@ import { Heart, Shield, Lock } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-700 mt-auto flex-shrink-0" style={{ minHeight: '280px' }}>
+    <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-700 mt-auto flex-shrink-0">
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-3 gap-6 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start space-x-2">
